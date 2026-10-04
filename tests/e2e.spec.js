@@ -278,4 +278,23 @@ test.describe('Progeni E2E Browser Suite', () => {
     expect(canonical).toBe(`${siteConfig.SITE_URL}/about/`);
   });
 
+  test('E14: serve dist at localhost; assert canonical href and og:url are absolute https://bench.progeni.live/... on 3 pages even when browsing from localhost', async ({ page }) => {
+    const testPages = [
+      { path: '/', expectedCanonical: `${siteConfig.SITE_URL}/`, expectedOg: `${siteConfig.SITE_URL}/` },
+      { path: '/tools/wallpaper/', expectedCanonical: `${siteConfig.SITE_URL}/tools/wallpaper/`, expectedOg: `${siteConfig.SITE_URL}/tools/wallpaper/` },
+      { path: '/tools/svg-cleaner/', expectedCanonical: `${siteConfig.SITE_URL}/tools/svg-cleaner/`, expectedOg: `${siteConfig.SITE_URL}/tools/svg-cleaner/` }
+    ];
+
+    for (const item of testPages) {
+      await page.goto(item.path);
+      const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+      expect(canonical).toBe(item.expectedCanonical);
+      expect(canonical.startsWith('https://bench.progeni.live/')).toBe(true);
+
+      const ogUrl = await page.locator('meta[property="og:url"]').getAttribute('content');
+      expect(ogUrl).toBe(item.expectedOg);
+      expect(ogUrl.startsWith('https://bench.progeni.live/')).toBe(true);
+    }
+  });
+
 });

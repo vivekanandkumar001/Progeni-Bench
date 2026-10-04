@@ -847,8 +847,133 @@ if (manifestValid) {
   addResult('C43', 'FAIL', `manifest name="${manifestName}", short_name="${manifestShort}" (expected "${siteName}")`);
 }
 
+// C44: literal host "progeni.live" appears ONLY in site.config.js and docs/MIGRATION.md; "bench.progeni.live" is only host in canonicals
+const c44Offenders = [];
+const c44JsFiles = ['app.js', 'utils.js', 'build_seo_pages.js'];
+for (const file of c44JsFiles) {
+  const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  if (content.includes('"progeni.live"') || content.includes("'progeni.live'") || content.includes('`progeni.live`')) {
+    c44Offenders.push(`${file} (hardcoded progeni.live)`);
+  }
+}
+
+// Canonical host check
+let nonBenchCanonicals = [];
+for (const file of allDistHtml) {
+  const content = fs.readFileSync(file, 'utf8');
+  const canonicalMatches = [...content.matchAll(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/gi)];
+  for (const m of canonicalMatches) {
+    try {
+      const u = new URL(m[1]);
+      if (u.hostname !== 'bench.progeni.live') {
+        nonBenchCanonicals.push(`${path.relative(ROOT, file)}: ${m[1]}`);
+      }
+    } catch (e) {
+      nonBenchCanonicals.push(`${path.relative(ROOT, file)}: invalid URL ${m[1]}`);
+    }
+  }
+}
+
+if (c44Offenders.length === 0 && nonBenchCanonicals.length === 0) {
+  addResult('C44', 'PASS', 'offenders: none; canonicals: bench.progeni.live only');
+} else {
+  addResult('C44', 'FAIL', `offenders: ${c44Offenders.concat(nonBenchCanonicals).join(', ')}`);
+}
+
+// C45: sitemap.xml <loc> values all start with SITE_URL and exactly equal canonical set; robots.txt Sitemap line == SITE_URL + /sitemap.xml
+const c45Issues = [];
+const sitemapDoc = fs.readFileSync(path.join(ROOT, 'dist', 'sitemap.xml'), 'utf8');
+const sitemapLocs = [...sitemapDoc.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+const allCanonicalHrefs = new Set();
+for (const file of allDistHtml) {
+  const content = fs.readFileSync(file, 'utf8');
+  const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
+  if (canonicalMatch) {
+    allCanonicalHrefs.add(canonicalMatch[1]);
+  }
+}
+
+for (const loc of sitemapLocs) {
+  if (!loc.startsWith(siteConfig.SITE_URL)) {
+    c45Issues.push(`sitemap loc does not start with SITE_URL: ${loc}`);
+  }
+}
+
+if (sitemapLocs.length !== allCanonicalHrefs.size) {
+  c45Issues.push(`count mismatch: sitemap has ${sitemapLocs.length}, canonicals set has ${allCanonicalHrefs.size}`);
+} else {
+  for (const loc of sitemapLocs) {
+    if (!allCanonicalHrefs.has(loc)) {
+      c45Issues.push(`sitemap loc not in canonical set: ${loc}`);
+    }
+  }
+}
+
+const robotsDoc = fs.readFileSync(path.join(ROOT, 'dist', 'robots.txt'), 'utf8');
+const robotsSitemapMatch = robotsDoc.match(/Sitemap:\s*(\S+)/i);
+const expectedRobotsSitemap = `${siteConfig.SITE_URL}/sitemap.xml`;
+if (!robotsSitemapMatch || robotsSitemapMatch[1] !== expectedRobotsSitemap) {
+  c45Issues.push(`robots.txt Sitemap mismatch: found "${robotsSitemapMatch ? robotsSitemapMatch[1] : 'none'}", expected "${expectedRobotsSitemap}"`);
+}
+
+if (c45Issues.length === 0) {
+  addResult('C45', 'PASS', `sitemap count=${sitemapLocs.length}, locs start with SITE_URL == canonical set, robots.txt valid`);
+} else {
+  addResult('C45', 'FAIL', c45Issues.slice(0, 2).join('; '));
+}
+
+// C46: Home JSON-LD: WebSite.url == SITE_URL, Organization.url == PARENT_URL; footer and About contain a link to PARENT_URL
+const c46Issues = [];
+const indexHtmlContent = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
+const aboutHtmlContent = fs.readFileSync(path.join(ROOT, 'dist', 'about', 'index.html'), 'utf8');
+
+const jsonLdMatches = [...indexHtmlContent.matchAll(/<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+let foundWebSite = false;
+let foundOrganization = false;
+for (const match of jsonLdMatches) {
+  try {
+    const data = JSON.parse(match[1]);
+    const items = data['@graph'] ? data['@graph'] : [data];
+    for (const item of items) {
+      if (item['@type'] === 'WebSite') {
+        foundWebSite = true;
+        const normSite = item.url.replace(/\/$/, '');
+        if (normSite !== siteConfig.SITE_URL) {
+          c46Issues.push(`WebSite.url is "${item.url}", expected "${siteConfig.SITE_URL}"`);
+        }
+      }
+      if (item['@type'] === 'Organization') {
+        foundOrganization = true;
+        const normOrg = item.url.replace(/\/$/, '');
+        if (normOrg !== siteConfig.PARENT_URL) {
+          c46Issues.push(`Organization.url is "${item.url}", expected "${siteConfig.PARENT_URL}"`);
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+if (!foundWebSite) c46Issues.push('WebSite JSON-LD not found in home');
+if (!foundOrganization) c46Issues.push('Organization JSON-LD not found in home');
+
+// Footer and About parent links
+const parentLinkPattern = new RegExp(`<a\\s+[^>]*href=["']${siteConfig.PARENT_URL}["'][^>]*>A Progeni project<\\/a>`, 'i');
+if (!parentLinkPattern.test(indexHtmlContent)) {
+  c46Issues.push('footer in index.html missing link to PARENT_URL with text "A Progeni project"');
+}
+if (!parentLinkPattern.test(aboutHtmlContent)) {
+  c46Issues.push('about/index.html missing link to PARENT_URL with text "A Progeni project"');
+}
+
+if (c46Issues.length === 0) {
+  addResult('C46', 'PASS', 'WebSite.url==SITE_URL, Organization.url==PARENT_URL, footer & About link to PARENT_URL');
+} else {
+  addResult('C46', 'FAIL', c46Issues.join('; '));
+}
+
 // SUMMARY
 const passCount = results.filter(r => r.status === 'PASS').length;
 const failCount = results.filter(r => r.status === 'FAIL').length;
 const skipCount = results.filter(r => r.status === 'SKIP').length;
 console.log(`SUMMARY | pass=${passCount} fail=${failCount} skip=${skipCount}`);
+
