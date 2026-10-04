@@ -1,0 +1,11 @@
+{
+  "name": "progeni",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Progeni — 30 Fast, Privacy-First Browser Tools & Utilities",
+  "scripts": {
+    "build": "node build_seo_pages.js",
+    "test": "node --test",
+    "start": "python3 -m http.server 3000 --directory dist"
+  }
+}

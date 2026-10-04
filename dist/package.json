@@ -1,0 +1,10 @@
+{
+  "name": "utilityhub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "build": "mkdir -p dist && cp -r index.html app.js styles.css robots.txt sitemap.xml manifest.webmanifest dist/ && cp -r about dist/about && cp -r privacy dist/privacy && cp -r tools dist/tools && cp -r assets dist/assets && cp -d _headers dist/_headers && cp -d manifest.webmanifest dist/manifest.webmanifest && cp -d netlify.toml dist/netlify.toml && cp -d vercel.json dist/vercel.json && cp -d package.json dist/package.json",
+    "start": "python3 -m http.server 3000 --directory dist"
+  }
+}
