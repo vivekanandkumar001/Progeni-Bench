@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://progeni.live/sitemap.xml
+Sitemap: https://bench.progeni.live/sitemap.xml

@@ -12,8 +12,11 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
 
   const PARENT_BRAND = "Progeni";
+  const PARENT_URL = "https://progeni.live";
   const SITE_NAME = "Progeni Bench";
-  const SITE_URL = "https://progeni.live";
+  const SITE_SHORT = "Bench";
+  const SITE_URL = "https://bench.progeni.live";
+  const SUPPORT_EMAIL = "support@progeni.live";
   const TAGLINE = "Small file jobs, done privately in your browser.";
   const LOCALE = "en-IN";
 
@@ -562,8 +565,11 @@
 
   return {
     PARENT_BRAND: PARENT_BRAND,
+    PARENT_URL: PARENT_URL,
     SITE_NAME: SITE_NAME,
+    SITE_SHORT: SITE_SHORT,
     SITE_URL: SITE_URL,
+    SUPPORT_EMAIL: SUPPORT_EMAIL,
     TAGLINE: TAGLINE,
     LOCALE: LOCALE,
     TOOLS: TOOLS

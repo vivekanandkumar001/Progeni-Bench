@@ -19,8 +19,11 @@ const {
 // Import brand and tools configuration from single source of truth (site.config.js)
 const {
   PARENT_BRAND,
+  PARENT_URL,
   SITE_NAME,
+  SITE_SHORT,
   SITE_URL,
+  SUPPORT_EMAIL,
   TAGLINE,
   LOCALE,
   TOOLS
@@ -232,8 +235,10 @@ async function processTool(id, files) {
         const ix = n => h.indexOf(n);
         const day = ix("day"), start = ix("start"), end = ix("end"), title = ix("title") >= 0 ? ix("title") : ix("subject"), date = ix("date");
         if (day < 0 || start < 0 || end < 0 || title < 0) throw Error("Required columns: day,start,end,title (optional date).");
-        const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Progeni//Timetable//EN"];
+        const prodBrand = PARENT_BRAND || "Progeni";
+        const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", `PRODID:-//${prodBrand}//Timetable//EN`];
         const days = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+        const hostDomain = SITE_URL ? new URL(SITE_URL).hostname : "bench.progeni.live";
         rows.slice(1).forEach((r, i) => {
           let d = date >= 0 && r[date] ? new Date(r[date]) : nextDay(days[(r[day] || "").toLowerCase()]);
           if (!d) return;
@@ -241,7 +246,7 @@ async function processTool(id, files) {
           const fmt = x => x.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
           let a = new Date(d); a.setHours(sh, sm, 0, 0);
           let b = new Date(d); b.setHours(eh, em, 0, 0);
-          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@progeni.live`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
+          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@${hostDomain}`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
         });
         ics.push("END:VCALENDAR");
         rs.innerHTML = `<div class="notice">Created ${rows.length - 1} recurring calendar events from your CSV.</div><button class="btn" id="dl">Download timetable.ics</button>`;
@@ -969,12 +974,12 @@ function about(kind) {
   const title = kind === "privacy" ? "Privacy Policy" : kind === "terms" ? "Terms of Service" : kind === "contact" ? "Contact Support" : `About ${SITE_NAME}`;
   let content = `
     <h2>Browser-First Global Architecture</h2>
-    <p>${SITE_NAME} is a ${PARENT_BRAND} project designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
+    <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
   `;
   if (kind === "contact") {
     content = `
       <h2>Direct Email Inquiries</h2>
-      <p>For general support, feedback, and inquiries: <a href="mailto:support@progeni.live" style="color:var(--brand);font-weight:700;">support@progeni.live</a></p>
+      <p>For general support, feedback, and inquiries: <a href="mailto:${SUPPORT_EMAIL}" style="color:var(--brand);font-weight:700;">${SUPPORT_EMAIL}</a></p>
     `;
   }
   app.innerHTML = `

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import siteConfig from '../site.config.js';
 
 test.describe('Progeni E2E Browser Suite', () => {
 
@@ -46,7 +47,7 @@ test.describe('Progeni E2E Browser Suite', () => {
     <H1>Bookmarks</H1>
     <DL><p>
       <DT><A HREF="javascript:alert(1)">Exploit</A>
-      <DT><A HREF="https://progeni.live/privacy">Valid Safe Link</A>
+      <DT><A HREF="${siteConfig.SITE_URL}/privacy/">Valid Safe Link</A>
     </DL><p>`;
 
     const buffer = Buffer.from(badBookmarkHTML, 'utf8');
@@ -253,7 +254,7 @@ test.describe('Progeni E2E Browser Suite', () => {
     expect(await page.title()).toContain('Progeni Bench');
     
     let canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
-    expect(canonical).toBe('https://progeni.live/');
+    expect(canonical).toBe(`${siteConfig.SITE_URL}/`);
 
     // Click on a tool card in SPA
     await page.click('a[href="/tools/sticker-sheet/"]');
@@ -266,7 +267,7 @@ test.describe('Progeni E2E Browser Suite', () => {
 
     // Assert canonical updated
     canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
-    expect(canonical).toBe('https://progeni.live/tools/sticker-sheet/');
+    expect(canonical).toBe(`${siteConfig.SITE_URL}/tools/sticker-sheet/`);
 
     // Navigate to about page in SPA
     await page.click('header nav a[href="/about/"]');
@@ -274,7 +275,7 @@ test.describe('Progeni E2E Browser Suite', () => {
     const aboutTitle = await page.title();
     expect(aboutTitle).toContain('About Progeni Bench');
     canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
-    expect(canonical).toBe('https://progeni.live/about/');
+    expect(canonical).toBe(`${siteConfig.SITE_URL}/about/`);
   });
 
 });

@@ -23,17 +23,17 @@ npm start
 1. Connect repository or upload `dist/` folder
 2. Build command: `npm run build`
 3. Publish directory: `dist`
-4. Custom domain: `progeni.live` (HTTPS automatic)
+4. Custom domain: `bench.progeni.live` (HTTPS automatic)
 
 #### Vercel
 1. Connect repository
 2. `vercel.json` has `cleanUrls: true` enabled
-3. Set custom domain: `progeni.live` (HTTPS automatic)
+3. Set custom domain: `bench.progeni.live` (HTTPS automatic)
 
 #### Cloudflare Pages
 1. Build command: `npm run build`
 2. Build output directory: `dist`
-3. Configure custom domain: `progeni.live`
+3. Configure custom domain: `bench.progeni.live`
 
 ## 📦 What's Included
 
@@ -42,11 +42,12 @@ The `dist/` folder contains everything needed for static production hosting:
 - **index.html** - Single-page app root with fast category search
 - **app.js** - Client-side router + 30 tool processors (zero dependencies)
 - **utils.js** - Pure utility helper module (XSS escaping, CSV parsing, SRT parser)
+- **site.config.js** - Single source of truth for site configuration & brand model
 - **styles.css** - Custom responsive styling and CSS variables
 - **_headers** - Strict Content-Security-Policy & security headers
 - **_redirects** - Netlify 404 handler
 - **manifest.webmanifest** - PWA configuration
-- **sitemap.xml** - 35 crawlable URLs for `progeni.live`
+- **sitemap.xml** - 35 crawlable URLs for `bench.progeni.live`
 - **robots.txt** - Crawler directives
 - **about/index.html** - About page
 - **privacy/index.html** - Privacy policy

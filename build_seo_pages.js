@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const { PARENT_BRAND, SITE_NAME, SITE_URL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
+const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
 
 const baseDir = __dirname;
 const distDir = path.join(baseDir, 'dist');
@@ -112,7 +112,12 @@ function generateToolPageHtml(tool) {
           "price": "0",
           "priceCurrency": "INR"
         },
-        "isAccessibleForFree": true
+        "isAccessibleForFree": true,
+        "provider": {
+          "@type": "Organization",
+          "name": PARENT_BRAND,
+          "url": PARENT_URL
+        }
       },
       {
         "@type": "BreadcrumbList",
@@ -215,7 +220,7 @@ function generateToolPageHtml(tool) {
 </main>
 
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> is a ${PARENT_BRAND} project — ${TAGLINE}</div>
+  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -244,12 +249,18 @@ function generateHomePageHtml() {
         "name": SITE_NAME,
         "url": canonicalUrl,
         "inLanguage": LOCALE,
-        "description": TAGLINE
+        "description": TAGLINE,
+        "publisher": {
+          "@type": "Organization",
+          "name": PARENT_BRAND,
+          "url": PARENT_URL,
+          "logo": `${SITE_URL}/assets/favicon.svg`
+        }
       },
       {
         "@type": "Organization",
         "name": PARENT_BRAND,
-        "url": canonicalUrl,
+        "url": PARENT_URL,
         "logo": `${SITE_URL}/assets/favicon.svg`,
         "brand": {
           "@type": "Brand",
@@ -302,7 +313,7 @@ function generateHomePageHtml() {
 </main>
 
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> is a ${PARENT_BRAND} project — ${TAGLINE}</div>
+  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -366,7 +377,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
 </main>
 
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> is a ${PARENT_BRAND} project — ${TAGLINE}</div>
+  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -409,7 +420,7 @@ function generate404Html() {
   <a href="/" class="btn">Return to ${SITE_NAME} Homepage</a>
 </main>
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> is a ${PARENT_BRAND} project — ${TAGLINE}</div>
+  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
   <div class="footer-links"><a href="/privacy/">Privacy</a><a href="/about/">About</a></div>
 </footer>
 <script src="/site.config.js"></script>
@@ -447,7 +458,7 @@ ${urls.map(u => `  <url>
 function generateManifestJson() {
   return JSON.stringify({
     "name": SITE_NAME,
-    "short_name": "Bench",
+    "short_name": SITE_SHORT,
     "description": TAGLINE,
     "start_url": "/",
     "display": "standalone",
@@ -484,7 +495,7 @@ fs.writeFileSync(path.join(distDir, 'index.html'), homeHtml, 'utf8');
 const aboutContent = `
   <h2>Browser-First Global Architecture</h2>
   <p>${SITE_NAME} is designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
-  <p>${SITE_NAME} is a ${PARENT_BRAND} project dedicated to building fast, zero-bloat web utilities.</p>
+  <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> dedicated to building fast, zero-bloat web utilities.</p>
   <h2>Who is ${SITE_NAME} Built For?</h2>
   <ul>
     <li><strong>Crafters & Creators:</strong> Make sticker sheets, mirror T-shirt prints, create cross-stitch patterns, and test video safe zones.</li>
@@ -535,7 +546,7 @@ const contactContent = `
     <h2>Direct Email Inquiries</h2>
     <p>For general support, feedback, and inquiries regarding ${SITE_NAME}:</p>
     <p style="font-size: 18px; font-weight: 700; color: var(--brand);">
-      📧 <a href="mailto:support@progeni.live" style="color: var(--brand); text-decoration: underline;">support@progeni.live</a>
+      📧 <a href="mailto:${SUPPORT_EMAIL}" style="color: var(--brand); text-decoration: underline;">${SUPPORT_EMAIL}</a>
     </p>
     <h3>Feature Suggestions & Bug Reports</h3>
     <p>${SITE_NAME} is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
