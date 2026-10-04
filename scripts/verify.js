@@ -443,6 +443,110 @@ try {
   addResult('C24', 'FAIL', e.message);
 }
 
+// C25: node --check app.js, utils.js, build_seo_pages.js
+try {
+  execSync('node --check app.js', { cwd: ROOT });
+  execSync('node --check utils.js', { cwd: ROOT });
+  execSync('node --check build_seo_pages.js', { cwd: ROOT });
+  addResult('C25', 'PASS', 'syntax valid across app.js, utils.js, build_seo_pages.js');
+} catch (e) {
+  addResult('C25', 'FAIL', `syntax check failed: ${e.message}`);
+}
+
+// C26: video-safe-zone handler must NOT pass a video file to imageFromFile
+const safeZoneCodeMatch = appContent.match(/async function safeZone\(([^)]*)\)\s*\{([\s\S]*?)\n\}/);
+if (safeZoneCodeMatch) {
+  const safeZoneBody = safeZoneCodeMatch[2];
+  const passesVideoDirectlyToImage = /imageFromFile\(\s*f\s*\)/.test(safeZoneBody) && !safeZoneBody.includes('f.type.startsWith("video")') && !safeZoneBody.includes('document.createElement("video")');
+  if (passesVideoDirectlyToImage) {
+    addResult('C26', 'FAIL', 'safeZone passes video file directly to imageFromFile without video frame extractor');
+  } else {
+    addResult('C26', 'PASS', 'safeZone extracts video frame or validates media type');
+  }
+} else {
+  addResult('C26', 'FAIL', 'safeZone function not found in app.js');
+}
+
+// C27: sticker-sheet/print-layout/ironon-sheet: N images placed message matches drawn count
+const sheetMakerMatch = appContent.match(/async function sheetMaker\([\s\S]*?maxAllowed\s*=\s*(\d+)[\s\S]*?files\.slice\(0,\s*maxAllowed\)[\s\S]*?Placed \$\{([^}]+)\} images/);
+if (sheetMakerMatch) {
+  const cap = sheetMakerMatch[1];
+  const msgVar = sheetMakerMatch[2].trim();
+  if (msgVar === 'imgs.length') {
+    addResult('C27', 'PASS', `cap=${cap}, msg_var=${msgVar} (placed message matches actual drawn slice)`);
+  } else {
+    addResult('C27', 'FAIL', `cap=${cap}, msg_var=${msgVar} (mismatch between placed count and drawn array)`);
+  }
+} else {
+  addResult('C27', 'FAIL', 'sheetMaker cap and placed message variable not verified');
+}
+
+// C28: vcard: no alert( and no placeholder text unless real zip exists
+const vcardHasAlert = /function vcardTool[\s\S]*?alert\(/i.test(appContent);
+const vcardHasPlaceholder = /function vcardTool[\s\S]*?(?:can be added|ZIP packaging)/i.test(appContent);
+if (!vcardHasAlert && !vcardHasPlaceholder) {
+  addResult('C28', 'PASS', 'no alert() or unfulfilled ZIP packaging text in vcard tool');
+} else {
+  addResult('C28', 'FAIL', `vcard contains alert=${vcardHasAlert} placeholderText=${vcardHasPlaceholder}`);
+}
+
+// C29: timetable RRULE: RRULE:FREQ=WEEKLY must include COUNT= or UNTIL=
+const rruleMatch = appContent.match(/RRULE:FREQ=WEEKLY[^\r\n"]*/);
+if (rruleMatch) {
+  const rruleStr = rruleMatch[0];
+  if (rruleStr.includes('COUNT=') || rruleStr.includes('UNTIL=')) {
+    addResult('C29', 'PASS', `emitted line pattern: ${rruleStr}`);
+  } else {
+    addResult('C29', 'FAIL', `emitted line pattern: ${rruleStr} (missing COUNT or UNTIL)`);
+  }
+} else {
+  addResult('C29', 'FAIL', 'RRULE:FREQ=WEEKLY not found in timetable export');
+}
+
+// C30: normalizeDate: ambiguous inputs flag or warning
+const amb1 = utils.normalizeDate("02/03/2024");
+const amb2 = utils.normalizeDate("05/06/2024");
+const amb3 = utils.normalizeDate("11/12/2024");
+const hasAmbiguousFlag = (typeof amb1 === 'object' && amb1 !== null && amb1.ambiguous) ||
+  appContent.includes('Ambiguous date') ||
+  appContent.includes('ambiguous date');
+
+if (hasAmbiguousFlag) {
+  addResult('C30', 'PASS', `02/03/2024->${JSON.stringify(amb1)}, 05/06/2024->${JSON.stringify(amb2)}, 11/12/2024->${JSON.stringify(amb3)}`);
+} else {
+  addResult('C30', 'FAIL', `02/03/2024->${amb1}, 05/06/2024->${amb2}, 11/12/2024->${amb3} (no ambiguous flag or warning)`);
+}
+
+// C31: subtitle: start==end cue must be reported as invalid-timing issue
+const subtitleCheckMatch = appContent.match(/function subtitleCheck\([\s\S]*?\{([\s\S]*?)\n\}/);
+if (subtitleCheckMatch) {
+  const body = subtitleCheckMatch[1];
+  const reportsZeroDurAsTiming = body.includes('dur <= 0') || body.includes('dur < 0.1') || body.includes('Zero duration') || body.includes('Timing error');
+  if (reportsZeroDurAsTiming) {
+    addResult('C31', 'PASS', 'start==end reported as invalid timing error');
+  } else {
+    addResult('C31', 'FAIL', 'start==end not reported as invalid timing error');
+  }
+} else {
+  addResult('C31', 'FAIL', 'subtitleCheck not found');
+}
+
+// C32: wallpaper: tool name/description must not contain "batch" unless multiple files are supported
+const wallpaperInApp = appContent.match(/\{id:"wallpaper"[^}]*\}/);
+let wpBatch = false;
+let wpMulti = false;
+if (wallpaperInApp) {
+  wpBatch = /batch/i.test(wallpaperInApp[0]);
+  const multiList = appContent.match(/\[([^\]]*"wallpaper"[^\]]*)\]\.includes\(id\)\)\s*\{\s*multi\s*=\s*true/);
+  wpMulti = !!multiList;
+}
+
+if (wpBatch && !wpMulti) {
+  addResult('C32', 'FAIL', 'wallpaper named "Wallpaper Batch Cropper" but tool picker only accepts a single file');
+} else {
+  addResult('C32', 'PASS', `wallpaper tool name/desc aligned with single/multi support (batch=${wpBatch}, multi=${wpMulti})`);
+}
+
 // SUMMARY
 const passCount = results.filter(r => r.status === 'PASS').length;
 const failCount = results.filter(r => r.status === 'FAIL').length;
