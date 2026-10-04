@@ -26,7 +26,7 @@ const TOOLS = [
   {id:"svg-cleaner",icon:"✦",cat:"Files",name:"SVG Cleanup & Minifier",desc:"Strip Illustrator, Inkscape metadata, and comments to shrink SVG file sizes."},
   {id:"calendar-cleaner",icon:"📅",cat:"Productivity",name:"iCal Calendar Deduplicator",desc:"Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars."},
   {id:"timetable-calendar",icon:"🗓️",cat:"Productivity",name:"Timetable → Calendar (.ics)",desc:"Convert school or work class timetable CSVs into recurring weekly iCal events."},
-  {id:"wallpaper",icon:"🖼️",cat:"Images",name:"Wallpaper Batch Cropper",desc:"Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion."},
+  {id:"wallpaper",icon:"🖼️",cat:"Images",name:"Wallpaper Photo Cropper",desc:"Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion."},
   {id:"panorama",icon:"🌄",cat:"Images",name:"Panorama Carousel Splitter",desc:"Seamlessly slice wide panoramic photos into 3 seamless square Instagram carousel tiles."},
   {id:"duplicate-finder",icon:"♻️",cat:"Images",name:"Photo Duplicate Finder",desc:"Find exact duplicate image files using browser-side SHA-256 cryptographic hashing."},
   {id:"best-shot",icon:"✨",cat:"Images",name:"Photo Best-Shot Finder",desc:"Rank burst photos by sharpness, contrast, and clarity heuristics."},

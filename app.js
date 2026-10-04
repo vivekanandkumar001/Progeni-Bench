@@ -41,7 +41,7 @@ const TOOLS = [
   {id:"svg-cleaner",icon:"✦",cat:"Files",name:"SVG Cleanup & Minifier",desc:"Strip Illustrator, Inkscape metadata, and comments to shrink SVG file sizes."},
   {id:"calendar-cleaner",icon:"📅",cat:"Productivity",name:"iCal Calendar Deduplicator",desc:"Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars."},
   {id:"timetable-calendar",icon:"🗓️",cat:"Productivity",name:"Timetable → Calendar (.ics)",desc:"Convert school or work class timetable CSVs into recurring weekly iCal events."},
-  {id:"wallpaper",icon:"🖼️",cat:"Images",name:"Wallpaper Batch Cropper",desc:"Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion."},
+  {id:"wallpaper",icon:"🖼️",cat:"Images",name:"Wallpaper Photo Cropper",desc:"Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion."},
   {id:"panorama",icon:"🌄",cat:"Images",name:"Panorama Carousel Splitter",desc:"Seamlessly slice wide panoramic photos into 3 seamless square Instagram carousel tiles."},
   {id:"duplicate-finder",icon:"♻️",cat:"Images",name:"Photo Duplicate Finder",desc:"Find exact duplicate image files using browser-side SHA-256 cryptographic hashing."},
   {id:"best-shot",icon:"✨",cat:"Images",name:"Photo Best-Shot Finder",desc:"Rank burst photos by sharpness, contrast, and clarity heuristics."},
@@ -310,7 +310,7 @@ async function processTool(id, files) {
           const fmt = x => x.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
           let a = new Date(d); a.setHours(sh, sm, 0, 0);
           let b = new Date(d); b.setHours(eh, em, 0, 0);
-          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@progeni.live`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY", "END:VEVENT");
+          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@progeni.live`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
         });
         ics.push("END:VCALENDAR");
         rs.innerHTML = `<div class="notice">Created ${rows.length - 1} recurring calendar events from your CSV.</div><button class="btn" id="dl">Download timetable.ics</button>`;
@@ -533,7 +533,28 @@ async function videoThumbs(f, rs) {
 
 /* Global Social Safe-Zone Overlays (TikTok, Instagram Reels, Shorts) */
 async function safeZone(f, rs) {
-  const im = await imageFromFile(f);
+  let im;
+  if (f.type.startsWith("video") || /\.(mp4|mov|webm)$/i.test(f.name)) {
+    const vSrc = URL.createObjectURL(f);
+    const v = document.createElement("video");
+    v.src = vSrc;
+    v.muted = true;
+    try {
+      await new Promise((r, j) => { v.onloadedmetadata = r; v.onerror = j; });
+      v.currentTime = Math.min(1, v.duration / 2);
+      await new Promise(r => v.onseeked = r);
+      const c = document.createElement("canvas");
+      c.width = v.videoWidth || 720;
+      c.height = v.videoHeight || 1280;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(v, 0, 0, c.width, c.height);
+      im = await imageFromFile(await canvasBlob(c));
+    } finally {
+      URL.revokeObjectURL(vSrc);
+    }
+  } else {
+    im = await imageFromFile(f);
+  }
   const platform = ($("#platformSelect") ? $("#platformSelect").value : "tiktok") || "tiktok";
   const c = document.createElement("canvas");
   c.width = im.width; c.height = im.height;
@@ -578,22 +599,31 @@ async function safeZone(f, rs) {
 
 function subtitleCheck(t, rs) {
   const a = parseSRT(t);
-  const issues = a.filter(x => {
+  const timingErrors = a.filter(x => (x.end - x.start) <= 0);
+  const speedIssues = a.filter(x => {
     let dur = x.end - x.start;
-    let cps = dur > 0 ? (x.text.length / dur) : x.text.length;
-    return dur < 1 || cps > 21;
+    let cps = dur > 0 ? (x.text.length / dur) : 0;
+    return dur > 0 && (dur < 1 || cps > 21);
   });
   const overlaps = a.filter((x, i) => i && x.start < a[i - 1].end);
+  const allIssues = a.filter(x => {
+    let dur = x.end - x.start;
+    let cps = dur > 0 ? (x.text.length / dur) : 0;
+    return dur <= 0 || dur < 1 || cps > 21;
+  });
+
   rs.innerHTML = `
     <div class="stats">
       <div class="stat"><b>${a.length}</b>Total Captions</div>
-      <div class="stat"><b>${issues.length}</b>Reading Speed Flags</div>
+      <div class="stat"><b>${speedIssues.length}</b>Reading Speed Flags</div>
+      <div class="stat"><b>${timingErrors.length}</b>Timing Errors (<=0s)</div>
       <div class="stat"><b>${overlaps.length}</b>Overlap Errors</div>
     </div>
-    <pre>${issues.map(x => {
+    <pre>${allIssues.map(x => {
       let dur = x.end - x.start;
-      let cps = dur > 0 ? (x.text.length / dur).toFixed(1) : "N/A";
-      return `${fmtTime(x.start)} — [${cps} CPS] ${x.text.slice(0, 90)}`;
+      if (dur <= 0) return `${fmtTime(x.start)} — [Timing error: zero duration] ${esc(x.text.slice(0, 90))}`;
+      let cps = (x.text.length / dur).toFixed(1);
+      return `${fmtTime(x.start)} — [${cps} CPS] ${esc(x.text.slice(0, 90))}`;
     }).join("\n") || "All subtitle lines adhere to standard reading speeds (<21 CPS)."}</pre>
   `;
 }
@@ -661,7 +691,7 @@ function csvTool(id, t, rs) {
     $("#go").onclick = () => {
       const c = +$("#col").value, fmt = $("#fmt").value;
       const out = rows.map((r, i) => i ? r.map((v, j) => j === c ? normalizeDate(v, fmt) : v) : r);
-      rs.insertAdjacentHTML("beforeend", `<div class="notice" style="margin-top:16px;">Dates standardized to ${fmt}.</div><button class="btn secondary" id="dl">Download Normalized CSV</button>`);
+      rs.insertAdjacentHTML("beforeend", `<div class="notice" style="margin-top:16px;">Dates standardized to ${fmt}.</div><div class="warn" style="margin-top:8px;">Ambiguous date warning: values with day and month <= 12 are parsed using standard format order.</div><button class="btn secondary" id="dl">Download Normalized CSV</button>`);
       $("#dl").onclick = () => textDownload(csvOut(out), "normalized.csv", "text/csv");
     };
   }
