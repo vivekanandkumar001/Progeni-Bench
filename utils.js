@@ -137,13 +137,13 @@
         throw new Error("Invalid SVG document");
       }
       const dangerousTags = ["script", "foreignobject", "iframe", "object", "embed"];
-      dangerousTags.forEach(function (tag) {
-        doc.querySelectorAll(tag).forEach(function (el) { el.remove(); });
-      });
-      const allEls = doc.querySelectorAll("*");
-      allEls.forEach(function (el) {
-        const attrs = Array.from(el.attributes);
-        attrs.forEach(function (attr) {
+      Array.from(doc.querySelectorAll("*")).forEach(function (el) {
+        const tag = el.tagName.toLowerCase();
+        if (dangerousTags.includes(tag)) {
+          el.remove();
+          return;
+        }
+        Array.from(el.attributes).forEach(function (attr) {
           const name = attr.name.toLowerCase();
           const val = attr.value.trim().toLowerCase();
           if (name.startsWith("on")) {
