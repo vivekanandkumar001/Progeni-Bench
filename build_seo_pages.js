@@ -583,6 +583,11 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 const filesToCopy = [
   'site.config.js', 'app.js', 'utils.js', 'styles.css', '_headers', '_redirects', 'vercel.json', 'netlify.toml'
 ];
+fs.readdirSync(baseDir).forEach(f => {
+  if (f.startsWith('google') && f.endsWith('.html')) {
+    filesToCopy.push(f);
+  }
+});
 filesToCopy.forEach(f => {
   const src = path.join(baseDir, f);
   if (fs.existsSync(src)) {

@@ -580,7 +580,7 @@ if (oldNameViolations.length === 0) {
 const allDistHtml = getAllHtmlFiles(path.join(ROOT, 'dist'));
 const c35Offending = [];
 for (const file of allDistHtml) {
-  if (path.basename(file) === '404.html') continue;
+  if (path.basename(file) === '404.html' || path.basename(file).startsWith('google')) continue;
   const rel = path.relative(ROOT, file).replace(/\\/g, '/');
   const content = fs.readFileSync(file, 'utf8');
   
@@ -622,7 +622,7 @@ const c36Titles = new Map();
 const c36Descs = new Map();
 const c36Dups = [];
 for (const file of allDistHtml) {
-  if (path.basename(file) === '404.html') continue;
+  if (path.basename(file) === '404.html' || path.basename(file).startsWith('google')) continue;
   const rel = path.relative(ROOT, file).replace(/\\/g, '/');
   const content = fs.readFileSync(file, 'utf8');
   const title = ((content.match(/<title>([^<]*)<\/title>/i) || [])[1] || '').trim();
@@ -886,6 +886,7 @@ const sitemapDoc = fs.readFileSync(path.join(ROOT, 'dist', 'sitemap.xml'), 'utf8
 const sitemapLocs = [...sitemapDoc.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
 const allCanonicalHrefs = new Set();
 for (const file of allDistHtml) {
+  if (path.basename(file).startsWith('google')) continue;
   const content = fs.readFileSync(file, 'utf8');
   const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
   if (canonicalMatch) {
