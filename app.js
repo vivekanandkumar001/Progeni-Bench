@@ -16,38 +16,15 @@ const {
   normalizeDate
 } = (typeof window !== "undefined" && window.ProgeniUtils) ? window.ProgeniUtils : (typeof require === "function" ? require("./utils.js") : {});
 
-const TOOLS = [
-  {id:"sticker-sheet",icon:"🏷️",cat:"Print & Craft",name:"Sticker Sheet Maker",desc:"Arrange images into printable US Letter / A4 sticker sheets for Cricut, Silhouette, or home printers."},
-  {id:"labels",icon:"📦",cat:"Print & Craft",name:"Avery 5160 / Label Maker",desc:"Generate printable US Letter Avery 5160, 5163, and A4 address label sheets directly from CSV."},
-  {id:"tshirt-mirror",icon:"👕",cat:"Print & Craft",name:"T-Shirt Print Mirror",desc:"Mirror artwork horizontally for heat transfer paper and iron-on vinyl printing."},
-  {id:"ironon-sheet",icon:"🧲",cat:"Print & Craft",name:"Iron-on Transfer Sheet Maker",desc:"Tile and arrange multiple designs on US Letter or A4 heat transfer paper."},
-  {id:"print-layout",icon:"🖨️",cat:"Print & Craft",name:"Print Layout Optimizer",desc:"Fit multiple photos onto US Letter, A4, or 4×6 inch paper with uniform margins."},
-  {id:"print-border",icon:"📐",cat:"Print & Craft",name:"Photo Print Border Calculator",desc:"Add precise white matting/borders for US 4×6, 5×7, 8×10 inch or European frames."},
-  {id:"cross-stitch",icon:"🧵",cat:"Print & Craft",name:"Cross-Stitch Pattern Maker",desc:"Convert photos into printable color-coded grids with standard DMC thread references."},
-  {id:"diamond-painting",icon:"💎",cat:"Print & Craft",name:"Diamond Painting Pattern Maker",desc:"Generate symbol-coded grids and DMC color palettes from any photo."},
-  {id:"embroidery",icon:"🪡",cat:"Print & Craft",name:"Embroidery Pattern Simplifier",desc:"Reduce artwork into a simplified DMC thread color palette for embroidery."},
-  {id:"video-safe-zone",icon:"📱",cat:"Audio & Video",name:"Video Safe-Zone Checker",desc:"Preview TikTok, Instagram Reels, and YouTube Shorts UI overlays to avoid cropped text."},
-  {id:"video-thumbnails",icon:"🎞️",cat:"Audio & Video",name:"Video Thumbnail Contact Sheet",desc:"Extract 12 evenly spaced high-res frames from MP4/MOV videos in your browser."},
-  {id:"audio-chapters",icon:"🎧",cat:"Audio & Video",name:"Chapter Timestamp Formatter",desc:"Format YouTube & podcast chapter timestamps with clean text export."},
-  {id:"silence-map",icon:"🔇",cat:"Audio & Video",name:"Podcast Silence Map",desc:"Analyze audio waveforms locally to detect dead air and pause durations."},
-  {id:"subtitle-speed",icon:"💬",cat:"Text & Subtitles",name:"Subtitle Reading-Speed Checker",desc:"Audit SRT subtitles for high Characters-Per-Second (CPS), duration, and overlaps."},
-  {id:"subtitle-linefix",icon:"📝",cat:"Text & Subtitles",name:"Subtitle Line-Break Fixer",desc:"Rebalance and wrap long SRT subtitle lines to meet BBC & Netflix guidelines."},
-  {id:"contact-dedupe",icon:"👥",cat:"Data",name:"Contact CSV Deduplicator",desc:"Merge and clean duplicate CRM contacts using email and international phone numbers."},
-  {id:"csv-splitter",icon:"↔️",cat:"Data",name:"CSV Column Splitter",desc:"Split names, addresses, or delimited data in CSV spreadsheets without Excel."},
-  {id:"csv-date",icon:"📆",cat:"Data",name:"CSV Date Normalizer",desc:"Standardize mixed dates into US (MM/DD/YYYY), ISO (YYYY-MM-DD), or European formats."},
-  {id:"vcard",icon:"📇",cat:"Data",name:"vCard (VCF) Split & Merge",desc:"Merge multiple .vcf contact cards or inspect contact files privately."},
-  {id:"bookmark-cleaner",icon:"🔖",cat:"Files",name:"Chrome Bookmark Cleaner",desc:"Remove duplicate bookmarks, dead links, and empty folders from exported bookmarks.html."},
-  {id:"bookmark-reading",icon:"📚",cat:"Files",name:"Bookmark → Reading List",desc:"Convert messy browser bookmark HTML files into a distraction-free offline reading list."},
-  {id:"svg-cleaner",icon:"✦",cat:"Files",name:"SVG Cleanup & Minifier",desc:"Strip Illustrator, Inkscape metadata, and comments to shrink SVG file sizes."},
-  {id:"calendar-cleaner",icon:"📅",cat:"Productivity",name:"iCal Calendar Deduplicator",desc:"Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars."},
-  {id:"timetable-calendar",icon:"🗓️",cat:"Productivity",name:"Timetable → Calendar (.ics)",desc:"Convert school or work class timetable CSVs into recurring weekly iCal events."},
-  {id:"wallpaper",icon:"🖼️",cat:"Images",name:"Wallpaper Photo Cropper",desc:"Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion."},
-  {id:"panorama",icon:"🌄",cat:"Images",name:"Panorama Carousel Splitter",desc:"Seamlessly slice wide panoramic photos into 3 seamless square Instagram carousel tiles."},
-  {id:"duplicate-finder",icon:"♻️",cat:"Images",name:"Photo Duplicate Finder",desc:"Find exact duplicate image files using browser-side SHA-256 cryptographic hashing."},
-  {id:"best-shot",icon:"✨",cat:"Images",name:"Photo Best-Shot Finder",desc:"Rank burst photos by sharpness, contrast, and clarity heuristics."},
-  {id:"photo-timeline",icon:"🕒",cat:"Images",name:"Photo Timeline Builder",desc:"Sort photos by file date and generate a standalone offline HTML photo album."},
-  {id:"family-organizer",icon:"🗂️",cat:"Images",name:"Family Photo Date Organizer",desc:"Inspect and group family photos chronologically from file modification timestamps."}
-];
+// Import brand and tools configuration from single source of truth (site.config.js)
+const {
+  PARENT_BRAND,
+  SITE_NAME,
+  SITE_URL,
+  TAGLINE,
+  LOCALE,
+  TOOLS
+} = (typeof window !== "undefined" && window.SiteConfig) ? window.SiteConfig : (typeof require === "function" ? require("./site.config.js") : {});
 
 // Global DMC Palette References for Crafters
 const DMC_PALETTE = [
@@ -93,65 +70,18 @@ const imageFromFile = async f => {
   });
 };
 
-// Rich SEO Content Database for 30 Tools
-const TOOL_SEO = {
-  "sticker-sheet": {
-    how: ["Upload multiple PNG or JPEG sticker graphics with transparent backgrounds.", "Select your target paper size: US Letter (8.5×11 in) or A4 (210×297 mm).", "Preview the auto-arranged grid and click Download High-Res PNG ready for Cricut or scissors."],
-    faqs: [
-      {q:"What is the best paper size for sticker printing?", a:"In North America, standard US Letter (8.5×11 in) is standard. In Europe and Asia, standard A4 is used. Progeni supports both with 300 DPI print quality."},
-      {q:"Do my sticker images get uploaded to a server?", a:"No. All image compositing is performed directly on your device's browser canvas. Your artwork remains 100% private."}
-    ]
-  },
-  "labels": {
-    how: ["Upload a CSV file containing addresses, names, or SKU numbers.", "Choose your label template and column to print.", "Click 'Download Printable Labels' to generate an exact print-ready HTML page."],
-    faqs: [
-      {q:"What is Avery 5160?", a:"Avery 5160 is the most popular standard mailing address label size in the US, measuring 1 x 2-5/8 inches with 30 labels on an 8.5 x 11 inch sheet."},
-      {q:"How do I print the labels accurately?", a:"Open the downloaded HTML file in Chrome/Edge, press Ctrl+P (or Cmd+P), and ensure 'Margins' is set to 'None' or 'Default'."}
-    ]
-  },
-  "video-safe-zone": {
-    how: ["Upload a screenshot or video frame from your short-form video.", "Select TikTok, Instagram Reels, or YouTube Shorts preset.", "Inspect where usernames, sound discs, captions, and like buttons will cover your video."],
-    faqs: [
-      {q:"Why do subtitles get cut off on TikTok and Reels?", a:"Social media platforms place engagement buttons (like, share, comments) and captions over the bottom and right edges of 9:16 videos. Using this tool ensures your text stays inside the visible zone."}
-    ]
-  },
-  "tshirt-mirror": {
-    how: ["Upload your T-shirt graphic or typography design.", "The tool automatically applies horizontal inversion (flip).", "Download the mirrored PNG and print directly onto light heat transfer paper."],
-    faqs: [
-      {q:"Why do you need to mirror images for iron-on transfers?", a:"When using light heat transfer paper, you place the printed sheet face-down on the fabric before applying heat. Mirroring prevents text and numbers from appearing backward."}
-    ]
-  },
-  "contact-dedupe": {
-    how: ["Export your contacts as a CSV file from Google Contacts, Outlook, or your CRM.", "Drop the CSV file into the tool.", "The algorithm matches emails and international phone numbers to remove duplicates while preserving records."],
-    faqs: [
-      {q:"Are my customer contacts safe?", a:"Yes! Progeni processes all CSV tables in your local browser memory. Zero contacts are transmitted over the internet."}
-    ]
-  }
-};
-
 function layout({ tool, body }) {
-  const related = TOOLS.filter(t => t.id !== tool.id && (t.cat === tool.cat || ["Images","Print & Craft"].includes(t.cat) && ["Images","Print & Craft"].includes(tool.cat))).slice(0, 6);
-  document.title = `${tool.name} — Free & Private Online Tool | Progeni`;
+  const related = TOOLS.filter(t => t.id !== tool.id && (t.cat === tool.cat || (["Images","Print & Craft"].includes(t.cat) && ["Images","Print & Craft"].includes(tool.cat)))).slice(0, 6);
+  
+  let pageTitle = `${tool.name}: Free Online, No Upload | ${SITE_NAME}`;
+  if (pageTitle.length > 60) pageTitle = `${tool.name}: Free Online | ${SITE_NAME}`;
+  if (pageTitle.length > 60) pageTitle = `${tool.name} | ${SITE_NAME}`;
+  if (pageTitle.length > 60) pageTitle = tool.name.slice(0, 60);
+  document.title = pageTitle;
 
-  const seo = TOOL_SEO[tool.id] || {
-    how: ["Upload your file or paste your data into the drop zone.", "Configure your preferred options above.", "Review the instant preview and click Download to save your result."],
-    faqs: [
-      { q: `Is the ${tool.name} free to use?`, a: `Yes, Progeni's ${tool.name} is 100% free with no account or subscription required.` },
-      { q: "Are my files private and secure?", a: "Yes. All processing is strictly client-side inside your browser. No files are uploaded to any server." }
-    ]
-  };
-
-  const schemaEl = $("#schema");
-  if (schemaEl) {
-    schemaEl.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": tool.name,
-      "applicationCategory": "UtilitiesApplication",
-      "description": tool.desc,
-      "operatingSystem": "Any",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-    });
+  const canonicalEl = document.querySelector('link[rel="canonical"]');
+  if (canonicalEl) {
+    canonicalEl.href = `${SITE_URL}/tools/${tool.id}/`;
   }
 
   app.innerHTML = `
@@ -165,22 +95,23 @@ function layout({ tool, body }) {
 
     <!-- Rich SEO & User Guide Section -->
     <section class="seo-section">
-      <h2>How to Use ${esc(tool.name)}</h2>
+      <h2>What It Does</h2>
+      <p>${esc(tool.whatItDoes || tool.desc)}</p>
+
+      <h2>How to Use</h2>
       <ol>
-        ${seo.how.map(step => `<li>${esc(step)}</li>`).join("")}
+        ${(tool.howToUse || []).map(step => `<li>${esc(step)}</li>`).join("")}
       </ol>
 
-      <h2>Frequently Asked Questions</h2>
-      ${seo.faqs.map(f => `
-        <div class="faq-box">
-          <h4>${esc(f.q)}</h4>
-          <p>${esc(f.a)}</p>
-        </div>
-      `).join("")}
+      <h2>Limitations & Scope</h2>
+      <p>${esc(tool.limits || "Processes standard files client-side.")}</p>
+
+      <h2>Privacy & Security</h2>
+      <p>${esc(tool.privacy || "Processed locally in your browser.")}</p>
 
       <h3>Related Utilities</h3>
       <div class="tool-links">
-        ${related.map(t => `<a href="/tools/${t.id}">${esc(t.icon)} ${esc(t.name)}</a>`).join("")}
+        ${related.map(t => `<a href="/tools/${t.id}/">${esc(t.icon)} ${esc(t.name)}</a>`).join("")}
       </div>
     </section>
   `;
@@ -893,6 +824,53 @@ function labels(t, rs) {
   };
 }
 
+function home() {
+  let homeTitle = `${SITE_NAME}: Free Private File Tools in Your Browser`;
+  if (homeTitle.length > 60) homeTitle = `${SITE_NAME}: Private File Tools`;
+  document.title = homeTitle;
+
+  const canonicalEl = document.querySelector('link[rel="canonical"]');
+  if (canonicalEl) {
+    canonicalEl.href = `${SITE_URL}/`;
+  }
+
+  app.innerHTML = `
+    <section class="hero">
+      <span class="eyebrow">30 Global Utilities · 100% Private</span>
+      <h1>Fix everyday digital problems in seconds.</h1>
+      <p>${esc(TAGLINE)} Instant client-side tools for crafters, creators, and professionals. Make Avery labels, sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts, and convert CSVs without uploading your data to external servers.</p>
+      <input id="search" class="search" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+      <div id="cats" class="categories"></div>
+    </section>
+
+    <section id="grid" class="grid"></section>
+  `;
+
+  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
+  $("#cats").innerHTML = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+
+  const render = (cat = "All", q = "") => {
+    $("#grid").innerHTML = TOOLS.filter(t => (cat === "All" || t.cat === cat) && (`${t.name} ${t.desc} ${t.cat}`.toLowerCase().includes(q.toLowerCase()))).map(t => `
+      <a class="tool-card" href="/tools/${t.id}/">
+        <div class="icon">${t.icon}</div>
+        <h3>${esc(t.name)}</h3>
+        <p>${esc(t.desc)}</p>
+        <span class="tag">${esc(t.cat)}</span>
+      </a>
+    `).join("") || `<div class="empty">No matching tools found.</div>`;
+  };
+
+  let cat = "All";
+  render();
+  document.querySelectorAll(".pill").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    cat = b.dataset.cat;
+    render(cat, $("#search").value);
+  });
+  $("#search").oninput = e => render(cat, e.target.value);
+}
+
 function toolPage(id) {
   const tool = TOOLS.find(x => x.id === id);
   if (!tool) { home(); return; }
@@ -983,21 +961,25 @@ function toolPage(id) {
 }
 
 function about(kind) {
-  document.title = kind === "privacy" ? "Privacy Policy — Progeni" : kind === "terms" ? "Terms of Service — Progeni" : kind === "contact" ? "Contact Us — Progeni" : "About Us — Progeni";
-  const title = kind === "privacy" ? "Privacy by Design" : kind === "terms" ? "Terms of Service" : kind === "contact" ? "Contact Progeni Support" : "About Progeni";
+  const canonicalEl = document.querySelector('link[rel="canonical"]');
+  if (canonicalEl) {
+    canonicalEl.href = `${SITE_URL}/${kind}/`;
+  }
+  document.title = kind === "privacy" ? `Privacy Policy: ${SITE_NAME} Zero-Upload Guarantee` : kind === "terms" ? `Terms of Service: ${SITE_NAME} Online Utilities` : kind === "contact" ? `Contact Us: ${SITE_NAME} Support & Inquiries` : `About ${SITE_NAME}: Privacy-First Browser Tools`;
+  const title = kind === "privacy" ? "Privacy Policy" : kind === "terms" ? "Terms of Service" : kind === "contact" ? "Contact Support" : `About ${SITE_NAME}`;
   let content = `
     <h2>Browser-First Global Architecture</h2>
-    <p>Progeni is designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
+    <p>${SITE_NAME} is a ${PARENT_BRAND} project designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
   `;
   if (kind === "contact") {
     content = `
       <h2>Direct Email Inquiries</h2>
-      <p>For general support, feedback, and DMCA inquiries: <a href="mailto:support@progeni.live" style="color:var(--brand);font-weight:700;">support@progeni.live</a></p>
+      <p>For general support, feedback, and inquiries: <a href="mailto:support@progeni.live" style="color:var(--brand);font-weight:700;">support@progeni.live</a></p>
     `;
   }
   app.innerHTML = `
     <section class="tool-head">
-      <span class="eyebrow">Progeni</span>
+      <span class="eyebrow">${PARENT_BRAND}</span>
       <h1>${title}</h1>
     </section>
     <section class="toolbox" style="line-height:1.8;">

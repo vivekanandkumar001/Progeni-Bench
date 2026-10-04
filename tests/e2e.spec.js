@@ -22,7 +22,7 @@ test.describe('Progeni E2E Browser Suite', () => {
     await page.goto('/');
     await page.evaluate(() => { window.__spa_marker = 'persisted'; });
 
-    await page.click('header nav a[href="/about"]');
+    await page.click('header nav a[href*="/about"]');
     await expect(page).toHaveURL(/.*\/about/);
     
     const marker = await page.evaluate(() => window.__spa_marker);
@@ -194,6 +194,87 @@ test.describe('Progeni E2E Browser Suite', () => {
       await expect(page.locator('#result')).toBeVisible();
     }
     expect(consoleErrors).toEqual([]);
+  });
+
+  test('E11: Home and 3 tool pages: document.title and h1 match config; no console errors; header shows SITE_NAME', async ({ page }) => {
+    const consoleErrors = [];
+    page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+    page.on('pageerror', err => consoleErrors.push(err.message));
+
+    // Home check
+    await page.goto('/');
+    await expect(page.locator('header .brand')).toContainText('Progeni Bench');
+    const homeTitle = await page.title();
+    expect(homeTitle).toContain('Progeni Bench');
+    expect(await page.locator('h1').textContent()).toContain('Fix everyday digital problems in seconds.');
+
+    // 3 Tools check
+    const toolPaths = [
+      { path: '/tools/sticker-sheet/', name: 'Sticker Sheet Maker' },
+      { path: '/tools/labels/', name: 'Avery 5160' },
+      { path: '/tools/csv-splitter/', name: 'CSV Column Splitter' }
+    ];
+
+    for (const item of toolPaths) {
+      await page.goto(item.path);
+      await expect(page.locator('header .brand')).toContainText('Progeni Bench');
+      const title = await page.title();
+      expect(title).toContain(item.name);
+      expect(title).toContain('Progeni Bench');
+      const h1Text = await page.locator('h1').textContent();
+      expect(h1Text).toContain(item.name);
+    }
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('E12: View-source style check: raw HTML contains JSON-LD, h1, and body text without JS', async ({ request }) => {
+    const res = await request.get('/tools/bookmark-cleaner/');
+    expect(res.status()).toBe(200);
+    const html = await res.text();
+
+    // Verify h1 exists in raw static HTML
+    expect(html).toContain('<h1');
+    expect(html).toContain('Chrome Bookmark Cleaner');
+
+    // Verify JSON-LD exists in raw static HTML
+    expect(html).toContain('application/ld+json');
+    expect(html).toContain('"@type":"WebApplication"');
+    expect(html).toContain('"@type":"BreadcrumbList"');
+
+    // Verify static body sections exist in raw HTML
+    expect(html).toContain('What it does');
+    expect(html).toContain('How to use');
+    expect(html).toContain('Limits & Considerations');
+    expect(html).toContain('Privacy & Security');
+  });
+
+  test('E13: SPA navigation keeps document.title and canonical updated on route change', async ({ page }) => {
+    await page.goto('/');
+    expect(await page.title()).toContain('Progeni Bench');
+    
+    let canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonical).toBe('https://progeni.live/');
+
+    // Click on a tool card in SPA
+    await page.click('a[href="/tools/sticker-sheet/"]');
+    await expect(page).toHaveURL(/.*\/tools\/sticker-sheet\//);
+
+    // Assert title updated
+    const toolTitle = await page.title();
+    expect(toolTitle).toContain('Sticker Sheet Maker');
+    expect(toolTitle).toContain('Progeni Bench');
+
+    // Assert canonical updated
+    canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonical).toBe('https://progeni.live/tools/sticker-sheet/');
+
+    // Navigate to about page in SPA
+    await page.click('header nav a[href="/about/"]');
+    await expect(page).toHaveURL(/.*\/about\//);
+    const aboutTitle = await page.title();
+    expect(aboutTitle).toContain('About Progeni Bench');
+    canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonical).toBe('https://progeni.live/about/');
   });
 
 });

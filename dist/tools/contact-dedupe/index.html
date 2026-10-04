@@ -1,36 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Contact CSV Deduplicator — Free & Private Online Tool | Progeni</title>
-  <meta name="description" content="Merge and clean duplicate CRM contacts using email and international phone numbers. 100% private, client-side browser processing with Progeni.">
+  <title>Contact CSV Deduplicator: Free Online Tool | Progeni Bench</title>
+  <meta name="description" content="Deduplicate contact CSV files in your browser. Merge duplicate CRM records using email and normalized phone numbers with zero data uploads.">
   <meta name="theme-color" content="#0b1020">
-  <meta property="og:title" content="Contact CSV Deduplicator — Progeni">
-  <meta property="og:description" content="Merge and clean duplicate CRM contacts using email and international phone numbers.">
+  <meta property="og:site_name" content="Progeni Bench">
+  <meta property="og:title" content="Contact CSV Deduplicator: Free Online Tool | Progeni Bench">
+  <meta property="og:description" content="Deduplicate contact CSV files in your browser. Merge duplicate CRM records using email and normalized phone numbers with zero data uploads.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://progeni.live/tools/contact-dedupe">
-  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/favicon.svg">
+  <meta property="og:url" content="https://progeni.live/tools/contact-dedupe/">
+  <meta property="og:image" content="https://progeni.live/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="https://progeni.live/tools/contact-dedupe">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Contact CSV Deduplicator","url":"https://progeni.live/tools/contact-dedupe","description":"Merge and clean duplicate CRM contacts using email and international phone numbers.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I use the Contact CSV Deduplicator?","acceptedAnswer":{"@type":"Answer","text":"Simply upload or drop your file into the tool on Progeni. Select your desired settings, and download your processed result instantly. Zero files are uploaded to remote servers."}},{"@type":"Question","name":"Is my data private and secure?","acceptedAnswer":{"@type":"Answer","text":"Yes. Progeni processes all files 100% locally inside your browser memory using HTML5 APIs. No files or private data leave your computer."}}]}]}</script>
+  <link rel="canonical" href="https://progeni.live/tools/contact-dedupe/">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Contact CSV Deduplicator","url":"https://progeni.live/tools/contact-dedupe/","description":"Deduplicate contact CSV files in your browser. Merge duplicate CRM records using email and normalized phone numbers with zero data uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://progeni.live/"},{"@type":"ListItem","position":2,"name":"Data","item":"https://progeni.live/"},{"@type":"ListItem","position":3,"name":"Contact CSV Deduplicator","item":"https://progeni.live/tools/contact-dedupe/"}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/">Progeni<span>.</span></a>
+  <a class="brand" href="/">Progeni Bench<span>.</span></a>
   <nav aria-label="Primary navigation">
     <a href="/">All tools</a>
-    <a href="/about">About</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/contact">Contact</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/contact/">Contact</a>
   </nav>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
     <span class="eyebrow">Data · 100% Private Client-Side</span>
-    <h1>👥 Contact CSV Deduplicator</h1>
+    <h1>Contact CSV Deduplicator</h1>
     <p>Merge and clean duplicate CRM contacts using email and international phone numbers. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
   </section>
 
@@ -42,17 +47,48 @@
       <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
     </section>
   </noscript>
+
+  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+    <h2>What it does</h2>
+    <p>Identifies and removes duplicate customer or contact rows in CSV exports by normalizing email casing and stripping non-digit phone formatting. Preserves the first primary contact record while cleaning up duplicate entries caused by multiple marketing imports or CRM merges.</p>
+
+    <h2>How to use</h2>
+    <ol>
+      <li>Drop your CRM or address book CSV file into the contact deduplicator drop area.</li>
+      <li>The tool automatically detects email and phone number columns across your dataset.</li>
+      <li>Review the summary displaying total unique contacts preserved and duplicate rows removed.</li>
+      <li>Download the cleaned, deduplicated CSV file ready for CRM import or email marketing.</li>
+    </ol>
+
+    <h2>Limits & Considerations</h2>
+    <p>Matches records using normalized email strings and cleaned phone digits. Does not perform fuzzy phonetic name matching or nickname deduplication.</p>
+
+    <h2>Privacy & Security</h2>
+    <p>Customer names, phone numbers, and emails are processed solely in local browser memory. Zero risk of CRM data leaks or privacy violations.</p>
+
+    <h2>Related Data Tools</h2>
+    <div class="tool-links">
+      <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <li><a href="/tools/csv-splitter/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">↔️ CSV Column Splitter</a></li>
+        <li><a href="/tools/csv-date/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📆 CSV Date Normalizer</a></li>
+        <li><a href="/tools/vcard/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📇 vCard (VCF) Split & Merge</a></li>
+        <li><a href="/tools/sticker-sheet/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">🏷️ Sticker Sheet Maker</a></li>
+        <li><a href="/tools/labels/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📦 Avery 5160 / Label Maker</a></li>
+      </ul>
+    </div>
+  </article>
 </main>
 
 <footer role="contentinfo">
-  <div><strong>Progeni</strong> — browser-first utilities for everyday digital problems. 100% private & client-side.</div>
+  <div><strong>Progeni Bench</strong> is a Progeni project — Small file jobs, done privately in your browser.</div>
   <div class="footer-links">
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
   </div>
 </footer>
+<script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/app.js"></script>
 </body>

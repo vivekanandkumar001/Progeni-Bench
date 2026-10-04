@@ -1,36 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Podcast Silence Map — Free & Private Online Tool | Progeni</title>
-  <meta name="description" content="Analyze audio waveforms locally to detect dead air and pause durations. 100% private, client-side browser processing with Progeni.">
+  <title>Podcast Silence Map: Free Online, No Upload | Progeni Bench</title>
+  <meta name="description" content="Analyze audio waveforms and find dead air gaps in your browser. Detect silence durations in podcast audio locally with zero server uploads.">
   <meta name="theme-color" content="#0b1020">
-  <meta property="og:title" content="Podcast Silence Map — Progeni">
-  <meta property="og:description" content="Analyze audio waveforms locally to detect dead air and pause durations.">
+  <meta property="og:site_name" content="Progeni Bench">
+  <meta property="og:title" content="Podcast Silence Map: Free Online, No Upload | Progeni Bench">
+  <meta property="og:description" content="Analyze audio waveforms and find dead air gaps in your browser. Detect silence durations in podcast audio locally with zero server uploads.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://progeni.live/tools/silence-map">
-  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/favicon.svg">
+  <meta property="og:url" content="https://progeni.live/tools/silence-map/">
+  <meta property="og:image" content="https://progeni.live/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="https://progeni.live/tools/silence-map">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Podcast Silence Map","url":"https://progeni.live/tools/silence-map","description":"Analyze audio waveforms locally to detect dead air and pause durations.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I use the Podcast Silence Map?","acceptedAnswer":{"@type":"Answer","text":"Simply upload or drop your file into the tool on Progeni. Select your desired settings, and download your processed result instantly. Zero files are uploaded to remote servers."}},{"@type":"Question","name":"Is my data private and secure?","acceptedAnswer":{"@type":"Answer","text":"Yes. Progeni processes all files 100% locally inside your browser memory using HTML5 APIs. No files or private data leave your computer."}}]}]}</script>
+  <link rel="canonical" href="https://progeni.live/tools/silence-map/">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Podcast Silence Map","url":"https://progeni.live/tools/silence-map/","description":"Analyze audio waveforms and find dead air gaps in your browser. Detect silence durations in podcast audio locally with zero server uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://progeni.live/"},{"@type":"ListItem","position":2,"name":"Audio & Video","item":"https://progeni.live/"},{"@type":"ListItem","position":3,"name":"Podcast Silence Map","item":"https://progeni.live/tools/silence-map/"}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/">Progeni<span>.</span></a>
+  <a class="brand" href="/">Progeni Bench<span>.</span></a>
   <nav aria-label="Primary navigation">
     <a href="/">All tools</a>
-    <a href="/about">About</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/contact">Contact</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/contact/">Contact</a>
   </nav>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
     <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
-    <h1>🔇 Podcast Silence Map</h1>
+    <h1>Podcast Silence Map</h1>
     <p>Analyze audio waveforms locally to detect dead air and pause durations. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
   </section>
 
@@ -42,17 +47,48 @@
       <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
     </section>
   </noscript>
+
+  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+    <h2>What it does</h2>
+    <p>Decodes audio tracks using the Web Audio API and runs root-mean-square (RMS) energy analysis across the waveform to detect dead air gaps and pauses longer than 500 milliseconds. Generates a chronological list of silence start times and durations to speed up podcast and interview editing.</p>
+
+    <h2>How to use</h2>
+    <ol>
+      <li>Drop a podcast audio track (WAV, MP3, AAC, or OGG) into the silence detector.</li>
+      <li>Wait a few moments while the local Web Audio engine decodes and audits the audio buffer.</li>
+      <li>Review the generated list of dead air intervals showing exact start and end timestamps.</li>
+      <li>Use the timestamp report to quickly locate and trim long pauses in your digital audio workstation (DAW).</li>
+    </ol>
+
+    <h2>Limits & Considerations</h2>
+    <p>Decodes audio into browser RAM; extremely large audio files (>200MB) may encounter memory limits on memory-constrained mobile devices.</p>
+
+    <h2>Privacy & Security</h2>
+    <p>Audio decoding, waveform inspection, and silence mapping execute entirely on your local CPU. Unreleased audio files never leave your computer.</p>
+
+    <h2>Related Audio & Video Tools</h2>
+    <div class="tool-links">
+      <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <li><a href="/tools/video-safe-zone/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📱 Video Safe-Zone Checker</a></li>
+        <li><a href="/tools/video-thumbnails/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">🎞️ Video Thumbnail Contact Sheet</a></li>
+        <li><a href="/tools/audio-chapters/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">🎧 Chapter Timestamp Formatter</a></li>
+        <li><a href="/tools/sticker-sheet/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">🏷️ Sticker Sheet Maker</a></li>
+        <li><a href="/tools/labels/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📦 Avery 5160 / Label Maker</a></li>
+      </ul>
+    </div>
+  </article>
 </main>
 
 <footer role="contentinfo">
-  <div><strong>Progeni</strong> — browser-first utilities for everyday digital problems. 100% private & client-side.</div>
+  <div><strong>Progeni Bench</strong> is a Progeni project — Small file jobs, done privately in your browser.</div>
   <div class="footer-links">
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
   </div>
 </footer>
+<script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/app.js"></script>
 </body>

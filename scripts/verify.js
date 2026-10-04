@@ -362,28 +362,16 @@ if (c20Violations.length === 0) {
   addResult('C20', 'FAIL', c20Violations.join(', '));
 }
 
-// C21: TOOLS drift
+// C21: TOOLS single source of truth (site.config.js) imported by app.js and build_seo_pages.js
 const buildSeo = fs.readFileSync(path.join(ROOT, 'build_seo_pages.js'), 'utf8');
-const seoToolsMatch = buildSeo.match(/const TOOLS = (\[[\s\S]*?\]);/);
-const appToolsMatch = appContent.match(/const TOOLS = (\[[\s\S]*?\]);/);
-if (seoToolsMatch && appToolsMatch) {
-  const evalTools = src => (new Function(`return ${src}`))();
-  const tSeo = evalTools(seoToolsMatch[1]);
-  const tApp = evalTools(appToolsMatch[1]);
-  const diffs = [];
-  if (tSeo.length !== tApp.length) diffs.push(`length ${tSeo.length}!=${tApp.length}`);
-  for (let i = 0; i < Math.min(tSeo.length, tApp.length); i++) {
-    if (tSeo[i].id !== tApp[i].id || tSeo[i].name !== tApp[i].name) {
-      diffs.push(`[${i}] ${tSeo[i].id} vs ${tApp[i].id}`);
-    }
-  }
-  if (diffs.length === 0) {
-    addResult('C21', 'PASS', '30 tools match exactly across app.js and build_seo_pages.js');
-  } else {
-    addResult('C21', 'FAIL', diffs.join(', '));
-  }
+const siteConfigModule = require(path.join(ROOT, 'site.config.js'));
+const tConfig = siteConfigModule.TOOLS;
+const appImportsConfig = appContent.includes('site.config.js') && appContent.includes('TOOLS');
+const buildImportsConfig = buildSeo.includes('site.config.js') && buildSeo.includes('TOOLS');
+if (tConfig && tConfig.length === 30 && appImportsConfig && buildImportsConfig) {
+  addResult('C21', 'PASS', '30 tools defined in site.config.js and shared across app.js and build_seo_pages.js');
 } else {
-  addResult('C21', 'FAIL', 'could not parse TOOLS in app.js or build_seo_pages.js');
+  addResult('C21', 'FAIL', `config tools=${tConfig ? tConfig.length : 0}, appImportsConfig=${appImportsConfig}, buildImportsConfig=${buildImportsConfig}`);
 }
 
 // C22: Router
@@ -545,6 +533,318 @@ if (wpBatch && !wpMulti) {
   addResult('C32', 'FAIL', 'wallpaper named "Wallpaper Batch Cropper" but tool picker only accepts a single file');
 } else {
   addResult('C32', 'PASS', `wallpaper tool name/desc aligned with single/multi support (batch=${wpBatch}, multi=${wpMulti})`);
+}
+
+// C33: site.config.js exists; SITE_NAME appears nowhere hardcoded outside it
+const siteConfigPath = path.join(ROOT, 'site.config.js');
+const siteConfigExists = fs.existsSync(siteConfigPath);
+let siteConfig = {};
+try { siteConfig = require(siteConfigPath); } catch (e) {}
+const siteName = siteConfig.SITE_NAME || 'Progeni Bench';
+const sourceJsFiles = ['app.js', 'build_seo_pages.js', 'utils.js'];
+const hardcodedInSource = sourceJsFiles.filter(f => {
+  const p = path.join(ROOT, f);
+  return fs.existsSync(p) && fs.readFileSync(p, 'utf8').includes(siteName);
+});
+if (siteConfigExists && hardcodedInSource.length === 0) {
+  addResult('C33', 'PASS', `site.config.js exists, literal SITE_NAME absent from source JS (${sourceJsFiles.join(', ')})`);
+} else {
+  addResult('C33', 'FAIL', `exists=${siteConfigExists}, hardcodedIn=${hardcodedInSource.join(', ') || 'none'}`);
+}
+
+// C34: Old names ("UtilityHub", standalone old product name) absent from source and dist
+const oldNameViolations = [];
+function checkOldNames(dir) {
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (item.name === 'node_modules' || item.name === '.git') continue;
+    const full = path.join(dir, item.name);
+    if (item.isDirectory()) {
+      checkOldNames(full);
+    } else if (item.name.endsWith('.html') || item.name.endsWith('.js') || item.name.endsWith('.webmanifest')) {
+      if (item.name === 'verify.js') continue;
+      const content = fs.readFileSync(full, 'utf8');
+      if (content.includes('UtilityHub')) {
+        oldNameViolations.push(path.relative(ROOT, full).replace(/\\/g, '/'));
+      }
+    }
+  }
+}
+checkOldNames(ROOT);
+if (oldNameViolations.length === 0) {
+  addResult('C34', 'PASS', 'old names absent from source and dist');
+} else {
+  addResult('C34', 'FAIL', `found old names in: ${oldNameViolations.join(', ')}`);
+}
+
+// C35: Every dist page has: <title> <= 60 chars, meta description 120-155 chars, exactly one h1, canonical, og:title, og:description, og:image (file exists), html lang
+const allDistHtml = getAllHtmlFiles(path.join(ROOT, 'dist'));
+const c35Offending = [];
+for (const file of allDistHtml) {
+  if (path.basename(file) === '404.html') continue;
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  
+  const titleMatch = content.match(/<title>([^<]*)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].trim() : '';
+  if (!title || title.length > 60) c35Offending.push(`${rel} (title len ${title.length})`);
+
+  const descMatch = content.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
+  const desc = descMatch ? descMatch[1].trim() : '';
+  if (!desc || desc.length < 120 || desc.length > 155) c35Offending.push(`${rel} (desc len ${desc.length})`);
+
+  const h1Matches = content.match(/<h1[^>]*>[\s\S]*?<\/h1>/gi) || [];
+  if (h1Matches.length !== 1) c35Offending.push(`${rel} (h1 count ${h1Matches.length})`);
+
+  const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
+  if (!canonicalMatch) c35Offending.push(`${rel} (missing canonical)`);
+
+  const ogTitle = content.match(/<meta\s+property=["']og:title["']/i);
+  const ogDesc = content.match(/<meta\s+property=["']og:description["']/i);
+  const ogImg = content.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']*)["']/i);
+  if (!ogTitle || !ogDesc || !ogImg) c35Offending.push(`${rel} (missing og tags)`);
+  if (ogImg) {
+    const imgUrl = ogImg[1];
+    const localPath = imgUrl.replace(siteConfig.SITE_URL || '', '').replace(/^\//, '');
+    if (!fs.existsSync(path.join(ROOT, 'dist', localPath))) c35Offending.push(`${rel} (og:image file missing ${localPath})`);
+  }
+
+  const htmlLang = content.match(/<html\s+[^>]*lang=["']en-IN["']/i);
+  if (!htmlLang) c35Offending.push(`${rel} (missing lang="en-IN")`);
+}
+if (c35Offending.length === 0) {
+  addResult('C35', 'PASS', 'none');
+} else {
+  addResult('C35', 'FAIL', c35Offending.join(', '));
+}
+
+// C36: No two pages share a <title> or meta description (print duplicates)
+const c36Titles = new Map();
+const c36Descs = new Map();
+const c36Dups = [];
+for (const file of allDistHtml) {
+  if (path.basename(file) === '404.html') continue;
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  const title = ((content.match(/<title>([^<]*)<\/title>/i) || [])[1] || '').trim();
+  const desc = ((content.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i) || [])[1] || '').trim();
+  if (c36Titles.has(title)) c36Dups.push(`title "${title}" in ${rel} & ${c36Titles.get(title)}`);
+  else c36Titles.set(title, rel);
+  if (c36Descs.has(desc)) c36Dups.push(`desc "${desc.slice(0, 30)}..." in ${rel} & ${c36Descs.get(desc)}`);
+  else c36Descs.set(desc, rel);
+}
+if (c36Dups.length === 0) {
+  addResult('C36', 'PASS', 'all titles and meta descriptions are unique');
+} else {
+  addResult('C36', 'FAIL', c36Dups.join('; '));
+}
+
+// C37: Every JSON-LD block in dist parses; tool pages have WebApplication + BreadcrumbList; home has WebSite + Organization. No Review/AggregateRating anywhere.
+const c37Errors = [];
+for (const file of allDistHtml) {
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  const scriptRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+  const blocks = [];
+  while ((match = scriptRegex.exec(content)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+        blocks.push(...parsed['@graph']);
+      } else {
+        blocks.push(parsed);
+      }
+    } catch (e) {
+      c37Errors.push(`${rel} invalid json: ${e.message}`);
+    }
+  }
+  if (rel.startsWith('dist/tools/')) {
+    const hasWebApp = blocks.some(b => b['@type'] === 'WebApplication');
+    const hasBreadcrumbs = blocks.some(b => b['@type'] === 'BreadcrumbList');
+    if (!hasWebApp || !hasBreadcrumbs) c37Errors.push(`${rel} missing WebApplication/BreadcrumbList`);
+  } else if (rel === 'dist/index.html') {
+    const hasWebSite = blocks.some(b => b['@type'] === 'WebSite');
+    const hasOrg = blocks.some(b => b['@type'] === 'Organization');
+    if (!hasWebSite || !hasOrg) c37Errors.push(`${rel} missing WebSite/Organization`);
+  }
+  const str = JSON.stringify(blocks);
+  if (str.includes('AggregateRating') || str.includes('Review')) {
+    c37Errors.push(`${rel} prohibited Review/AggregateRating`);
+  }
+}
+if (c37Errors.length === 0) {
+  addResult('C37', 'PASS', 'all JSON-LD blocks parse, schemas match specifications, zero fake ratings');
+} else {
+  addResult('C37', 'FAIL', c37Errors.join(', '));
+}
+
+// C38: sitemap URLs == set of canonical URLs in dist (print diff), count printed, lastmod deterministic
+const sitemapPath = path.join(ROOT, 'dist', 'sitemap.xml');
+let sitemapUrls = [];
+let lastmodValid = true;
+if (fs.existsSync(sitemapPath)) {
+  const sitemapContent = fs.readFileSync(sitemapPath, 'utf8');
+  const locMatches = [...sitemapContent.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+  sitemapUrls = locMatches;
+  const lastmodMatches = [...sitemapContent.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m => m[1]);
+  lastmodValid = lastmodMatches.length === locMatches.length && lastmodMatches.every(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+}
+const canonicalDistUrls = [];
+for (const file of allDistHtml) {
+  if (path.basename(file) === '404.html') continue;
+  const content = fs.readFileSync(file, 'utf8');
+  const canMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
+  if (canMatch) canonicalDistUrls.push(canMatch[1]);
+}
+const sitemapSet = new Set(sitemapUrls);
+const canonicalSet = new Set(canonicalDistUrls);
+const sitemapDiff = [...canonicalSet].filter(u => !sitemapSet.has(u)).concat([...sitemapSet].filter(u => !canonicalSet.has(u)));
+if (sitemapDiff.length === 0 && lastmodValid && sitemapSet.size === 35) {
+  addResult('C38', 'PASS', `sitemap count=${sitemapSet.size}, diff=none, lastmod deterministic`);
+} else {
+  addResult('C38', 'FAIL', `sitemap count=${sitemapSet.size}, canonical count=${canonicalSet.size}, diff=${sitemapDiff.join(', ') || 'none'}, lastmodValid=${lastmodValid}`);
+}
+
+// C39: Every tool page body text >= 120 unique words (strip tags, nav, footer); print the 3 lowest word counts
+const toolWordCounts = [];
+const toolsDistDir = path.join(ROOT, 'dist', 'tools');
+if (fs.existsSync(toolsDistDir)) {
+  const toolFolders = fs.readdirSync(toolsDistDir, { withFileTypes: true }).filter(d => d.isDirectory());
+  for (const dir of toolFolders) {
+    const indexPath = path.join(toolsDistDir, dir.name, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      let html = fs.readFileSync(indexPath, 'utf8');
+      html = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                 .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+                 .replace(/<header[\s\S]*?<\/header>/gi, ' ')
+                 .replace(/<footer[\s\S]*?<\/footer>/gi, ' ')
+                 .replace(/<nav[\s\S]*?<\/nav>/gi, ' ')
+                 .replace(/<[^>]+>/g, ' ');
+      const words = html.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+      const uniqueWords = new Set(words);
+      toolWordCounts.push({ tool: dir.name, count: uniqueWords.size });
+    }
+  }
+}
+toolWordCounts.sort((a, b) => a.count - b.count);
+const lowest3 = toolWordCounts.slice(0, 3).map(t => `${t.tool}=${t.count}`).join(', ');
+const c39Failed = toolWordCounts.filter(t => t.count < 120);
+if (c39Failed.length === 0 && toolWordCounts.length === 30) {
+  addResult('C39', 'PASS', `all 30 tools >= 120 unique words; lowest: ${lowest3}`);
+} else {
+  addResult('C39', 'FAIL', `below 120: ${c39Failed.map(t => `${t.tool}=${t.count}`).join(', ')}`);
+}
+
+// C40: Pairwise sentence overlap between tool pages <= 40% (print the highest pair)
+const toolSentenceSets = [];
+if (fs.existsSync(toolsDistDir)) {
+  const toolFolders = fs.readdirSync(toolsDistDir, { withFileTypes: true }).filter(d => d.isDirectory());
+  for (const dir of toolFolders) {
+    const indexPath = path.join(toolsDistDir, dir.name, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      let html = fs.readFileSync(indexPath, 'utf8');
+      const seoMatch = html.match(/<section class="seo-section">([\s\S]*?)<\/section>/i);
+      const bodyHtml = seoMatch ? seoMatch[1] : html;
+      const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+      const sentences = text.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.length > 15);
+      toolSentenceSets.push({ tool: dir.name, sentences: new Set(sentences) });
+    }
+  }
+}
+let highestOverlap = 0;
+let highestPair = 'none';
+for (let i = 0; i < toolSentenceSets.length; i++) {
+  for (let j = i + 1; j < toolSentenceSets.length; j++) {
+    const a = toolSentenceSets[i];
+    const b = toolSentenceSets[j];
+    let common = 0;
+    for (const s of a.sentences) {
+      if (b.sentences.has(s)) common++;
+    }
+    const minSize = Math.min(a.sentences.size, b.sentences.size) || 1;
+    const ratio = common / minSize;
+    if (ratio > highestOverlap) {
+      highestOverlap = ratio;
+      highestPair = `${a.tool} & ${b.tool} (${(ratio * 100).toFixed(1)}%)`;
+    }
+  }
+}
+if (highestOverlap <= 0.40) {
+  addResult('C40', 'PASS', `max pairwise overlap ${(highestOverlap * 100).toFixed(1)}% (${highestPair})`);
+} else {
+  addResult('C40', 'FAIL', `overlap exceeded: ${highestPair}`);
+}
+
+// C41: Internal links: each tool page has 4-6 related links; no broken internal href (all targets exist in dist)
+const c41Issues = [];
+for (const file of allDistHtml) {
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  if (rel.startsWith('dist/tools/')) {
+    const toolLinksMatch = content.match(/<div class="tool-links">([\s\S]*?)<\/div>/i);
+    if (toolLinksMatch) {
+      const links = [...toolLinksMatch[1].matchAll(/<a\s+href=["']([^"']*)["']/g)].map(m => m[1]);
+      if (links.length < 4 || links.length > 6) {
+        c41Issues.push(`${rel} has ${links.length} related links (expected 4-6)`);
+      }
+    } else {
+      c41Issues.push(`${rel} missing tool-links container`);
+    }
+  }
+  const allHrefs = [...content.matchAll(/<a\s+[^>]*href=["'](\/[^"']*)["']/g)].map(m => m[1]);
+  for (const href of allHrefs) {
+    if (href.startsWith('//') || href.startsWith('/mailto:') || href.startsWith('/#')) continue;
+    let clean = href.split('?')[0].split('#')[0];
+    if (clean === '/') clean = '/index.html';
+    else if (clean.endsWith('/')) clean += 'index.html';
+    else if (!path.extname(clean)) clean += '/index.html';
+    const targetFile = path.join(ROOT, 'dist', clean.replace(/^\//, ''));
+    if (!fs.existsSync(targetFile)) {
+      c41Issues.push(`broken link in ${rel} -> ${href} (${path.relative(ROOT, targetFile)})`);
+    }
+  }
+}
+if (c41Issues.length === 0) {
+  addResult('C41', 'PASS', 'all tool pages have 4-6 related links; zero broken internal hrefs');
+} else {
+  addResult('C41', 'FAIL', c41Issues.slice(0, 3).join('; '));
+}
+
+// C42: 404.html has noindex; _redirects returns 404 for unknown paths
+const notFoundPath = path.join(ROOT, 'dist', '404.html');
+const redirectsPath = path.join(ROOT, 'dist', '_redirects');
+let notFoundNoindex = false;
+let redirects404 = false;
+if (fs.existsSync(notFoundPath)) {
+  const nfContent = fs.readFileSync(notFoundPath, 'utf8');
+  notFoundNoindex = /<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(nfContent);
+}
+if (fs.existsSync(redirectsPath)) {
+  const rdrContent = fs.readFileSync(redirectsPath, 'utf8');
+  redirects404 = /\/\*\s+\/404\.html\s+404/.test(rdrContent);
+}
+if (notFoundNoindex && redirects404) {
+  addResult('C42', 'PASS', '404 has noindex; _redirects returns 404 status for unknown routes');
+} else {
+  addResult('C42', 'FAIL', `404 noindex=${notFoundNoindex}, _redirects 404=${redirects404}`);
+}
+
+// C43: manifest name/short_name == SITE_NAME / short variant
+const manifestPath = path.join(ROOT, 'dist', 'manifest.webmanifest');
+let manifestValid = false;
+let manifestName = '', manifestShort = '';
+if (fs.existsSync(manifestPath)) {
+  try {
+    const mf = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    manifestName = mf.name;
+    manifestShort = mf.short_name;
+    manifestValid = (mf.name === siteName) && (mf.short_name === siteName || mf.short_name === 'Bench' || mf.short_name === 'Progeni Bench');
+  } catch (e) {}
+}
+if (manifestValid) {
+  addResult('C43', 'PASS', `manifest name="${manifestName}", short_name="${manifestShort}"`);
+} else {
+  addResult('C43', 'FAIL', `manifest name="${manifestName}", short_name="${manifestShort}" (expected "${siteName}")`);
 }
 
 // SUMMARY

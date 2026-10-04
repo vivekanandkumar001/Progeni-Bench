@@ -1,4 +1,6 @@
-# Progeni - Production README
+# Progeni Bench - Production README
+
+Progeni Bench is a Progeni project delivering fast, zero-bloat browser utilities with 100% private client-side processing.
 
 ## 🚀 Quick Start
 
