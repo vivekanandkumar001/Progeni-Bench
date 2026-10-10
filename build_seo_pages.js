@@ -169,7 +169,7 @@ function generateToolPageHtml(tool) {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/">${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>

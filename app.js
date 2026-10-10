@@ -125,10 +125,13 @@ function home() {
   app.innerHTML = `
     <section class="hero">
       <span class="eyebrow">30 Global Utilities · 100% Private</span>
-      <h1>Fix everyday digital problems in seconds.</h1>
-      <p>Instant client-side tools for crafters, creators, and professionals. Make Avery labels, sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts, and convert CSVs without uploading your data to external servers.</p>
-      <input id="search" class="search" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
-      <div id="cats" class="categories"></div>
+      <h1>Free Online PDF Tools</h1>
+      <p>Merge, split, compress, convert, and edit PDFs instantly — all client-side, zero uploads.</p>
+      <div class="drop" id="drop">
+        <strong>Drop PDF files here</strong>
+        <span>or click to browse from device</span>
+        <input id="file" type="file" multiple accept=".pdf">
+      </div>
     </section>
 
     <section id="grid" class="grid"></section>
@@ -177,10 +180,23 @@ function bindPicker(cb) {
   f.onchange = () => cb([...f.files]);
 }
 
+// Mobile navigation toggle
+document.getElementById("hamburger")?.addEventListener("click", () => {
+  const nav = document.querySelector("nav");
+  if (nav) {
+    nav.classList.toggle("open");
+    const hamburger = document.getElementById("hamburger");
+    if (hamburger) {
+      hamburger.setAttribute("aria-expanded", nav.classList.contains("open"));
+    }
+  }
+});
+
 function resultBox(html = "") {
   const r = document.createElement("div");
   r.className = "result";
   r.id = "result";
+  r.setAttribute("aria-live", "polite");
   r.innerHTML = html;
   $(".toolbox").appendChild(r);
   return r;
@@ -195,6 +211,15 @@ async function processTool(id, files) {
   const f = files[0];
   let rs = $("#result");
   if (!rs) rs = resultBox();
+
+  // Show loading state
+  if (rs) {
+    rs.innerHTML = `
+      <div class="loading-result">
+        <div class="loader">Processing...</div>
+      </div>
+    `;
+  }
 
   try {
     switch (id) {
@@ -286,6 +311,8 @@ async function processTool(id, files) {
         const as = safeLinks.map(a => `<li><a href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.text)}</a></li>`).join("");
         const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Offline Reading List</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6}li{margin:10px 0}a{color:#4f46e5;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><h1>Reading List</h1><p>Exported from Progeni.</p><ul>${as}</ul></body></html>`;
         rs.innerHTML = `<div class="notice">${safeLinks.length} valid links converted into clean offline reading list.</div><button class="btn" id="dl">Download reading-list.html</button>`;
+        // Remove loading state
+        $("#result.loading-result")?.remove();
         $("#dl").onclick = () => textDownload(out, "reading-list.html", "text/html");
         break;
       }
@@ -305,7 +332,8 @@ async function processTool(id, files) {
     }
   } catch (e) {
     console.error(e);
-    rs.innerHTML = `<div class="error">${esc(e.message || e)}</div>`;
+    // Remove loading state on error
+    if (rs) rs.innerHTML = `<div class="error">${esc(e.message || e)}</div>`;
   }
 }
 
@@ -993,13 +1021,25 @@ function about(kind) {
   `;
 }
 
+function setActiveNav() {
+  const path = location.pathname;
+  document.querySelectorAll("nav a").forEach(a => {
+    const href = a.getAttribute("href");
+    if (href && (path === href || (href !== "/" && path.startsWith(href)))) {
+      a.classList.add("active");
+    } else {
+      a.classList.remove("active");
+    }
+  });
+}
+
 function route() {
   const hash = location.hash.replace(/^#/, "") || "";
   const path = location.pathname.replace(/^\/+/, "/") || "/";
   let p = path || hash || "/";
   p = p.replace(/\/+$/, "") || "/";
 
-  if (p === "/" || p === "") { home(); return; }
+  if (p === "/" || p === "") { home(); setActiveNav(); return; }
   if (p === "/about") { about("about"); return; }
   if (p === "/privacy") { about("privacy"); return; }
   if (p === "/terms") { about("terms"); return; }
