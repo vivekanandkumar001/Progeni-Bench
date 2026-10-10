@@ -1,0 +1,55 @@
+﻿# Progeni Bench — Free Private Browser File Utilities
+
+> Progeni Bench (https://bench.progeni.live) is a fast, 100% client-side web utility suite featuring 30 free file tools. All processing executes locally inside the user's web browser using HTML5 Canvas, Web Cryptography, and WebAssembly. Zero files, images, or documents are uploaded to external servers.
+
+## Core Values & Privacy Guarantee
+- 100% Client-Side Processing: All file transformations occur in local browser memory (RAM).
+- Zero Uploads: Sensitive CSVs, personal photos, contact databases, and calendar files never touch a remote server.
+- Free & No Registration: Unlimited access to all 30 utility tools without signup or ads.
+
+## Tool Categories & Key Capabilities
+
+### 1. Print & Craft Utilities
+- Sticker Sheet Maker (https://bench.progeni.live/tools/sticker-sheet/): Tile images onto US Letter / A4 sticker grids for Cricut & Silhouette printers.
+- Avery 5160 / Label Maker (https://bench.progeni.live/tools/labels/): Format contact lists into printable mailing labels.
+- T-Shirt Print Mirror (https://bench.progeni.live/tools/tshirt-mirror/): Flip illustrations horizontally for iron-on transfer paper printing.
+- Iron-on Transfer Sheet Maker (https://bench.progeni.live/tools/ironon-sheet/): Arrange multiple mirrored graphics on printable heat transfer sheets.
+- Print Layout Optimizer (https://bench.progeni.live/tools/print-layout/): Optimize paper usage by nesting graphic elements onto custom page sizes.
+- Photo Print Border Calculator (https://bench.progeni.live/tools/print-border/): Calculate exact mat framing borders and print margins.
+
+### 2. Craft & Needlework
+- Cross-Stitch Pattern Generator (https://bench.progeni.live/tools/cross-stitch/): Convert photographs into DMC color-coded grid charts.
+- Diamond Painting Grid Calculator (https://bench.progeni.live/tools/diamond-painting/): Generate drill count matrices and color maps for diamond embroidery.
+- Embroidery Thread Estimator (https://bench.progeni.live/tools/embroidery/): Calculate skein requirements from stitch counts.
+
+### 3. Video & Audio Utilities
+- Video Title Safe Zone Overlay (https://bench.progeni.live/tools/video-safe-zone/): Preview 16:9, 9:16, 4:5 social media action and title safe boundaries.
+- Video Thumbnail Comparison (https://bench.progeni.live/tools/video-thumbnails/): Compare YouTube/TikTok thumbnail candidates side-by-side.
+- Audio Podcast Chapter Editor (https://bench.progeni.live/tools/audio-chapters/): Edit and export MP3/AAC chapter markers into clean text format.
+- Audio Silence Map Visualizer (https://bench.progeni.live/tools/silence-map/): Map quiet sections in voice recordings to trim dead air.
+- Subtitle Speed & CPS Analyzer (https://bench.progeni.live/tools/subtitle-speed/): Audit SRT/VTT subtitle reading speeds and characters per second.
+- Subtitle Line Break Fixer (https://bench.progeni.live/tools/subtitle-linefix/): Automatically format long subtitle lines into readable 2-line blocks.
+
+### 4. Data & Contact Tools
+- Contact Database Deduplicator (https://bench.progeni.live/tools/contact-dedupe/): Deduplicate CSV/vCard contact lists by phone and email.
+- CSV File Splitter (https://bench.progeni.live/tools/csv-splitter/): Split multi-gigabyte CSV spreadsheets by line count or file size.
+- CSV Date Format Converter (https://bench.progeni.live/tools/csv-date/): Standardize ISO 8601 YYYY-MM-DD date columns across databases.
+- vCard QR & Contact Generator (https://bench.progeni.live/tools/vcard/): Build VCF contact cards and scan-to-save QR codes locally.
+- Bookmark Clean & Audit (https://bench.progeni.live/tools/bookmark-cleaner/): Clean duplicate URLs and broken links from HTML browser bookmark exports.
+- Reading List Manager (https://bench.progeni.live/tools/bookmark-reading/): Organize browser bookmarks into categorized reading queues.
+- SVG Asset Cleaner & Optimizer (https://bench.progeni.live/tools/svg-cleaner/): Strip metadata, comments, and unused attributes from SVG graphics.
+- iCal / Calendar Event Cleaner (https://bench.progeni.live/tools/calendar-cleaner/): Sanitize ICS calendar feeds by stripping private notes and duplicate events.
+- Timetable to iCal Generator (https://bench.progeni.live/tools/timetable-calendar/): Convert class or work schedules into importable .ics files.
+
+### 5. Image & Photo Tools
+- Smartphone Wallpaper Cropper (https://bench.progeni.live/tools/wallpaper/): Center-crop photographs to 9:19.5 mobile phone display ratios.
+- Panorama Carousel Splitter (https://bench.progeni.live/tools/panorama/): Slice wide panoramic photos into 3 seamless square Instagram carousel tiles.
+- Photo Duplicate Finder (https://bench.progeni.live/tools/duplicate-finder/): Detect exact duplicate images using local SHA-256 binary hashing.
+- Photo Best-Shot Finder (https://bench.progeni.live/tools/best-shot/): Rank burst photo sets by sharpness and contrast using Laplacian edge gradients.
+- Photo Timeline Builder (https://bench.progeni.live/tools/photo-timeline/): Sort photo collections chronologically into offline HTML event galleries.
+- Family Photo Date Organizer (https://bench.progeni.live/tools/family-organizer/): Group family photos by date and create structured timeline indices.
+
+## Primary Contact & Publisher Information
+- Publisher: Progeni (https://progeni.live)
+- Support Email: support@progeni.live
+- License: Free client-side web utility suite.
