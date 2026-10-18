@@ -29,19 +29,19 @@ function crc32(buf) {
   return (crc ^ (-1)) >>> 0;
 }
 
-function createPng(width, height, r, g, b) {
+// Encodes raw RGB pixels (drawn via a setPx callback) into a PNG buffer
+function encodePng(width, height, drawFn) {
   const rowSize = 1 + width * 3;
   const rawData = Buffer.alloc(rowSize * height);
-  for (let y = 0; y < height; y++) {
-    const rowOffset = y * rowSize;
-    rawData[rowOffset] = 0;
-    for (let x = 0; x < width; x++) {
-      const p = rowOffset + 1 + x * 3;
-      rawData[p] = r;
-      rawData[p + 1] = g;
-      rawData[p + 2] = b;
-    }
-  }
+  for (let y = 0; y < height; y++) rawData[y * rowSize] = 0; // scanline filter: none
+  const setPx = (x, y, r, g, b) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return;
+    const p = y * rowSize + 1 + x * 3;
+    rawData[p] = r;
+    rawData[p + 1] = g;
+    rawData[p + 2] = b;
+  };
+  drawFn(setPx, width, height);
   const compressed = zlib.deflateSync(rawData);
   function chunk(type, data) {
     const len = Buffer.alloc(4);
@@ -64,13 +64,56 @@ function createPng(width, height, r, g, b) {
   return Buffer.concat([signature, chunk('IHDR', ihdrData), chunk('IDAT', compressed), chunk('IEND', Buffer.alloc(0))]);
 }
 
+function pointInPoly(px, py, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Light corporate brand art: soft gray field + rounded brand-blue tile + white bolt
+function drawBrandMark(setPx, width, height) {
+  const bg = [244, 246, 249];
+  const brand = [29, 78, 216];
+  const white = [255, 255, 255];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) setPx(x, y, bg[0], bg[1], bg[2]);
+  }
+
+  const tile = Math.round(Math.min(width, height) * 0.68);
+  const tx = Math.round((width - tile) / 2);
+  const ty = Math.round((height - tile) / 2);
+  const rad = tile * 0.22;
+  const half = tile / 2;
+  const inner = half - rad;
+  const bolt = [
+    [0.58, 0.16], [0.33, 0.55], [0.49, 0.55],
+    [0.33, 0.85], [0.67, 0.45], [0.50, 0.45]
+  ];
+
+  for (let y = 0; y < tile; y++) {
+    for (let x = 0; x < tile; x++) {
+      const qx = Math.abs(x + 0.5 - half) - inner;
+      const qy = Math.abs(y + 0.5 - half) - inner;
+      const dx = Math.max(qx, 0);
+      const dy = Math.max(qy, 0);
+      if (Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) > rad) continue;
+      const c = pointInPoly(x / tile, y / tile, bolt) ? white : brand;
+      setPx(tx + x, ty + y, c[0], c[1], c[2]);
+    }
+  }
+}
+
 const assetsDir = path.join(baseDir, 'assets');
 const distAssetsDir = path.join(distDir, 'assets');
 if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
 if (!fs.existsSync(distAssetsDir)) fs.mkdirSync(distAssetsDir, { recursive: true });
 
-const ogPng = createPng(1200, 630, 11, 16, 32);
-const iconPng = createPng(180, 180, 11, 16, 32);
+const ogPng = encodePng(1200, 630, drawBrandMark);
+const iconPng = encodePng(180, 180, drawBrandMark);
 fs.writeFileSync(path.join(assetsDir, 'og-image.png'), ogPng);
 fs.writeFileSync(path.join(distAssetsDir, 'og-image.png'), ogPng);
 fs.writeFileSync(path.join(assetsDir, 'apple-touch-icon.png'), iconPng);
@@ -152,7 +195,7 @@ function generateToolPageHtml(tool) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${tool.seoDesc}">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="${SITE_NAME}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${tool.seoDesc}">
@@ -170,13 +213,14 @@ function generateToolPageHtml(tool) {
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
   <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
-  <nav aria-label="Primary navigation">
+  <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
 <main id="app" class="container" tabindex="-1">
@@ -230,6 +274,16 @@ function generateToolPageHtml(tool) {
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/sticker-studio.js"></script>
+<script src="/label-studio.js"></script>
+<script src="/sheet-studio.js"></script>
+<script src="/data/dmc.js"></script>
+<script src="/pattern-studio.js"></script>
+<script src="/image-studio.js"></script>
+<script src="/photo-batch-studio.js"></script>
+<script src="/album-studio.js"></script>
+<script src="/media-studio.js"></script>
+<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -277,7 +331,7 @@ function generateHomePageHtml() {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${desc}">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="${SITE_NAME}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${desc}">
@@ -294,14 +348,15 @@ function generateHomePageHtml() {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/">${SITE_NAME}<span>.</span></a>
-  <nav aria-label="Primary navigation">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
 <main id="app" class="container">
@@ -340,7 +395,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${desc}">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="${SITE_NAME}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${desc}">
@@ -356,14 +411,15 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/">${SITE_NAME}<span>.</span></a>
-  <nav aria-label="Primary navigation">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
 <main id="app" class="container" tabindex="-1">
@@ -405,7 +461,7 @@ function generate404Html() {
   <meta name="robots" content="noindex, nofollow">
   <title>${title}</title>
   <meta name="description" content="${desc}">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="theme-color" content="#f4f6f9">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -462,8 +518,8 @@ function generateManifestJson() {
     "description": TAGLINE,
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0b1020",
-    "theme_color": "#0b1020",
+    "background_color": "#f4f6f9",
+    "theme_color": "#f4f6f9",
     "icons": [
       {
         "src": "/assets/favicon.svg",
@@ -581,7 +637,7 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'utils.js', 'styles.css', '_headers', '_redirects', 'vercel.json', 'netlify.toml'
+  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', '_headers', '_redirects', 'vercel.json', 'netlify.toml'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -599,6 +655,17 @@ filesToCopy.forEach(f => {
 if (fs.existsSync(assetsDir)) {
   fs.readdirSync(assetsDir).forEach(f => {
     fs.copyFileSync(path.join(assetsDir, f), path.join(distAssetsDir, f));
+  });
+}
+
+// Copy shared data modules (DMC palette used by pattern-studio.js)
+const dataDir = path.join(baseDir, 'data');
+if (fs.existsSync(dataDir)) {
+  const distDataDir = path.join(distDir, 'data');
+  if (!fs.existsSync(distDataDir)) fs.mkdirSync(distDataDir, { recursive: true });
+  fs.readdirSync(dataDir).forEach(f => {
+    const src = path.join(dataDir, f);
+    if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(distDataDir, f));
   });
 }
 

@@ -4,8 +4,8 @@
   "description": "Small file jobs, done privately in your browser.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#0b1020",
+  "background_color": "#f4f6f9",
+  "theme_color": "#f4f6f9",
   "icons": [
     {
       "src": "/assets/favicon.svg",

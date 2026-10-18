@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Photo Duplicate Finder: Free Online Tool | Progeni Bench</title>
-  <meta name="description" content="Find duplicate photos in your browser using SHA-256 hashes. Detect exact duplicate image files locally with total privacy and zero uploads.">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Find duplicate and near-duplicate photos by SHA-256 and perceptual hash in your browser. Export a CSV or HTML cleanup report with zero uploads.">
+  <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="Progeni Bench">
   <meta property="og:title" content="Photo Duplicate Finder: Free Online Tool | Progeni Bench">
-  <meta property="og:description" content="Find duplicate photos in your browser using SHA-256 hashes. Detect exact duplicate image files locally with total privacy and zero uploads.">
+  <meta property="og:description" content="Find duplicate and near-duplicate photos by SHA-256 and perceptual hash in your browser. Export a CSV or HTML cleanup report with zero uploads.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/duplicate-finder/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
@@ -18,53 +18,54 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/duplicate-finder/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Photo Duplicate Finder","url":"https://bench.progeni.live/tools/duplicate-finder/","description":"Find duplicate photos in your browser using SHA-256 hashes. Detect exact duplicate image files locally with total privacy and zero uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Photo Duplicate Finder","item":"https://bench.progeni.live/tools/duplicate-finder/"}]}]}</script>
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Photo Duplicate Finder","url":"https://bench.progeni.live/tools/duplicate-finder/","description":"Find duplicate and near-duplicate photos by SHA-256 and perceptual hash in your browser. Export a CSV or HTML cleanup report with zero uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Photo Duplicate Finder","item":"https://bench.progeni.live/tools/duplicate-finder/"}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
   <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
-  <nav aria-label="Primary navigation">
+  <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
     <span class="eyebrow">Images · 100% Private Client-Side</span>
     <h1>Photo Duplicate Finder</h1>
-    <p>Find exact duplicate image files using browser-side SHA-256 cryptographic hashing. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    <p>Find exact and near-duplicate photos by hash, with a keep recommendation. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
   </section>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
     <section class="toolbox">
       <h2>About Photo Duplicate Finder</h2>
-      <p>Find exact duplicate image files using browser-side SHA-256 cryptographic hashing.</p>
+      <p>Find exact and near-duplicate photos by hash, with a keep recommendation.</p>
       <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
     </section>
   </noscript>
 
   <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
-    <p>Scans batches of digital image files and identifies bit-for-bit duplicate copies using pre-filtered file size grouping and cryptographic SHA-256 binary hashing. Helps photographers and collectors reclaim disk space by finding redundant photo copies quickly and securely.</p>
+    <p>Groups selected files into exact byte-duplicates (size + SHA-256, hashed in a Web Worker) and perceptual near-duplicates (aHash/dHash Hamming distance with a sensitivity slider and similarity percentage). Per-group thumbnail strips carry group id, size, date and hash columns with checkboxes to select copies, and the recommended keeper (oldest date, then shortest name) is pre-marked. Any file type is accepted.</p>
 
     <h2>How to use</h2>
     <ol>
-      <li>Select multiple image files or drop an entire photo folder from your hard drive.</li>
-      <li>The browser engine groups matching file sizes and hashes binary data using the SubtleCrypto API.</li>
-      <li>Review the duplicate report showing exact duplicate groupings and file names.</li>
-      <li>Use the findings to clean up redundant duplicate copies from your local storage.</li>
+      <li>Select multiple files, or drop an entire folder — every file type is accepted, not just images.</li>
+      <li>Exact duplicates are grouped by byte size then SHA-256 hashed; images also get aHash/dHash perceptual hashes.</li>
+      <li>Review each thumbnail group, tick the copies to remove, or use Keep recommended to keep the oldest copy.</li>
+      <li>Export the cleanup report as CSV (Group,File,Size,Date,Hash,Distance) or as a standalone HTML report.</li>
     </ol>
 
     <h2>Limits & Considerations</h2>
-    <p>Identifies byte-for-byte exact duplicate files. Does not detect perceptual similarities between differently compressed or resized versions.</p>
+    <p>Exact dedupe uses SHA-256 (needs https or localhost). Perceptual hashing catches resized and recompressed copies, but heavy edits or crops may fall outside the similarity threshold.</p>
 
     <h2>Privacy & Security</h2>
-    <p>Binary cryptographic hashing executes purely on your device CPU using Web Cryptography. Zero image bytes leave your machine.</p>
+    <p>Hashing and thumbnailing run entirely in your browser with Web Crypto and Canvas. Your files are never uploaded to any server.</p>
 
     <h2>Related Images Tools</h2>
     <div class="tool-links">
@@ -90,6 +91,16 @@
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/sticker-studio.js"></script>
+<script src="/label-studio.js"></script>
+<script src="/sheet-studio.js"></script>
+<script src="/data/dmc.js"></script>
+<script src="/pattern-studio.js"></script>
+<script src="/image-studio.js"></script>
+<script src="/photo-batch-studio.js"></script>
+<script src="/album-studio.js"></script>
+<script src="/media-studio.js"></script>
+<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

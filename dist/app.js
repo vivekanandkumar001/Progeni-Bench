@@ -8,7 +8,6 @@ const {
   esc,
   csvParse,
   csvOut,
-  parseSRT,
   buildContactKey,
   filterBookmarkLinks,
   cleanSVG,
@@ -30,16 +29,8 @@ const {
 } = (typeof window !== "undefined" && window.SiteConfig) ? window.SiteConfig : (typeof require === "function" ? require("./site.config.js") : {});
 
 // Global DMC Palette References for Crafters
-const DMC_PALETTE = [
-  {code:"DMC 310", name:"Black", rgb:[0,0,0]},
-  {code:"DMC Blanc", name:"White", rgb:[255,255,255]},
-  {code:"DMC 666", name:"Bright Red", rgb:[227,28,45]},
-  {code:"DMC 796", name:"Royal Blue", rgb:[17,67,144]},
-  {code:"DMC 700", name:"Bright Green", rgb:[15,133,59]},
-  {code:"DMC 444", name:"Lemon Yellow", rgb:[255,213,0]},
-  {code:"DMC 550", name:"Dark Violet", rgb:[92,24,107]},
-  {code:"DMC 434", name:"Light Brown", rgb:[151,85,41]}
-];
+// (The shared DMC floss table now lives in data/dmc.js — loaded as window.DMC_PALETTE
+// and consumed by pattern-studio.js for the cross-stitch / diamond / embroidery tools.)
 
 const $ = s => document.querySelector(s);
 const app = $("#app");
@@ -144,7 +135,7 @@ function home() {
     $("#grid").innerHTML = TOOLS.filter(t => (cat === "All" || t.cat === cat) && (`${t.name} ${t.desc} ${t.cat}`.toLowerCase().includes(q.toLowerCase()))).map(t => `
       <a class="tool-card" href="/tools/${t.id}">
         <div class="icon">${t.icon}</div>
-        <h3>${esc(t.name)}</h3>
+        <h2>${esc(t.name)}</h2>
         <p>${esc(t.desc)}</p>
         <span class="tag">${esc(t.cat)}</span>
       </a>
@@ -282,10 +273,6 @@ async function processTool(id, files) {
         await sheetMaker(id, files, rs);
         break;
       }
-      case "cross-stitch": case "diamond-painting": case "embroidery": {
-        await patternMaker(id, f, rs);
-        break;
-      }
       case "svg-cleaner": {
         const raw = await readText(f);
         const cleaned = cleanSVG(raw);
@@ -293,23 +280,14 @@ async function processTool(id, files) {
         $("#dl").onclick = () => textDownload(cleaned, "cleaned.svg", "image/svg+xml");
         break;
       }
-      case "audio-chapters": {
-        const val = $("#chap") ? $("#chap").value : "";
-        textDownload(val, "chapters.txt");
-        break;
-      }
-      case "silence-map": { await silenceMap(f, rs); break; }
-      case "video-thumbnails": { await videoThumbs(f, rs); break; }
       case "video-safe-zone": { await safeZone(f, rs); break; }
-      case "subtitle-speed": { const t = await readText(f); subtitleCheck(t, rs); break; }
-      case "subtitle-linefix": { const t = await readText(f); subtitleFix(t, rs); break; }
       case "bookmark-reading": {
         const t = await readText(f);
         const doc = new DOMParser().parseFromString(t, "text/html");
         const rawAnchors = [...doc.querySelectorAll("a[href]")].map(a => ({ href: a.href, text: a.textContent || a.href }));
         const safeLinks = filterBookmarkLinks(rawAnchors);
         const as = safeLinks.map(a => `<li><a href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.text)}</a></li>`).join("");
-        const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Offline Reading List</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6}li{margin:10px 0}a{color:#4f46e5;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><h1>Reading List</h1><p>Exported from Progeni.</p><ul>${as}</ul></body></html>`;
+        const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Offline Reading List</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6}li{margin:10px 0}a{color:#1d4ed8;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><h1>Reading List</h1><p>Exported from Progeni.</p><ul>${as}</ul></body></html>`;
         rs.innerHTML = `<div class="notice">${safeLinks.length} valid links converted into clean offline reading list.</div><button class="btn" id="dl">Download reading-list.html</button>`;
         // Remove loading state
         $("#result.loading-result")?.remove();
@@ -320,14 +298,7 @@ async function processTool(id, files) {
       case "csv-date": { csvTool(id, await readText(f), rs); break; }
       case "contact-dedupe": { contactDedupe(await readText(f), rs); break; }
       case "vcard": { vcardTool(files, rs); break; }
-      case "wallpaper": { imageTransform("wallpaper", f, rs); break; }
-      case "print-border": { imageTransform("print-border", f, rs); break; }
-      case "tshirt-mirror": { imageTransform("tshirt-mirror", f, rs); break; }
       case "panorama": { panorama(f, rs); break; }
-      case "photo-timeline": case "family-organizer": { photoTimeline(files, rs); break; }
-      case "duplicate-finder": { duplicateFinder(files, rs); break; }
-      case "best-shot": { bestShot(files, rs); break; }
-      case "labels": { labels(await readText(f), rs); break; }
       default: rs.innerHTML = `<div class="warn">Ready for processing. Drop files to begin.</div>`;
     }
   } catch (e) {
@@ -391,109 +362,14 @@ async function sheetMaker(id, files, rs) {
   $("#dl").onclick = () => downloadBlob(b, `${id}-${pSize}-sheet.png`);
 }
 
-/* Pattern Maker with Global DMC Color Palette */
-async function patternMaker(id, f, rs) {
-  const im = await imageFromFile(f), c = document.createElement("canvas"), ctx = c.getContext("2d");
-  const cols = 50, rows = Math.max(1, Math.round(cols * im.height / im.width));
-  c.width = cols * 14; c.height = rows * 14;
-  ctx.drawImage(im, 0, 0, c.width, c.height);
-  const data = ctx.getImageData(0, 0, c.width, c.height);
-  const counts = new Map();
-
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      let p = (y * 14 * c.width + x * 14) * 4, best = 0, bd = 1e9;
-      for (let j = 0; j < DMC_PALETTE.length; j++) {
-        let rgb = DMC_PALETTE[j].rgb;
-        let d = Math.pow(data.data[p] - rgb[0], 2) + Math.pow(data.data[p + 1] - rgb[1], 2) + Math.pow(data.data[p + 2] - rgb[2], 2);
-        if (d < bd) { bd = d; best = j; }
-      }
-      let dmc = DMC_PALETTE[best];
-      counts.set(dmc.code, (counts.get(dmc.code) || 0) + 1);
-      ctx.fillStyle = `rgb(${dmc.rgb.join(",")})`;
-      ctx.fillRect(x * 14, y * 14, 14, 14);
-      ctx.strokeStyle = "rgba(0,0,0,0.15)";
-      ctx.strokeRect(x * 14, y * 14, 14, 14);
-    }
-  }
-
-  const b = await canvasBlob(c);
-  rs.innerHTML = `
-    <div class="notice">Pattern created with <strong>Standard DMC Thread Palette</strong> (${cols}×${rows} stitch grid).</div>
-    <img style="max-width:100%;max-height:400px;image-rendering:pixelated;border:1px solid #cbd5e1;border-radius:12px;margin:0 auto 16px;display:block;" src="${URL.createObjectURL(b)}">
-    <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px;">
-      <strong style="display:block;margin-bottom:8px;">DMC Thread Floss Legend:</strong>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;font-size:13px;">
-        ${[...counts.entries()].map(([code, cnt]) => `<div>🧵 <b>${esc(code)}</b>: ${cnt} stitches</div>`).join("")}
-      </div>
-    </div>
-    <button class="btn" id="dl">Download Pattern Grid (.PNG)</button>
-  `;
-  $("#dl").onclick = () => downloadBlob(b, `${id}-dmc-pattern.png`);
-}
-
 /* Audio & Video Tools */
-async function silenceMap(f, rs) {
-  const ac = new (window.AudioContext || window.webkitAudioContext)();
-  try {
-    const ab = await f.arrayBuffer();
-    const buf = await ac.decodeAudioData(ab), ch = buf.getChannelData(0), step = Math.floor(buf.sampleRate * 0.25), ranges = [];
-    let on = false, start = 0;
-    for (let i = 0; i < ch.length; i += step) {
-      let sum = 0;
-      for (let j = i; j < Math.min(i + step, ch.length); j++) sum += Math.abs(ch[j]);
-      let rms = sum / Math.min(step, ch.length - i);
-      let silent = rms < 0.006;
-      if (silent && !on) { start = i / buf.sampleRate; on = true; }
-      if (!silent && on) {
-        if (i / buf.sampleRate - start > 0.5) ranges.push([start, i / buf.sampleRate]);
-        on = false;
-      }
-    }
-    rs.innerHTML = `
-      <div class="stats">
-        <div class="stat"><b>${ranges.length}</b>Dead Air Gaps</div>
-        <div class="stat"><b>${buf.duration.toFixed(1)}s</b>Total Audio</div>
-        <div class="stat"><b>${buf.sampleRate}</b>Hz Rate</div>
-      </div>
-      <pre>${ranges.map(r => `${fmtTime(r[0])} → ${fmtTime(r[1])} (${(r[1] - r[0]).toFixed(1)}s silence)`).join("\n") || "No long dead air detected."}</pre>
-    `;
-  } finally {
-    await ac.close();
-  }
-}
 const fmtTime = s => {
-  let m = Math.floor(s / 60), sec = Math.floor(s % 60);
-  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  if (!isFinite(s) || s < 0) s = 0;
+  let h = Math.floor(s / 3600);
+  let m = Math.floor((s % 3600) / 60);
+  let sec = Math.floor(s % 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 };
-
-async function videoThumbs(f, rs) {
-  const vSrc = URL.createObjectURL(f);
-  const v = document.createElement("video");
-  v.src = vSrc;
-  v.muted = true;
-  try {
-    await new Promise((r, j) => { v.onloadedmetadata = r; v.onerror = j; });
-    const c = document.createElement("canvas"), ctx = c.getContext("2d"), n = 12;
-    c.width = 480; c.height = 270;
-    const thumbs = [];
-    for (let i = 0; i < n; i++) {
-      v.currentTime = v.duration * i / (n - 1 || 1);
-      await new Promise(r => v.onseeked = r);
-      ctx.drawImage(v, 0, 0, c.width, c.height);
-      thumbs.push(ctx.getImageData(0, 0, c.width, c.height));
-    }
-    const out = document.createElement("canvas");
-    out.width = 480 * 3; out.height = 270 * 4;
-    const o = out.getContext("2d");
-    thumbs.forEach((im, i) => o.putImageData(im, (i % 3) * 480, Math.floor(i / 3) * 270));
-    const b = await canvasBlob(out);
-    rs.innerHTML = `<img style="width:100%;border-radius:12px;margin-bottom:16px;" src="${URL.createObjectURL(b)}"><button class="btn" id="dl">Download 12-Frame Sheet</button>`;
-    $("#dl").onclick = () => downloadBlob(b, "video-thumbnails.png");
-  } finally {
-    URL.revokeObjectURL(vSrc);
-  }
-}
 
 /* Global Social Safe-Zone Overlays (TikTok, Instagram Reels, Shorts) */
 async function safeZone(f, rs) {
@@ -558,57 +434,68 @@ async function safeZone(f, rs) {
   rs.innerHTML = `
     <div class="notice">Red zones show areas obscured by <strong>${pName} UI</strong> (captions, right action buttons, header tabs). Keep critical text inside the center safe area!</div>
     <img style="max-width:100%;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
+    <button class="btn" id="dl-overlay">Download Overlay PNG</button>
   `;
+  $("#dl-overlay").onclick = () => downloadBlob(b, "video-safe-zone-overlay.png");
 }
 
-function subtitleCheck(t, rs) {
-  const a = parseSRT(t);
-  const timingErrors = a.filter(x => (x.end - x.start) <= 0);
-  const speedIssues = a.filter(x => {
-    let dur = x.end - x.start;
-    let cps = dur > 0 ? (x.text.length / dur) : 0;
-    return dur > 0 && (dur < 1 || cps > 21);
-  });
-  const overlaps = a.filter((x, i) => i && x.start < a[i - 1].end);
-  const allIssues = a.filter(x => {
-    let dur = x.end - x.start;
-    let cps = dur > 0 ? (x.text.length / dur) : 0;
-    return dur <= 0 || dur < 1 || cps > 21;
-  });
-
-  rs.innerHTML = `
-    <div class="stats">
-      <div class="stat"><b>${a.length}</b>Total Captions</div>
-      <div class="stat"><b>${speedIssues.length}</b>Reading Speed Flags</div>
-      <div class="stat"><b>${timingErrors.length}</b>Timing Errors (<=0s)</div>
-      <div class="stat"><b>${overlaps.length}</b>Overlap Errors</div>
-    </div>
-    <pre>${allIssues.map(x => {
-      let dur = x.end - x.start;
-      if (dur <= 0) return `${fmtTime(x.start)} — [Timing error: zero duration] ${esc(x.text.slice(0, 90))}`;
-      let cps = (x.text.length / dur).toFixed(1);
-      return `${fmtTime(x.start)} — [${cps} CPS] ${esc(x.text.slice(0, 90))}`;
-    }).join("\n") || "All subtitle lines adhere to standard reading speeds (<21 CPS)."}</pre>
-  `;
+function parseChapters(input) {
+  const lines = input.replace(/\r\n/g, "\n").split("\n");
+  const entries = [];
+  const issues = [];
+  let skipped = 0;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line === "") continue;
+    const m = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(.*)$/);
+    if (!m) { skipped++; continue; }
+    const ts = normalizeTimestamp(m[1]);
+    if (ts === null || ts === undefined) { skipped++; continue; }
+    const title = m[2].trim();
+    if (!title) { skipped++; continue; }
+    entries.push({ ts, title });
+  }
+  if (entries.length === 0) return { entries: [], clean: "", issues: ["No valid chapters found"] };
+  entries.sort((a, b) => a.ts - b.ts);
+  if (skipped > 0) issues.push(`${skipped} line${skipped > 1 ? "s" : ""} skipped (expected "MM:SS Title" or "HH:MM:SS Title")`);
+  // Enforce start at 00:00:00
+  if (entries[0].ts !== 0) {
+    issues.push(`Chapters must start at 00:00:00 — first chapter "${entries[0].title}" moved from ${fmtTime(entries[0].ts)} (fix your input if unintended)`);
+    entries[0] = { ts: 0, title: entries[0].title };
+  }
+  // Duplicates
+  for (let i = 1; i < entries.length; i++) {
+    if (entries[i].ts === entries[i - 1].ts) issues.push(`Duplicate timestamp ${fmtTime(entries[i].ts)} ("${entries[i].title}")`);
+  }
+  // Large-gap warning (> 15 min)
+  for (let i = 1; i < entries.length; i++) {
+    const gap = entries[i].ts - entries[i - 1].ts;
+    if (gap > 900) issues.push(`Large gap of ${Math.round(gap / 60)} min before "${entries[i].title}"`);
+  }
+  const clean = formatChapters(entries);
+  return { entries, clean, issues };
 }
 
-function subtitleFix(t, rs) {
-  const blocks = t.split(/\r?\n\r?\n/).map(b => {
-    let l = b.split(/\r?\n/), tm = l.findIndex(x => x.includes("-->"));
-    if (tm < 0) return b;
-    let words = l.slice(tm + 1).join(" ").replace(/\s+/g, " ").trim(), chunks = [];
-    while (words.length > 38) {
-      let p = words.lastIndexOf(" ", 38);
-      if (p < 12) p = 38;
-      chunks.push(words.slice(0, p));
-      words = words.slice(p).trim();
-    }
-    chunks.push(words);
-    return [...l.slice(0, tm + 1), ...chunks].join("\n");
-  });
-  const out = blocks.join("\n\n");
-  rs.innerHTML = `<div class="notice">Subtitle line lengths rebalanced to standard 38-character max.</div><button class="btn" id="dl">Download Fixed .SRT</button>`;
-  $("#dl").onclick = () => textDownload(out, "fixed.srt");
+function normalizeTimestamp(s) {
+  const parts = s.split(":");
+  if (parts.length === 2) {
+    const m = parseInt(parts[0], 10);
+    const sec = parseInt(parts[1], 10);
+    if (isNaN(m) || isNaN(sec) || sec < 0 || sec >= 60) return null;
+    return m * 60 + sec;
+  }
+  if (parts.length === 3) {
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    const sec = parseInt(parts[2], 10);
+    if (isNaN(h) || isNaN(m) || isNaN(sec) || m < 0 || m >= 60 || sec < 0 || sec >= 60) return null;
+    return h * 3600 + m * 60 + sec;
+  }
+  return null;
+}
+
+function formatChapters(entries) {
+  return entries.map(e => `${fmtTime(e.ts)} ${e.title}`).join("\n");
 }
 
 function csvTool(id, t, rs) {
@@ -701,161 +588,53 @@ async function vcardTool(files, rs) {
   });
 }
 
-/* Image & Framing Transform Tools */
-async function imageTransform(type, f, rs) {
-  const im = await imageFromFile(f), c = document.createElement("canvas"), ctx = c.getContext("2d");
-  let w = im.width, h = im.height;
-  if (type === "wallpaper") {
-    const ar = 9 / 19.5;
-    let nw = w, nh = w / ar;
-    if (nh > h) { nh = h; nw = h * ar; }
-    c.width = nw; c.height = nh;
-    ctx.drawImage(im, (w - nw) / 2, (h - nh) / 2, nw, nh, 0, 0, nw, nh);
-  } else if (type === "tshirt-mirror") {
-    c.width = w; c.height = h;
-    ctx.translate(w, 0); ctx.scale(-1, 1);
-    ctx.drawImage(im, 0, 0);
-  } else {
-    let margin = Math.round(Math.min(w, h) * 0.06);
-    c.width = w + margin * 2; c.height = h + margin * 2;
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.drawImage(im, margin, margin);
-  }
-  const b = await canvasBlob(c, "image/png");
-  rs.innerHTML = `
-    <div class="notice">Image processed locally.</div>
-    <img style="max-width:100%;max-height:400px;border-radius:12px;margin:0 auto 16px;display:block;" src="${URL.createObjectURL(b)}">
-    <button class="btn" id="dl">Download Processed PNG</button>
-  `;
-  $("#dl").onclick = () => downloadBlob(b, `${type}.png`);
-}
-
 async function panorama(f, rs) {
-  const im = await imageFromFile(f), parts = 3, w = Math.floor(im.width / parts), c = document.createElement("canvas"), ctx = c.getContext("2d");
-  c.width = w; c.height = im.height;
-  rs.innerHTML = `<div class="notice">Panorama split into 3 seamless carousel tiles:</div><div style="display:flex;gap:10px;margin-bottom:16px;" id="pg"></div>`;
+  const im = await imageFromFile(f);
+  const partsEl = $("#panoramaParts");
+  const parts = partsEl ? parseInt(partsEl.value, 10) : 3;
+  const tileWidth = Math.floor(im.width / parts);
+  const tileHeight = tileWidth; // square tiles
+  const c = document.createElement("canvas"), ctx = c.getContext("2d");
+  c.width = tileWidth; c.height = tileHeight;
+  let html = `<div class="notice">Panorama split into ${parts} square carousel tiles (height = width/parts):</div>`;
+  if (tileHeight > im.height) {
+    html = `<div class="warn">Cannot yield square tiles (tile height ${tileHeight}px > image height ${im.height}px). Using rectangular tiles instead.</div>`;
+  }
+  html += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;" id="pg"></div>`;
+  rs.innerHTML = html;
+  const tileBlobs = [];
   for (let i = 0; i < parts; i++) {
-    c.width = w; c.height = im.height;
-    ctx.clearRect(0, 0, w, c.height);
-    ctx.drawImage(im, i * w, 0, w, im.height, 0, 0, w, im.height);
+    c.width = tileWidth;
+    c.height = tileHeight > im.height ? im.height : tileHeight;
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.drawImage(im, i * tileWidth, 0, tileWidth, c.height, 0, 0, c.width, c.height);
     let b = await canvasBlob(c);
+    tileBlobs.push(b);
     let img = document.createElement("img");
     img.src = URL.createObjectURL(b);
-    img.style.width = "33%"; img.style.borderRadius = "8px"; img.style.cursor = "pointer";
+    img.style.width = "30%"; img.style.borderRadius = "8px"; img.style.cursor = "pointer";
     img.title = `Click to download Tile ${i + 1}`;
     img.onclick = () => downloadBlob(b, `carousel-tile-${i + 1}.png`);
     $("#pg").appendChild(img);
   }
-}
-
-async function photoTimeline(files, rs) {
-  const data = files.map(f => ({ name: f.name, date: new Date(f.lastModified) })).sort((a, b) => a.date - b.date);
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Photo Timeline</title><style>body{font:16px system-ui;max-width:800px;margin:40px auto;padding:20px;line-height:1.6}li{margin:10px 0;padding:8px;background:#f8fafc;border-radius:8px;list-style:none}</style></head><body><h1>Photo Chronological Timeline</h1><ul>${data.map(x => `<li>📅 <strong>${esc(x.date.toLocaleString())}</strong> — ${esc(x.name)}</li>`).join("")}</ul></body></html>`;
-  rs.innerHTML = `<div class="notice">Sorted ${data.length} photos into chronological order by file date.</div><button class="btn" id="dl">Download Timeline Album (.HTML)</button>`;
-  $("#dl").onclick = () => textDownload(html, "photo-timeline.html", "text/html");
-}
-
-async function duplicateFinder(files, rs) {
-  const sizeMap = new Map();
-  for (const f of files) {
-    if (!sizeMap.has(f.size)) sizeMap.set(f.size, []);
-    sizeMap.get(f.size).push(f);
-  }
-  const map = new Map();
-  for (const [size, group] of sizeMap.entries()) {
-    if (group.length < 2) continue;
-    for (const f of group) {
-      const buf = await f.arrayBuffer(), hash = await crypto.subtle.digest("SHA-256", buf);
-      const key = [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, "0")).join("");
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(f.name);
+  let dlAll = document.createElement("button");
+  dlAll.className = "btn";
+  dlAll.id = "dl-all-tiles";
+  dlAll.textContent = "Download All Tiles";
+  rs.appendChild(dlAll);
+  dlAll.onclick = async () => {
+    for (let i = 0; i < tileBlobs.length; i++) {
+      downloadBlob(tileBlobs[i], `carousel-tile-${i + 1}.png`);
+      await new Promise(r => setTimeout(r, 100));
     }
-  }
-  const groups = [...map.values()].filter(x => x.length > 1);
-  rs.innerHTML = `
-    <div class="stats">
-      <div class="stat"><b>${files.length}</b>Scanned Files</div>
-      <div class="stat"><b>${groups.length}</b>Duplicate Sets</div>
-      <div class="stat"><b>${groups.reduce((n, g) => n + g.length - 1, 0)}</b>Exact Copies</div>
-    </div>
-    <pre>${groups.map(g => g.join("\n  ↳ duplicate: ")).join("\n\n") || "No exact duplicate files found."}</pre>
-  `;
-}
-
-async function bestShot(files, rs) {
-  const rows = [];
-  for (const f of files) {
-    const im = await imageFromFile(f), c = document.createElement("canvas"), ctx = c.getContext("2d");
-    c.width = 160; c.height = 160;
-    ctx.drawImage(im, 0, 0, 160, 160);
-    const d = ctx.getImageData(0, 0, 160, 160).data;
-    let mean = 0;
-    for (let i = 0; i < d.length; i += 4) mean += (d[i] + d[i + 1] + d[i + 2]) / 3;
-    mean /= d.length / 4;
-    let edge = 0;
-    for (let y = 1; y < 159; y++) {
-      for (let x = 1; x < 159; x++) {
-        let p = (y * 160 + x) * 4, q = (y * 160 + x - 1) * 4;
-        edge += Math.abs(d[p] - d[q]);
-      }
-    }
-    rows.push({ f, score: edge / (160 * 160) - Math.abs(mean - 128) * 0.05 });
-  }
-  rows.sort((a, b) => b.score - a.score);
-  rs.innerHTML = `
-    <div class="notice">Ranked by local sharpness and edge-contrast heuristics:</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;">
-      ${rows.slice(0, 12).map((x, i) => `
-        <div style="border:1px solid #cbd5e1;padding:8px;border-radius:10px;text-align:center;background:#fff;">
-          <img style="width:100%;height:100px;object-fit:cover;border-radius:6px;" src="${URL.createObjectURL(x.f)}">
-          <small style="font-weight:700;display:block;margin-top:4px;">#${i + 1} Best</small>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-/* Global Avery 5160 & Standard Label Sheet Generator */
-function labels(t, rs) {
-  const rows = csvParse(t);
-  const h = rows[0] || [];
-  const template = $("#labelTemplate") ? $("#labelTemplate").value : "avery5160";
-
-  rs.innerHTML = `
-    <div class="controls">
-      <label>Label Content Column
-        <select id="labelCol">
-          ${h.map((colName, i) => `<option value="${i}">${esc(colName)}</option>`).join("")}
-        </select>
-      </label>
-    </div>
-    <button class="btn" id="btn-gen-labels">Generate Printable Sheet</button>
-  `;
-
-  $("#btn-gen-labels").onclick = () => {
-    const col = +($("#labelCol").value || 0);
-    let gridStyle = "display:grid;grid-template-columns:repeat(3, 2.625in);gap:0.125in;justify-content:center;";
-    let labelStyle = "height:1in;border:1px dashed #cbd5e1;padding:0.1in;overflow:hidden;box-sizing:border-box;font-size:12px;font-family:Arial,sans-serif;";
-    let pageStyle = "@page{size:8.5in 11in;margin:0.5in 0.1875in;}";
-
-    if (template === "avery5163") {
-      gridStyle = "display:grid;grid-template-columns:repeat(2, 4in);gap:0.15in;justify-content:center;";
-      labelStyle = "height:2in;border:1px dashed #cbd5e1;padding:0.15in;overflow:hidden;box-sizing:border-box;font-size:14px;";
-    } else if (template === "a4") {
-      pageStyle = "@page{size:A4;margin:10mm;}";
-      gridStyle = "display:grid;grid-template-columns:repeat(3, 1fr);gap:6mm;";
-      labelStyle = "height:30mm;border:1px dashed #cbd5e1;padding:4mm;overflow:hidden;font-size:12px;";
-    }
-
-    const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Printable Labels</title><style>${pageStyle}body{margin:0;font-family:Arial,sans-serif}.sheet{${gridStyle}}.label{${labelStyle}}</style></head><body><div class="sheet">${rows.slice(1).map(r => `<div class="label">${esc(r[col] || "")}</div>`).join("")}</div></body></html>`;
-
-    rs.insertAdjacentHTML("beforeend", `
-      <div class="notice" style="margin-top:16px;">Generated ${template.toUpperCase()} printable sheet (${rows.length - 1} labels from column "${esc(h[col] || "")}").</div>
-      <button class="btn secondary" id="dl">Download Print-Ready Labels (.HTML)</button>
-    `);
-    $("#dl").onclick = () => textDownload(out, "avery-labels.html", "text/html");
   };
 }
+
+/* Photo Timeline Builder (2.5) and Family Photo Date Organizer (2.6) run inside
+   the shared Album Studio engine (album-studio.js — EXIF dating, embedded
+   thumbnails, day/month grouping, rename planner). The legacy text-only
+   photoTimeline() was retired. Duplicate Finder (2.3) and Best-Shot Finder
+   (2.4) run inside the shared PhotoBatch engine (photo-batch-studio.js). */
 
 function home() {
   let homeTitle = `${SITE_NAME}: Free Private File Tools in Your Browser`;
@@ -886,7 +665,7 @@ function home() {
     $("#grid").innerHTML = TOOLS.filter(t => (cat === "All" || t.cat === cat) && (`${t.name} ${t.desc} ${t.cat}`.toLowerCase().includes(q.toLowerCase()))).map(t => `
       <a class="tool-card" href="/tools/${t.id}/">
         <div class="icon">${t.icon}</div>
-        <h3>${esc(t.name)}</h3>
+        <h2>${esc(t.name)}</h2>
         <p>${esc(t.desc)}</p>
         <span class="tag">${esc(t.cat)}</span>
       </a>
@@ -915,50 +694,180 @@ function toolPage(id) {
   if (["svg-cleaner"].includes(id)) accept = ".svg,image/svg+xml";
   if (id.startsWith("csv") || id === "contact-dedupe" || id === "labels" || id === "timetable-calendar") accept = ".csv,text/csv";
   if (id === "vcard") accept = ".vcf,text/vcard";
-  if (["sticker-sheet", "print-layout", "ironon-sheet", "photo-timeline", "family-organizer", "duplicate-finder", "best-shot"].includes(id)) { multi = true; accept = "image/*"; }
-  if (["wallpaper", "print-border", "tshirt-mirror", "cross-stitch", "embroidery", "diamond-painting", "panorama"].includes(id)) accept = "image/*";
+  if (["sticker-sheet", "print-layout", "ironon-sheet", "best-shot", "wallpaper", "tshirt-mirror"].includes(id)) { multi = true; accept = "image/*"; }
+  if (id === "photo-timeline") { multi = true; accept = "image/*"; }
+  if (id === "family-organizer") { multi = true; accept = "*/*"; }
+  if (id === "duplicate-finder") { multi = true; accept = "*/*"; }
+  if (["print-border", "cross-stitch", "embroidery", "diamond-painting", "panorama"].includes(id)) accept = "image/*";
   if (id === "silence-map") accept = "audio/*";
-  if (["video-thumbnails", "video-safe-zone"].includes(id)) accept = "video/*,image/*";
+  if (id === "video-safe-zone") accept = "video/*,image/*";
+  if (id === "video-thumbnails") accept = "video/*";
 
   let body = picker(multi, accept);
+
+  // Sticker Sheet Maker runs inside the dedicated Sticker Studio engine
+  // (live layout controls, drag-to-reorder preview, PNG/PDF/SVG export).
+  if (id === "sticker-sheet") {
+    layout({ tool, body: body + `<div class="studio" id="studio"></div>` });
+    const studio = window.StickerStudio.mount(document.getElementById("studio"));
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  // Avery 5160 / Label Maker runs inside the dedicated Label Studio engine
+  // (multi-line builder, sheet preview, PNG/HTML/Print export — see docs/LABELS_PLAN.md).
+  if (id === "labels") {
+    layout({ tool, body: body + `<div class="studio" id="studio"></div>` });
+    const studio = window.LabelStudio.mount(document.getElementById("studio"));
+    bindPicker(files => {
+      const f = files[0];
+      if (f) readText(f).then(t => studio.addCsv(t, f.name)).catch(() => studio.addCsv("", ""));
+    });
+    return;
+  }
+
+  // Cross-Stitch, Diamond Painting and Embroidery run inside the shared Pattern
+  // Studio engine (DMC palette, median-cut + snap, symbol charts, drill planner,
+  // skein estimates, CSV/PNG/print — see pattern-studio.js, docs/TOOLS_ROADMAP.md
+  // 1.7–1.9).
+  if (id === "cross-stitch" || id === "diamond-painting" || id === "embroidery") {
+    layout({ tool, body: body + `<div class="studio" id="patternstudio"></div>` });
+    const studio = window.PatternStudio.mount(document.getElementById("patternstudio"), {
+      mode: id === "cross-stitch" ? "cross-stitch" : id === "diamond-painting" ? "diamond" : "embroidery"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  // T-Shirt Print Mirror, Photo Print Border and Wallpaper Cropper run inside
+  // the shared Image Studio engine (flip / border / crop modes — see
+  // image-studio.js and docs/TOOLS_ROADMAP.md 1.3 / 1.6 / 2.1). The legacy
+  // imageTransform() helper that used to serve these three was removed.
+  if (id === "tshirt-mirror" || id === "print-border" || id === "wallpaper") {
+    layout({ tool, body: body + `<div class="studio" id="imagestudio"></div>` });
+    const studio = window.ImageStudio.mount(document.getElementById("imagestudio"), {
+      mode: id === "tshirt-mirror" ? "mirror" : id === "print-border" ? "border" : "wallpaper"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  // Photo Duplicate Finder and Photo Best-Shot Finder run inside the shared
+  // Photo Batch Studio engine (exact SHA-256 + aHash/dHash dedupe; Laplacian
+  // sharpness / exposure / contrast ranking — see photo-batch-studio.js and
+  // docs/TOOLS_ROADMAP.md 2.3 / 2.4).
+  if (id === "duplicate-finder" || id === "best-shot") {
+    layout({ tool, body: body + `<div class="studio" id="photobatch"></div>` });
+    const studio = window.PhotoBatch.mount(document.getElementById("photobatch"), {
+      mode: id === "duplicate-finder" ? "dedupe" : "best-shot"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  // Photo Timeline Builder (2.5) and Family Photo Date Organizer (2.6) run
+  // inside the shared Album Studio engine (EXIF dating, embedded data-URL
+  // thumbnails, day/month/year grouping, rename-pattern planner — see
+  // album-studio.js). The legacy shared photoTimeline() was retired.
+  if (id === "photo-timeline" || id === "family-organizer") {
+    layout({ tool, body: body + `<div class="studio" id="albumstudio"></div>` });
+    const studio = window.AlbumStudio.mount(document.getElementById("albumstudio"), {
+      mode: id === "photo-timeline" ? "timeline" : "organizer"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  // Video Thumbnail Contact Sheet (3.2) and Podcast Silence Map (3.4) run inside
+  // the shared Media Studio engine — the seek-capture loop races every seek
+  // against a timeout with a previous-frame fallback, and the silence scanner
+  // decodes + scans in chunks with a waveform, gap list and CSV/TXT exports
+  // (see media-studio.js). The legacy videoThumbs() / silenceMap() were retired.
+  if (id === "video-thumbnails" || id === "silence-map") {
+    layout({ tool, body: body + `<div class="studio" id="mediastudio"></div>` });
+    const studio = window.MediaStudio.mount(document.getElementById("mediastudio"), {
+      mode: id === "video-thumbnails" ? "thumbs" : "silence"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
 
   if (id === "audio-chapters") {
     body = `
       <div class="controls">
-        <label style="width:100%">Chapter Timestamps & Titles (MM:SS Title)
+        <label style="width:100%">Chapter Timestamps & Titles (MM:SS or HH:MM:SS Title)
           <textarea id="chap" rows="8" style="width:100%;font-family:monospace;" placeholder="00:00 Introduction&#10;02:15 Main Topic&#10;06:40 Key Insights&#10;11:20 Conclusion"></textarea>
         </label>
       </div>
-      <button class="btn" id="dl-chap">Download Chapters.txt</button>
+      <div id="chap-preview" class="notice" style="display:none;margin-top:12px;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn" id="dl-chap">Download Chapters.txt</button>
+        <button class="btn secondary" id="clean-chap">Validate & Clean</button>
+      </div>
     `;
     layout({ tool, body });
-    $("#dl-chap").onclick = () => textDownload($("#chap").value, "chapters.txt");
+    const updatePreview = () => {
+      const raw = $("#chap").value;
+      const res = parseChapters(raw);
+      const prev = $("#chap-preview");
+      if (!prev) return;
+      if (res.issues.length) {
+        prev.innerHTML = `Issues: ${res.issues.join("; ")}<br><pre>${esc(res.clean || "")}</pre>`;
+        prev.style.display = "block";
+        prev.className = "warn";
+      } else if (res.entries.length) {
+        prev.innerHTML = `<pre>${esc(res.clean)}</pre>`;
+        prev.style.display = "block";
+        prev.className = "notice";
+      } else {
+        prev.style.display = "none";
+      }
+    };
+    $("#clean-chap").onclick = updatePreview;
+    $("#dl-chap").onclick = () => {
+      const raw = $("#chap").value;
+      const chapters = parseChapters(raw);
+      textDownload(chapters.clean, "chapters.txt");
+    };
+    updatePreview();
     return;
   }
 
-  // Global Presets & Options Controls
-  if (["sticker-sheet", "print-layout", "ironon-sheet"].includes(id)) {
-    body = `
-      <div class="controls">
-        <label>Paper Standard
-          <select id="paperSize">
-            <option value="letter" selected>US Letter (8.5 × 11 in - US/Canada Standard)</option>
-            <option value="a4">A4 (210 × 297 mm - International)</option>
-            <option value="4x6">4 × 6 inch Photo Paper</option>
-            <option value="a3">A3 Poster Sheet</option>
-          </select>
-        </label>
-      </div>
-    ` + body;
+  // Iron-on Transfer Sheet and Print Layout Optimizer run inside the shared
+  // Sheet Studio engine (mirror presets / aspect-aware packing, PNG + print —
+  // see sheet-studio.js). The legacy shared sheetMaker() path stays for
+  // sticker-sheet fallbacks, but these two tools never use it anymore.
+  if (id === "ironon-sheet" || id === "print-layout") {
+    layout({ tool, body: body + `<div class="studio" id="sheetstudio"></div>` });
+    const studio = window.SheetStudio.mount(document.getElementById("sheetstudio"),
+      id === "ironon-sheet" ? "ironon" : "printlayout");
+    bindPicker(files => studio.addFiles(files));
+    return;
   }
-  if (id === "labels") {
+
+  // Subtitle Speed Checker (4.1) and Subtitle Line Fixer (4.2) run inside the
+  // shared Subtitle Studio engine — profile-based CPS/duration/line/overlap
+  // audits with CSV + annotated SRT exports, plus a two-pass rewrap with a
+  // diff preview and fixed-SRT download (see subtitle-studio.js).
+  if (id === "subtitle-speed" || id === "subtitle-linefix" || id === "subtitle-fix") {
+    layout({ tool, body: body + `<div class="studio" id="subtitleapp"></div>` });
+    const studio = window.SubtitleStudio.mount(document.getElementById("subtitleapp"), {
+      mode: id === "subtitle-speed" ? "speed" : "fix"
+    });
+    bindPicker(files => studio.addFiles(files));
+    return;
+  }
+
+  if (id === "panorama") {
     body = `
       <div class="controls">
-        <label>Label Template Standard
-          <select id="labelTemplate">
-            <option value="avery5160" selected>Avery 5160 / 8160 (30 Labels/Sheet - 1" x 2-5/8" on US Letter)</option>
-            <option value="avery5163">Avery 5163 / 8163 (10 Shipping Labels - 2" x 4" on US Letter)</option>
-            <option value="a4">A4 Standard (24 Labels/Sheet - 3 x 8)</option>
+        <label>Tile Count
+          <select id="panoramaParts">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
           </select>
         </label>
       </div>

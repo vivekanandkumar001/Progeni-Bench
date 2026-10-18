@@ -27,16 +27,17 @@
       cat: "Print & Craft",
       name: "Sticker Sheet Maker",
       keyword: "Sticker Sheet Maker",
-      desc: "Arrange images into printable US Letter / A4 sticker sheets for Cricut, Silhouette, or home printers.",
-      seoDesc: "Create printable sticker sheets in your browser. Tile and arrange multiple transparent PNG designs onto US Letter or A4 grids without server uploads.",
-      whatItDoes: "Arranges multiple image graphics into an evenly spaced multi-column printable sticker layout on US Letter, A4, or 4x6 inch paper dimensions. Each sticker artwork is scaled uniformly to preserve sharp visual resolution and prevent irregular edge clipping during manual scissors trimming or vinyl cutting.",
+      desc: "Build printable sticker sheets in your browser — custom grids, shapes, kiss-cut lines, and PNG / PDF / SVG die-line export for Cricut, Silhouette, or home printers.",
+      seoDesc: "Create print-ready sticker sheets in your browser: custom grid, spacing, shapes, kiss-cut lines and PNG, PDF or SVG die-line export for Cricut. No uploads, no limits.",
+      whatItDoes: "Arranges any number of transparent PNG or JPEG graphics onto a precise multi-column sticker layout on US Letter, A4, A3 or 4x6 paper at 300 DPI. Every sticker can be fitted (contain or cover), masked to a square, rounded or true-circle shape, outlined with a white kiss-cut border, extended with print bleed, and traced with dashed or solid cut lines plus optional corner registration marks for Print-Then-Cut workflows. A per-sticker editor gives you rotate, flip, size control (with live mm readout) and automatic transparent-edge trimming, and the whole sheet supports undo/redo, saved projects, zoom with a tilt-able 3D paper preview, multi-copy sheets, browser printing, and PNG / PDF / SVG die-line export.",
       howToUse: [
-        "Select your target paper standard (US Letter 8.5x11 inch, A4 210x297 mm, or 4x6 photo paper).",
-        "Drag and drop up to 12 image graphics (transparent PNG or JPEG) into the upload container.",
-        "Preview the auto-arranged composite grid directly on the responsive canvas viewport.",
-        "Click Download High-Res Print Sheet to save your 300 DPI composite PNG file ready for printing."
+        "Choose your paper standard (US Letter, A4, A3, or 4x6 photo paper) and set columns, rows, spacing, margins, and bleed — or leave columns on Auto to fit everything on one page.",
+        "Drag and drop your PNG, JPEG, WebP, or SVG graphics into the upload box with a live loading bar. There is no 12-image limit: extra designs automatically flow onto additional pages, and Sheet copies repeats every sticker up to 4 times.",
+        "Style the sheet: contain or cover fit, square / rounded / circle shape, white kiss-cut border width, dashed or solid cut lines, cut line color, background color, and optional corner registration marks.",
+        "Click the pencil on any thumbnail to open the per-sticker editor: rotate, flip, resize with mm readout, trim transparent edges, replace, duplicate, or delete. Drag thumbnails to reorder (or Ctrl+Arrow keys), and undo any step with Ctrl+Z.",
+        "Preview flat in 2D with zoom/pan or switch to the 3D tilt view, then download a 300 DPI PNG, a print-ready multi-page PDF, an SVG die-line for Cricut / Silhouette, or send the sheet straight to your printer. Save the project in your browser or export it as JSON."
       ],
-      limits: "Composites up to 12 graphic files onto a single physical sheet. Does not automatically generate vector SVG cut paths or contour registration marks.",
+      limits: "Cut lines follow the chosen sticker shape (square, rounded, circle) — the tool does not auto-trace irregular artwork silhouettes into vector contours. PNG and SVG export the page currently shown (or all pages at once); PDF bundles every page into one file. Saved projects use this browser's local storage; use Export JSON to move a project between devices.",
       privacy: "All canvas operations and image composing execute locally in your web browser memory. Your illustrations and design assets are never transmitted to external cloud servers."
     },
     {
@@ -45,17 +46,18 @@
       cat: "Print & Craft",
       name: "Avery 5160 / Label Maker",
       keyword: "Avery 5160 Label Maker",
-      desc: "Generate printable US Letter Avery 5160, 5163, and A4 address label sheets directly from CSV.",
-      seoDesc: "Generate printable Avery 5160 and 5163 address label sheets in your browser from CSV files. Format mailing lists with zero data uploads.",
-      whatItDoes: "Parses uploaded CSV contact spreadsheets and formats standardized Avery 5160 (30 address labels per sheet), Avery 5163 (10 large shipping labels per sheet), or A4 grid templates. Automatically calculates CSS page print breaks and padding to align precisely with physical adhesive sticker sheets.",
+      desc: "Build printable Avery 5160, 5163, 5167, L7160 and custom label sheets from CSV, pasted rows, or a single manual label — multi-line builder with live sheet preview.",
+      seoDesc: "Make Avery 5160, 5163, 5167, L7160 and custom label sheets in your browser from CSV or pasted rows. Multi-line builder, address wizard, sequence numbers, live preview, PNG and print-ready export. Zero uploads.",
+      whatItDoes: "Runs a full Label Studio engine: verified template geometry (Avery 5160 30-up, 5163 10-up, 5167 80-up return, EU L7160 21-up, name badges and fully custom grids) drives a live canvas preview built from the same layout the exports use, so preview and print always match. A multi-line builder (up to 6 lines) places {{Column}} tokens, sequence numbers, bold/italic/alignment, per-line sizes and auto-shrink overflow on every label; an address wizard detects name, street, city, state and zip columns automatically. Data comes from an uploaded CSV, pasted spreadsheet rows, or manual single-label mode, with a sortable inline-editable data table. Exports: 300 DPI PNG, standalone HTML, or direct print with exact @page sizing.",
       howToUse: [
-        "Upload a spreadsheet CSV file containing customer names, physical mailing addresses, or inventory SKU numbers.",
-        "Choose your target template standard (Avery 5160 30-up, Avery 5163 10-up, or A4 standard 24-up).",
-        "Select which specific spreadsheet column contains the destination text to print on the label cells.",
-        "Click Generate Printable Sheet and download your standalone print-ready HTML document."
+        "Pick your label template (Avery 5160, 5163, 5167, L7160, name badge, or a custom grid) and nudge the calibration offsets if your printer feeds paper off-center.",
+        "Load your data: upload a CSV, paste rows copied from Excel or Google Sheets, or skip data entirely to compose a single manual label.",
+        "Build the label lines — click column chips to insert {{Column}} tokens, or press the Address wizard to detect and lay out name/address columns automatically.",
+        "Fine-tune fonts, alignment, vertical position, repeat mode and overflow policy while watching the live sheet preview, page tabs and sheet-count report.",
+        "Export a 300 DPI PNG, download standalone HTML, or open Print for physical output / Save as PDF — always print at 100% / Actual size."
       ],
-      limits: "Formats plain text strings into standardized label cells. Does not render custom QR barcodes or embedded graphical corporate logos.",
-      privacy: "Your customer spreadsheets and confidential mailing lists are parsed purely via client-side JavaScript. Private data never leaves your personal workstation."
+      limits: "Text-only labels (up to 6 lines per label); QR/Code128 barcodes, logo artwork and UPC/EAN are not yet supported. Print at 100% scale — do not use 'Fit to page'. Margins for the 5163/5167/badge templates are provisional and can be corrected with the ±3 mm calibration offsets or the custom grid.",
+      privacy: "Your CSV files, pasted rows and mailing lists are parsed purely in your browser and never uploaded. Saved presets store label layout only — row data persists locally only if you explicitly export a JSON project."
     },
     {
       id: "tshirt-mirror",
@@ -63,17 +65,18 @@
       cat: "Print & Craft",
       name: "T-Shirt Print Mirror",
       keyword: "T-Shirt Print Mirror",
-      desc: "Mirror artwork horizontally for heat transfer paper and iron-on vinyl printing.",
-      seoDesc: "Mirror artwork and typography horizontally in your browser for heat transfer paper. Flip shirt designs with no quality loss and zero uploads.",
-      whatItDoes: "Performs an exact geometric horizontal reflection across the vertical Y-axis on uploaded artwork and typography designs. Essential for light heat transfer papers and iron-on vinyl where designs are placed face-down on fabric and heat-pressed, ensuring lettering and numbers appear in the correct readable orientation.",
+      desc: "Flip art horizontally, vertically or 180° for heat-transfer paper — SVG passthrough, before/after preview, batch download and PNG/JPEG/WebP export.",
+      seoDesc: "Mirror or flip artwork for heat transfer paper in your browser: horizontal, vertical or 180° rotation, SVG vector passthrough, white-background flatten, before/after preview. Zero uploads.",
+      whatItDoes: "Runs an Image Studio flip engine. Choose a horizontal flip (the classic heat-transfer mirror), a vertical flip, or a 180° rotation, and check the result in a before/after side-by-side preview before you print. Raster art exports as PNG (lossless), JPEG or WebP with a quality slider and an optional white-background flatten. Uploaded SVGs can pass straight through in vector mode: the file is re-serialised with a mirrored <g transform> so cutting machines and vinyl plotters keep true paths instead of a rasterised PNG. Multiple files can be flipped and downloaded one by one in batch, and a 'flipped sheet' hand-off note lists the mirrored filenames and explains how to feed them into the Iron-on Transfer Sheet Maker.",
       howToUse: [
-        "Drag and drop your finished apparel graphic or typography banner (PNG, JPG, or SVG).",
-        "The browser tool automatically applies a horizontal flip transformation to the graphic canvas.",
-        "Inspect the mirrored preview to verify all numbers, words, and asymmetrical logos are inverted.",
-        "Download the processed high-resolution PNG file ready for your inkjet or laser transfer printer."
+        "Drop one or more graphics — PNG, JPEG, WebP or SVG — into the upload box (batch works on the whole set).",
+        "Pick the flip axis: Horizontal for transfer paper, Vertical, or 180° rotation.",
+        "Check the Before / After panels; toggle Flatten onto white background for JPEG export, or leave SVG passthrough on to keep vectors.",
+        "Set the export format (PNG, JPEG or WebP) and quality, then press Download flipped for the active file.",
+        "Use Download all for a batch, or grab the hand-off note to continue in the Iron-on Transfer Sheet Maker with mirroring already applied."
       ],
-      limits: "Flips one graphic per operation at original pixel dimensions. Does not perform color separations or CMYK halftone dot screening for screen-printing.",
-      privacy: "Image transformation is handled exclusively within HTML5 Canvas in local browser RAM. Creative apparel designs are processed with strict privacy."
+      limits: "Flips raster art at original pixel dimensions and rotates SVGs inside their viewBox; it does not perform colour separations or CMYK halftone dot screening for screen-printing. Batch mode downloads files one at a time (allow multiple downloads in your browser). Up to 30 files per session.",
+      privacy: "Flips, SVG re-serialisation and canvas export all run in local browser memory. Your apparel designs and logos are never uploaded to any server."
     },
     {
       id: "ironon-sheet",
@@ -81,17 +84,18 @@
       cat: "Print & Craft",
       name: "Iron-on Transfer Sheet Maker",
       keyword: "Iron-on Transfer Sheet Maker",
-      desc: "Tile and arrange multiple designs on US Letter or A4 heat transfer paper.",
-      seoDesc: "Tile iron-on transfer designs onto printable sheets in your browser. Maximize heat transfer vinyl layout efficiency with zero server uploads.",
-      whatItDoes: "Tiles multiple logos, chest emblems, pocket badges, or jersey numbers across standard heat transfer paper dimensions. Optimizes layout density to minimize expensive vinyl and transfer paper waste during craft apparel production and DIY merchandise printing.",
+      desc: "Lay out iron-on transfer designs on US Letter or A4 with one-click mirroring, paper presets, cut lines and 300 DPI PNG or print export.",
+      seoDesc: "Make iron-on transfer sheets in your browser: mirror all images by default, light/dark/HTV presets, per-image mirror override, cut-line guides and 300 DPI PNG or print. No uploads.",
+      whatItDoes: "Runs a Sheet Studio engine tuned for heat-transfer paper: a live canvas preview built from the exact layout the exports use, with a one-click Mirror all images toggle that is ON by default (the core iron-on requirement) and per-image mirror overrides in the thumbnail strip. Three preset profiles configure the sheet in one step — Light transfer paper (mirror), Dark transfer paper (no mirror) and HTV vinyl (mirror + cut lines) — and cut-line guides draw on every cell in the preview with an option to bake them into the export for scissor or plotter trimming. Choose Letter or A4 paper, margin, gap and 1-6 columns; designs never mirror across cells — each flips in place about its own center. Exports a 300 DPI PNG (150 DPI draft option) or prints with exact @page sizing.",
       howToUse: [
-        "Choose your target transfer paper format (US Letter 8.5x11 inch or International A4).",
-        "Drop multiple badge or emblem artwork files into the drop container to populate the sheet grid.",
-        "Review the automated grid spacing and margin layout to ensure adequate cutting margins.",
-        "Download the high-resolution composite sheet file for immediate home or workshop printing."
+        "Pick a preset profile — Light transfer paper (mirror), Dark transfer paper (no mirror), or HTV vinyl (mirror + cut lines) — or toggle Mirror all images yourself; it starts ON because light transfer paper and HTV are applied face-down.",
+        "Drop multiple PNG/JPEG designs into the upload box; thumbnails appear in the strip with a ⇄ badge that cycles each image between automatic, forced-mirrored and never-mirrored.",
+        "Choose Letter or A4 paper and set margin, gap and columns (1-6) while watching the live sheet preview and page tabs for multi-page jobs.",
+        "Enable cut lines to see dashed guides around every design, and optionally bake them into the exported PNG for trimming.",
+        "Download a 300 DPI PNG or press Print — always print at 100% / Actual size, then press face-down so the mirrored artwork reads correctly."
       ],
-      limits: "Tiles up to 12 graphics onto a single print sheet. Does not automatically invert artwork; please use the T-Shirt Print Mirror tool first if using light transfer paper.",
-      privacy: "Image compositing occurs entirely within your local browser sandbox. No brand assets or personal logos are ever sent to remote cloud infrastructure."
+      limits: "Mirrors each design horizontally in place (no rotation, color separation or CMYK halftone screening). Cut lines are rectangular guides around each cell — irregular artwork silhouettes are not auto-traced. Up to 40 images per session with automatic multi-page flow; print at 100% scale, not 'Fit to page'.",
+      privacy: "All mirroring, compositing and PNG export happen in local browser memory using HTML5 Canvas. Your artwork, logos and designs are never uploaded to any server."
     },
     {
       id: "print-layout",
@@ -99,17 +103,18 @@
       cat: "Print & Craft",
       name: "Print Layout Optimizer",
       keyword: "Print Layout Optimizer",
-      desc: "Fit multiple photos onto US Letter, A4, or 4×6 inch paper with uniform margins.",
-      seoDesc: "Fit and optimize multiple photos onto standard printable paper sheets in your browser. Align pictures with uniform borders and zero uploads.",
-      whatItDoes: "Calculates optimal 2x2 and 3x2 grid layouts to fit multiple personal photographs onto standard printer sheets while enforcing balanced white borders. Automatically computes aspect ratio scaling factors to ensure photos are presented cleanly without awkward perspective distortion or subject truncation.",
+      desc: "Pack up to 40 photos onto Letter, A4, 4×6 or A3 paper with aspect-aware grids, auto-pack rows, mm borders and a printed-size report.",
+      seoDesc: "Fit photos onto Letter, A4, 4×6 or A3 paper in your browser: aspect-aware uniform grids, greedy auto-pack rows, auto-rotate, mm borders with color, 150/300 DPI PNG. Zero uploads.",
+      whatItDoes: "Runs a Sheet Studio layout engine with two packing modes: a uniform grid with selectable rows and columns whose cells fill the sheet minus margins (photos fit inside with their aspect ratio preserved and are letterboxed in the border color), and an auto-pack mode that greedily fills rows by aspect ratio at a computed target row height so mixed portrait and landscape shots waste almost nothing. Photos auto-rotate 90° when that fills the cell better. Margins, gaps and per-photo borders are controlled in millimeters with white, black or a custom border color, and the result is reported on screen (e.g. each photo printed at ≈ 102 × 136 mm). Supports Letter, A4, 4×6 and A3 paper, 150 or 300 DPI PNG export, and direct printing with exact @page sizing.",
       howToUse: [
-        "Select your destination paper format (US Letter, A4 international, 4x6 photo paper, or A3 poster sheet).",
-        "Add between 1 and 12 photographs from your computer or camera memory card.",
-        "Examine the real-time layout canvas for spacing, alignment, and outer border balance.",
-        "Click the download button to receive a crisp 300 DPI composite file ready for printing."
+        "Choose your paper (Letter, A4, 4×6 photo paper or A3) and a pack mode: Uniform grid for equal cells, or Auto-pack rows to let the engine fill rows by each photo's aspect ratio.",
+        "Add up to 40 photos from the upload box — a progress note tracks loading and extras beyond 40 are skipped.",
+        "Set margin, gap and border width in mm, pick white/black/custom border color, and toggle auto-rotate if landscape shots should turn 90° to fill their cell.",
+        "Check the live preview, page tabs and the meta line for the resulting physical photo size before you print.",
+        "Download a 150 or 300 DPI PNG, or press Print — always print at 100% / Actual size for true dimensions."
       ],
-      limits: "Scales images using uniform letterboxing to preserve native aspect ratios. Does not support arbitrary freehand collaging, diagonal rotation, or polygonal cropping.",
-      privacy: "Your family snapshots and personal prints remain strictly on your machine. Client-side canvas processing ensures complete data isolation."
+      limits: "Packs rectangular photos only — no freehand collage, diagonal rotation, polygonal cropping or rounded corners. In grid mode all photos share one cell size (varying aspects letterbox differently), while auto-pack mode sizes rows by aspect; up to 40 photos per session, flowing across multiple pages. Print at 100% scale for the reported mm sizes to hold true.",
+      privacy: "Your photos are processed entirely in local browser memory with HTML5 Canvas and never leave your device — no server sees your images."
     },
     {
       id: "print-border",
@@ -117,17 +122,18 @@
       cat: "Print & Craft",
       name: "Photo Print Border Calculator",
       keyword: "Photo Print Border Calculator",
-      desc: "Add precise white matting/borders for US 4×6, 5×7, 8×10 inch or European frames.",
-      seoDesc: "Add precise white matting borders to your digital photos in your browser. Prepare pictures for standard frames with zero server uploads.",
-      whatItDoes: "Expands the canvas boundaries of digital photographs to add uniform white gallery matting borders. Allows photographers and hobbyists to prepare images for standard picture frames without suffering unexpected edge cropping by photo print labs.",
+      desc: "Add a precise mat border for 4×6, 5×7, 8×10, 8×11 or A4 frames at 200/300 DPI — fixed mm or % borders, custom colour and an optional mat keyline.",
+      seoDesc: "Add precise print borders and mats to photos in your browser: 4×6, 5×7, 8×10, 8×11, A4 or custom sizes at 200/300 DPI, mm or % borders, crop-to-fill and PNG/JPEG export. No uploads.",
+      whatItDoes: "Runs an Image Studio border engine that places your photo onto a real physical target — 4×6, 5×7, 8×10, 8×11, A4 or a custom size in mm or inches — and renders the result at a chosen 200 or 300 DPI, sized to the physical target. In Fit-inside mode the photo is scaled to sit inside the target with a uniform border, so a 4:5 photo prints inside a 5×7 without any edge cropping; in Fit-to-exact-target mode the photo crops to fill the canvas edge to edge. The border width is set in fixed millimetres or as a percentage of the short side, the colour is white, black or a custom pick, and an optional mat effect draws a thin keyline around the photo. A live report shows the output pixels, the physical size and the exact border and printed-photo dimensions, and the result exports as PNG or JPEG.",
       howToUse: [
-        "Select and drop a digital image file into the border calculator interface.",
-        "The tool automatically calculates and expands the outer canvas margin by a proportional 6%.",
-        "Preview the matted photograph inside the responsive visual result container.",
-        "Download the framed PNG image file ready for commercial lab printing or framing."
+        "Drop a photo and pick the target print size: 4×6, 5×7, 8×10, 8×11, A4 or Custom (switch the units between mm and inches).",
+        "Choose the fitting mode: Fit inside for a uniform border around the whole photo, or Fit to exact target (crop to fill) to fill the canvas edge to edge.",
+        "Set the border width in fixed mm or as a % of the short side, and pick white, black or a custom border colour.",
+        "Enable the mat effect to add a thin keyline around the photo, and choose the output DPI (200 or 300).",
+        "Read the on-screen report to confirm the physical dimensions, then download a PNG or JPEG — print at 100% / actual size for the stated measurements to hold true."
       ],
-      limits: "Applies a proportional solid white border. Does not generate textured wooden picture frames, beveled acrylic bevels, or drop shadow overlays.",
-      privacy: "Image expansion is executed in local device RAM using HTML5 Canvas. Your personal photographs never leave your browser environment."
+      limits: "Creates rectangular borders and mats only — no textured or beveled frames, drop shadows or rounded corners. Border percentages are relative to the shorter target side; print at 100% scale for the reported millimetre sizes to be accurate.",
+      privacy: "Borders and mats are composited locally with HTML5 Canvas. Your personal photographs are never uploaded or stored on any server."
     },
     {
       id: "cross-stitch",
@@ -135,17 +141,18 @@
       cat: "Print & Craft",
       name: "Cross-Stitch Pattern Maker",
       keyword: "Cross-Stitch Pattern Maker",
-      desc: "Convert photos into printable color-coded grids with standard DMC thread references.",
-      seoDesc: "Convert photos into cross-stitch pattern grids in your browser. Map digital colors to standard DMC thread floss codes with zero server uploads.",
-      whatItDoes: "Quantizes digital photos into a structured 50-column pixelated cross-stitch embroidery chart. Evaluates every color cluster using Euclidean RGB distance algorithms to match pixels against official standard DMC embroidery floss references, producing a clear stitch count legend.",
+      desc: "Turn any photo into a printable cross-stitch chart — 20–200 stitches wide, median-cut colours snapped to a 300-colour DMC floss palette, symbol charts, 10×10 grid lines and a skein shopping list.",
+      seoDesc: "Convert photos into printable cross-stitch patterns in your browser: median-cut colour reduction, snap-to-DMC thread matching, symbol charts, 10×10 grid, skein estimates, PNG, CSV and print. No uploads.",
+      whatItDoes: "Runs a full Pattern Studio engine. Your image is average-pooled into a stitch grid 20–200 stitches wide (rows follow the aspect ratio), reduced to 2–64 colours with median-cut quantisation, and optionally snapped to a real DMC embroidery floss palette of 300 numbered threads, so every cell carries a genuine floss code and name. Cells can be drawn as flat colour or as a symbol chart (each palette entry gets a stable glyph) over a light cell grid with heavy lines every 10 stitches, and an optional Floyd–Steinberg dithering pass smooths gradients. The legend lists the DMC code, thread name, swatch, chart symbol, stitch count, percentage and an estimated skein count (~1,700 stitches per skein), and the tool reports the finished size on 14-count Aida. Exports a PNG stretched to at least 2,000 px wide with the aspect ratio preserved, a CSV shopping list, and a black-and-white symbol-only print mode.",
       howToUse: [
-        "Upload any digital photo, portrait, or illustration into the pattern generator.",
-        "The tool processes pixel clusters and renders a 50-column color-coded stitch chart.",
-        "Review the generated stitch grid and the accompanying DMC embroidery floss legend.",
-        "Download the high-resolution pattern chart PNG containing floss numbers and stitch counts."
+        "Drop a photo or illustration (PNG, JPEG or WebP) into the upload box — processing stays entirely in your browser.",
+        "Set the stitch width (20–200) and maximum colours (2–64); the grid rows follow your image's aspect ratio automatically.",
+        "Choose whether to snap colours to the DMC floss palette (recommended for real thread matching) and toggle symbol chart, 10×10 heavy grid lines, dithering or the black-and-white symbol-only print mode.",
+        "Check the live preview and legend — every colour shows its DMC code, name, chart symbol, stitch count percentage and estimated skeins, plus the physical size on 14-count Aida.",
+        "Download the chart PNG, export the CSV floss shopping list, or press Print for a symbol chart plus legend you can stitch from."
       ],
-      limits: "Fixed at a 50-column resolution grid for readability. Does not generate monochrome symbol overlays or backstitch contour outlines.",
-      privacy: "Color quantization and thread matching run purely in client-side JavaScript. Your craft patterns and family portraits remain 100% confidential."
+      limits: "Charts are capped at a 200×200 cell grid (40,000 stitches) so the preview stays responsive; very large or very tall photos are automatically reduced to fit. Colour matches are nearest-neighbour in RGB against the built-in DMC table, which is accurate to typical floss shades but not a lab-grade match to a specific dye lot. Dithering is available for cross-stitch charts only, and the symbol set repeats after 64 colours.",
+      privacy: "Photos are decoded and quantised entirely inside your browser with HTML5 Canvas. Your images, family portraits and craft projects are never uploaded to any server."
     },
     {
       id: "diamond-painting",
@@ -153,17 +160,18 @@
       cat: "Print & Craft",
       name: "Diamond Painting Pattern Maker",
       keyword: "Diamond Painting Pattern Maker",
-      desc: "Generate symbol-coded grids and DMC color palettes from any photo.",
-      seoDesc: "Generate diamond painting chart grids from photos in your browser. Calculate DMC drill color counts with total privacy and zero data uploads.",
-      whatItDoes: "Transforms digital pictures into structured diamond painting drill canvas grids. Calculates total round and square rhinestone drill counts per color code mapped directly to standard DMC craft references, helping crafters plan custom DIY diamond art kits efficiently.",
+      desc: "Generate symbol-coded diamond painting drill charts — round or square drills, DMC drill counts per colour, a cm canvas planner and a CSV kit shopping list.",
+      seoDesc: "Make diamond painting charts from photos in your browser: round or square drills with symbol letters, grid every 10 drills, DMC colour codes, a 2.5 mm canvas planner, drill totals and CSV. Zero uploads.",
+      whatItDoes: "Uses the same Pattern Studio pipeline as the cross-stitch tool — average-pooled cells, median-cut reduction and snap-to-DMC — but renders every cell as a drill instead of a stitch. Drills are drawn as filled circles (round) or rounded squares with a highlight (square), each optionally stamped with a bold symbol letter, over a grid highlighted every 10 drills to match the standard drill-counting rulers. A canvas-size planner converts a physical width in centimetres to a drill count at the standard 2.5 mm diamond drill pitch and back, so kits can be planned from a real canvas size. The legend reports the DMC code, colour name, swatch, symbol and per-colour drill total, the grand total drill count and estimated skeins, and the physical canvas dimensions. Export the chart as a PNG (≥2,000 px wide), download a CSV kit shopping list mapping DMC codes to drill counts, or print the chart with its legend.",
       howToUse: [
-        "Select your source picture and drop it into the diamond painting generator.",
-        "The algorithm quantizes colors and renders a tiled diamond drill chart on screen.",
-        "Check the DMC drill requirement summary table showing color numbers and bead estimates.",
-        "Save the high-resolution grid pattern to your local hard drive for crafting."
+        "Drop your source picture into the upload box — the image never leaves your device.",
+        "Pick the drill shape (round or square with highlight), and set the drill width (20–200) and maximum colours (2–64); leave snap-to-DMC on to map drills to real floss codes.",
+        "Use the canvas planner to type a canvas width in centimetres and press Plan drills — the engine converts it to a drill count using the ~2.5 mm pitch.",
+        "Turn the symbol letter per cell and the grid-every-10-drills guide on or off, and watch the live preview and per-colour drill totals in the legend.",
+        "Download the chart PNG, export the CSV shopping list (DMC code → drill count), or print the chart and legend for your work surface."
       ],
-      limits: "Generates square drill visual grid approximations. Does not output adhesive backing templates with proprietary symbol fonts.",
-      privacy: "All color parsing and chart rendering execute inside your browser sandbox. No personal artwork or family pictures are sent to remote servers."
+      limits: "Charts are capped at a 200×200 drill grid (40,000 drills) with the same automatic reduction for oversized or very tall photos. Drill colour codes follow DMC floss names — proprietary AB drill numbering is not included. The canvas planner assumes the standard 2.5 mm drill pitch; larger or smaller drills change the physical size. This produces a printable chart, not a plotted adhesive canvas or a cutting-machine file.",
+      privacy: "Colour reduction, symbol assignment and drill rendering all execute in local browser memory with HTML5 Canvas. Your photos and kit plans are never sent to a remote server."
     },
     {
       id: "embroidery",
@@ -171,17 +179,18 @@
       cat: "Print & Craft",
       name: "Embroidery Pattern Simplifier",
       keyword: "Embroidery Pattern Simplifier",
-      desc: "Reduce artwork into a simplified DMC thread color palette for embroidery.",
-      seoDesc: "Simplify images into embroidery thread color palettes in your browser. Map artwork to core DMC floss shades with zero server uploads.",
-      whatItDoes: "Reduces complex gradient illustrations and continuous-tone images into a clean, simplified palette of core thread colors. Provides hand embroiderers with an actionable color reduction reference, making it easy to select matching physical floss skeins for hand stitching projects.",
+      desc: "Reduce artwork to a simplified thread palette — median-cut to N colours, optional DMC matching or a pasted custom hex palette, with a side-by-side smooth preview and skein estimates.",
+      seoDesc: "Simplify images into embroidery thread palettes in your browser: median-cut colour reduction, optional DMC floss matching, a custom pasted hex palette, smooth simplified export, area percentages and skein estimates. No uploads.",
+      whatItDoes: "A dedicated colour-reduction studio rather than a stitch chart. Your image is average-pooled, clustered with median-cut quantisation to any thread count from 2 to 64, and either left as exact clustered colours or snapped to the shared DMC floss palette. You can also paste your own hex palette (one colour per line) to match non-DMC threads — ideal for planning from a specific thread set or a fabric swatch. The preview shows the original photograph beside a smooth, non-gridded simplified render so you can judge the reduction before committing, and the legend lists every thread's code or hex, name, swatch, share of the design as a percentage and an estimated skein count (~1,700 stitches per skein). Export a smooth simplified reference image (≥2,000 px wide), a stitched grid chart PNG, or a CSV palette report with hex, DMC code/name, count, percentage and skeins.",
       howToUse: [
-        "Drag and drop your illustration or photo into the embroidery simplifier tool.",
-        "The palette engine clusters colors against primary standard DMC embroidery thread shades.",
-        "Review the simplified color block distribution and estimated stitch percentages.",
-        "Download the simplified pattern reference graphic for your needlework hoop."
+        "Drag and drop the illustration or photo you want to reduce onto the upload box.",
+        "Set the thread count with the Max colours slider (2–64) — median-cut clustering does the colour reduction.",
+        "Leave Snap to DMC on for real floss codes, or paste your own hex list into the custom palette box and press Apply custom palette to match other threads.",
+        "Compare the original and the smooth simplified preview side by side, and read the per-colour area percentages and estimated skeins in the legend.",
+        "Export the smooth simplified PNG for reference, a grid chart PNG for stitching, or the CSV palette report for your floss shopping list."
       ],
-      limits: "Designed for hand embroidery color planning and floss selection. Does not generate computerized machine embroidery stitch files such as DST, PES, or JEF formats.",
-      privacy: "Local canvas processing guarantees your original illustrations, textile concepts, and family photos remain confidential on your device."
+      limits: "Designed for hand-embroidery colour planning and floss selection; it does not generate machine-embroidery files such as DST, PES or JEF, and it does not auto-trace stitch direction or shading. Custom palettes accept up to 64 hex colours. Reduction is capped at the same 200×200 cell grid as the other pattern tools, and median-cut produces representative colours rather than a perfectly perceptually uniform palette.",
+      privacy: "All clustering, matching and export run locally in your browser via HTML5 Canvas. Your original artwork, textile concepts and photographs stay on your device."
     },
     {
       id: "video-safe-zone",
@@ -207,17 +216,17 @@
       cat: "Audio & Video",
       name: "Video Thumbnail Contact Sheet",
       keyword: "Video Thumbnail Contact Sheet",
-      desc: "Extract 12 evenly spaced high-res frames from MP4/MOV videos in your browser.",
-      seoDesc: "Extract 12 evenly spaced video thumbnail frames in your browser. Generate high-resolution contact sheets from MP4 files with zero uploads.",
-      whatItDoes: "Scans through local video media files and automatically extracts 12 evenly spaced timestamped frames into a clean 3x4 grid contact sheet. Allows video editors, creators, and archivists to quickly inspect video pacing, scene changes, and visual quality without opening dedicated video software.",
+      desc: "Extract 4–48 timestamped frames into a configurable PNG/JPEG contact sheet.",
+      seoDesc: "Build video contact sheets with 4–48 timestamped frames, custom grid columns and resolution in your browser. Export PNG/JPEG plus a CSV of sampled times, with zero uploads.",
+      whatItDoes: "Scans a local video file and extracts between 4 and 48 evenly spaced frames into a contact sheet whose grid columns, per-thumbnail resolution, padding and background colour you control. Every frame is stamped with a burned-in MM:SS.mmm timestamp and frame index so scenes can be located precisely, and each seek is raced against a timeout with an automatic previous-frame fallback, so an unresponsive codec never hangs the sheet. Export the sheet as PNG or JPEG (with quality control) and download a CSV of the sampled timestamps.",
       howToUse: [
-        "Drop any MP4, WebM, or MOV video file into the video thumbnail extractor interface.",
-        "The browser engine seeks through the video timeline to capture 12 progressive frame grabs.",
-        "View the assembled 12-frame composite contact sheet rendered in the browser.",
-        "Click Download Contact Sheet to save the full-resolution summary image to your device."
+        "Drop an MP4, WebM or MOV video into the extractor, or click Add file and pick one.",
+        "Choose the frame count (4–48), grid columns, thumbnail width, padding, background colour and whether to burn timestamp labels.",
+        "Watch the progress bar as the browser seeks through the timeline, then inspect the assembled contact sheet on screen.",
+        "Download the sheet as PNG or JPEG, or grab the CSV of sampled timestamps for editing notes."
       ],
-      limits: "Requires browser-supported codecs (H.264, VP8, VP9, AV1). High-bitrate Apple ProRes, raw AVI, or MKV containers not supported by your browser cannot be decoded.",
-      privacy: "Video decoding and frame rendering occur entirely through local browser hardware acceleration. Zero bytes of your video footage are sent to any server."
+      limits: "Requires browser-supported codecs (H.264, VP8, VP9, AV1). High-bitrate ProRes, DNxHD, raw AVI, HEVC-in-MKV and DRM-protected files cannot be decoded. Seeks that time out after 8 seconds fall back to the previous frame and are reported as warnings.",
+      privacy: "Video decoding, seeking and frame rendering occur entirely through local browser hardware acceleration. Zero bytes of your video footage are sent to any server."
     },
     {
       id: "audio-chapters",
@@ -243,16 +252,16 @@
       cat: "Audio & Video",
       name: "Podcast Silence Map",
       keyword: "Podcast Silence Map",
-      desc: "Analyze audio waveforms locally to detect dead air and pause durations.",
-      seoDesc: "Analyze audio waveforms and find dead air gaps in your browser. Detect silence durations in podcast audio locally with zero server uploads.",
-      whatItDoes: "Decodes audio tracks using the Web Audio API and runs root-mean-square (RMS) energy analysis across the waveform to detect dead air gaps and pauses longer than 500 milliseconds. Generates a chronological list of silence start times and durations to speed up podcast and interview editing.",
+      desc: "Detect dead air with a dBFS threshold slider, waveform view and CSV/TXT gap export.",
+      seoDesc: "Find dead air in your browser with a dBFS threshold slider, window and channel controls. Waveform view, click-to-preview gaps, CSV/TXT export, zero uploads.",
+      whatItDoes: "Decodes an audio track locally and scans its energy window-by-window to map every silence gap longer than a length you choose. Set the silence threshold as a dBFS slider (converted to amplitude), the analysis window size, the minimum gap length and the channel mode (left, right, mono mix or max-of-channels). The peak-envelope waveform shades each detected gap, and clicking a gap preview-plays just that stretch through an embedded player. Reports file duration, total silence, percentage silence and gap count, listing every gap as HH:MM:SS.mmm — including recordings longer than an hour.",
       howToUse: [
-        "Drop a podcast audio track (WAV, MP3, AAC, or OGG) into the silence detector.",
-        "Wait a few moments while the local Web Audio engine decodes and audits the audio buffer.",
-        "Review the generated list of dead air intervals showing exact start and end timestamps.",
-        "Use the timestamp report to quickly locate and trim long pauses in your digital audio workstation (DAW)."
+        "Drop a podcast audio track (WAV, MP3, AAC or OGG) into the silence detector.",
+        "Set the silence threshold in dBFS, the window size, the minimum gap length and the channel mode for your recording.",
+        "Review the shaded waveform and the gap table, and click any row to preview-play that stretch of audio.",
+        "Download the gaps as CSV (Start, End, Duration) or a plain-text list, or copy the list to the clipboard."
       ],
-      limits: "Decodes audio into browser RAM; extremely large audio files (>200MB) may encounter memory limits on memory-constrained mobile devices.",
+      limits: "Decodes audio into browser RAM; extremely large audio files (>200 MB) may hit memory limits on constrained devices. Undecodable codecs (for example DRM-protected M4A, unsupported FLAC builds or raw AC-3) show codec guidance instead of results — convert to WAV or standard MP3 and retry.",
       privacy: "Audio decoding, waveform inspection, and silence mapping execute entirely on your local CPU. Unreleased audio files never leave your computer."
     },
     {
@@ -261,14 +270,14 @@
       cat: "Text & Subtitles",
       name: "Subtitle Reading-Speed Checker",
       keyword: "Subtitle Reading-Speed Checker",
-      desc: "Audit SRT subtitles for high Characters-Per-Second (CPS), duration, and overlaps.",
-      seoDesc: "Audit SRT subtitle reading speed in your browser. Detect high CPS lines, short durations, and timecode overlaps locally with zero uploads.",
-      whatItDoes: "Audits SubRip (.srt) subtitle files to identify caption cues that exceed broadcast standards (such as Netflix and BBC guidelines of 21 characters per second). Flags cues with insufficient reading duration, zero-duration errors, and overlapping timecodes to ensure accessibility for viewers.",
+      desc: "Audit SRT subtitles for reading speed (CPS), duration, line length and overlaps against Netflix, BBC or custom limits.",
+      seoDesc: "Audit SRT subtitle reading speed in your browser. Detect high CPS lines, short durations, long lines and timecode overlaps locally with zero uploads.",
+      whatItDoes: "Audits SubRip (.srt) subtitle files against broadcast reading-speed standards. Choose the Netflix profile (21 CPS, 1s minimum, 42 characters), the BBC profile (about 180 words per minute, 16-20 CPS), or a custom profile with your own CPS, minimum-duration and line-length limits. The engine strips styling tags before measuring, reports raw and clean character counts, and flags excessive CPS, short or zero-duration cues, overlong lines and overlapping timecodes (naming the neighbouring cue and the clashing range). It shows totals, flagged counts, an average CPS and the longest cue, and exports a CSV report or an annotated .issues.srt review copy.",
       howToUse: [
-        "Upload your SubRip (.srt) subtitle caption file into the reading speed auditor.",
-        "The engine calculates active duration, character counts, and CPS metrics for every subtitle cue.",
-        "Inspect highlighted cues flagged for excessive reading speed or timecode collision errors.",
-        "Use the audit summary to adjust caption timing and line splits in your subtitle editor."
+        "Upload your SubRip (.srt) subtitle caption file, or click Load sample to see the checker in action.",
+        "Pick a reading-speed profile (Netflix, BBC or Custom) and tweak the CPS, minimum duration and character limits if you need to.",
+        "Review the stats summary and the issue table, where each flagged cue lists its type, raw/clean character counts and details such as the overlapping neighbour and time range.",
+        "Download the CSV report for a spreadsheet, the annotated .issues.srt for review, or click Fix line breaks to send the text straight to the line-break fixer."
       ],
       limits: "Audits SubRip SRT subtitle files. Does not directly extract proprietary binary subtitle streams embedded in container formats like MKV or MP4.",
       privacy: "Subtitle files are parsed purely within client-side memory. Confidential movie scripts, documentary translations, and transcripts remain strictly private."
@@ -279,17 +288,17 @@
       cat: "Text & Subtitles",
       name: "Subtitle Line-Break Fixer",
       keyword: "Subtitle Line-Break Fixer",
-      desc: "Rebalance and wrap long SRT subtitle lines to meet BBC & Netflix guidelines.",
-      seoDesc: "Rebalance long SRT subtitle lines in your browser. Wrap caption lines to standard 38-character limits automatically with zero data uploads.",
-      whatItDoes: "Rebalances and wraps overlong subtitle lines to comply with industry-standard 38-character limits per line. Breaks text naturally at whitespace word boundaries rather than mid-word, improving readability on mobile devices and television screens without altering timecodes.",
+      desc: "Rebalance and rewrap long SRT subtitle lines to your chosen characters-per-line and line-count limits.",
+      seoDesc: "Rebalance long SRT subtitle lines in your browser. Two-pass rewrap to your character-per-line limit, with tag preservation and zero data uploads.",
+      whatItDoes: "Rebalances and rewraps overlong SRT subtitle lines with a two-pass algorithm: it first splits at the clause punctuation nearest the midpoint for a natural break, then greedily wraps the remaining words to your character-per-line limit. Tokens that exceed the limit on their own are hard-cut, and inline styling tags such as <i> and {\\an8} are preserved as anchored spans so formatting survives the rewrap. Adjust the maximum characters per line (20-60), the maximum number of lines (1-3) and tag preservation, then compare a diff-style before/after preview with a changed-cue count. Timecodes are never touched, and you can download the fixed .srt or send it back to the speed checker.",
       howToUse: [
-        "Drop your unformatted, wide, or single-line .srt subtitle file into the fixer.",
-        "The formatting algorithm analyzes timecodes and rewraps text lines exceeding 38 characters.",
-        "Inspect the notice showing total cues processed and rebalanced line breaks.",
-        "Download the corrected, broadcast-compliant .srt subtitle file directly to your disk."
+        "Drop your wide or single-line .srt subtitle file into the line-break fixer, or click Load sample.",
+        "Set the maximum characters per line, the maximum number of lines and whether to preserve inline tags.",
+        "Review the diff-style preview, which shows the changed-cue count and the before/after line breaks for each affected cue.",
+        "Download the fixed .srt subtitle file, or click Send to speed checker to audit the repaired file for reading speed."
       ],
-      limits: "Rebalances plain text caption lines. Does not modify timing cue points, adjust start/end timestamps, or translate language text.",
-      privacy: "All text parsing and subtitle file generation run in client JavaScript. Your transcripts and film dialogue are never sent to third-party servers."
+      limits: "Rewraps SubRip SRT subtitle text only. It does not alter timecodes, merge or split cues, or translate subtitle language.",
+      privacy: "Subtitle files are parsed purely within client-side memory. Confidential movie scripts, documentary translations, and transcripts remain strictly private."
     },
     {
       id: "contact-dedupe",
@@ -459,17 +468,18 @@
       cat: "Images",
       name: "Wallpaper Photo Cropper",
       keyword: "Wallpaper Photo Cropper",
-      desc: "Crop photos to 9:19.5 (iPhone/Android) or 16:9 desktop aspect ratios without distortion.",
-      seoDesc: "Crop photos to phone wallpaper aspect ratios in your browser. Fit images to iPhone and Android mobile screens locally with zero uploads.",
-      whatItDoes: "Crops and centers high-resolution digital photographs to modern smartphone screen aspect ratios (9:19.5 for iPhone and Android devices) without stretching or distortion. Calculates focal center coordinates to ensure wallpaper images fit lock screens and home screens perfectly.",
+      desc: "Crop photos to exact phone, tablet and desktop wallpapers — device presets, custom ratio and pixels, a draggable focal crop box, cover-crop or blur padding, PNG/JPEG/WebP export.",
+      seoDesc: "Crop photos to phone wallpaper sizes in your browser: iPhone 1170×2532, Android 1080×2400, 16:9 desktop or a custom ratio and pixel size, a draggable focal point, blur padding, batch PNG/JPEG/WebP. Zero uploads.",
+      whatItDoes: "Runs an Image Studio wallpaper engine that crops a photo to an exact screen aspect and pixel size. Choose a device preset (iPhone 1170×2532 and 1290×2796, Android 1080×2400, 16:9 desktop 1920×1080, 9:16 social, 4:3 tablet or 19.5:9 wide), or enter a custom ratio and custom output pixels. A crop box overlays the preview and you drag it to set the focal point, so the important part of the shot — a face, a landmark — stays in frame instead of being blindly centre-cropped. In Cover-crop mode the photo fills the output edge to edge with no distortion; in Blur-padding mode the crop is fitted and the leftover space is filled with a blurred, darkened copy of the image so nothing is cut off. Everything exports as PNG, JPEG or WebP with a quality slider, one photo at a time or as a batch with a shared ratio.",
       howToUse: [
-        "Upload a high-resolution photograph from your camera or photo library.",
-        "The tool automatically calculates the exact center-crop for 9:19.5 smartphone displays.",
-        "Preview the cropped wallpaper in the viewport preview box.",
-        "Download the optimized wallpaper PNG file directly to your smartphone or desktop."
+        "Drop one or more photos (PNG, JPEG, WebP) into the upload box — batch works on the whole set with the same ratio.",
+        "Pick a device / ratio preset, or choose Custom ratio and type the custom pixels for an exact wallpaper size.",
+        "Drag the crop box on the preview to set the focal point so the subject stays centred; press Reset focal point to recentre.",
+        "Choose Cover crop to fill the frame, or Blur padding to fit the whole photo with a softened background — no crop loss.",
+        "Set the format and quality, then Download for the active photo or Download all for the batch; set the saved file as your wallpaper."
       ],
-      limits: "Processes one high-resolution photo per action using center-weighted cropping. Does not add blur padding sidebars or generate animated live wallpapers.",
-      privacy: "Photo cropping and canvas rendering happen entirely in local browser RAM. Your personal photos remain 100% private."
+      limits: "Processes common raster photos (PNG, JPEG, WebP) up to 30 files per session and does not render animated live wallpapers. Blur padding relies on the browser's canvas blur filter, so the padding look varies slightly between browsers.",
+      privacy: "Cropping, blur padding and canvas rendering happen entirely in local browser memory. Your personal photos remain 100% private."
     },
     {
       id: "panorama",
@@ -495,17 +505,17 @@
       cat: "Images",
       name: "Photo Duplicate Finder",
       keyword: "Photo Duplicate Finder",
-      desc: "Find exact duplicate image files using browser-side SHA-256 cryptographic hashing.",
-      seoDesc: "Find duplicate photos in your browser using SHA-256 hashes. Detect exact duplicate image files locally with total privacy and zero uploads.",
-      whatItDoes: "Scans batches of digital image files and identifies bit-for-bit duplicate copies using pre-filtered file size grouping and cryptographic SHA-256 binary hashing. Helps photographers and collectors reclaim disk space by finding redundant photo copies quickly and securely.",
+      desc: "Find exact and near-duplicate photos by hash, with a keep recommendation.",
+      seoDesc: "Find duplicate and near-duplicate photos by SHA-256 and perceptual hash in your browser. Export a CSV or HTML cleanup report with zero uploads.",
+      whatItDoes: "Groups selected files into exact byte-duplicates (size + SHA-256, hashed in a Web Worker) and perceptual near-duplicates (aHash/dHash Hamming distance with a sensitivity slider and similarity percentage). Per-group thumbnail strips carry group id, size, date and hash columns with checkboxes to select copies, and the recommended keeper (oldest date, then shortest name) is pre-marked. Any file type is accepted.",
       howToUse: [
-        "Select multiple image files or drop an entire photo folder from your hard drive.",
-        "The browser engine groups matching file sizes and hashes binary data using the SubtleCrypto API.",
-        "Review the duplicate report showing exact duplicate groupings and file names.",
-        "Use the findings to clean up redundant duplicate copies from your local storage."
+        "Select multiple files, or drop an entire folder — every file type is accepted, not just images.",
+        "Exact duplicates are grouped by byte size then SHA-256 hashed; images also get aHash/dHash perceptual hashes.",
+        "Review each thumbnail group, tick the copies to remove, or use Keep recommended to keep the oldest copy.",
+        "Export the cleanup report as CSV (Group,File,Size,Date,Hash,Distance) or as a standalone HTML report."
       ],
-      limits: "Identifies byte-for-byte exact duplicate files. Does not detect perceptual similarities between differently compressed or resized versions.",
-      privacy: "Binary cryptographic hashing executes purely on your device CPU using Web Cryptography. Zero image bytes leave your machine."
+      limits: "Exact dedupe uses SHA-256 (needs https or localhost). Perceptual hashing catches resized and recompressed copies, but heavy edits or crops may fall outside the similarity threshold.",
+      privacy: "Hashing and thumbnailing run entirely in your browser with Web Crypto and Canvas. Your files are never uploaded to any server."
     },
     {
       id: "best-shot",
@@ -513,16 +523,16 @@
       cat: "Images",
       name: "Photo Best-Shot Finder",
       keyword: "Photo Best-Shot Finder",
-      desc: "Rank burst photos by sharpness, contrast, and clarity heuristics.",
-      seoDesc: "Rank burst photos by sharpness and clarity in your browser. Find the best shot in photo sets locally with total privacy and zero uploads.",
-      whatItDoes: "Evaluates bursts of similar photographs using Laplacian-style edge contrast, sharpness, and brightness heuristics to rank pictures from sharpest to blurriest. Helps photographers quickly pick the crispest frame from rapid-fire action burst photography.",
+      desc: "Rank burst photos by Laplacian sharpness, exposure and contrast.",
+      seoDesc: "Rank burst photos by sharpness, exposure and contrast in your browser. Export a ranked CSV of the best shot locally with zero uploads.",
+      whatItDoes: "Scores every photo with variance-of-Laplacian sharpness on an aspect-preserving 256 px downsample (letterboxed, never stretched), plus an exposure/clipping penalty and a contrast term. Blends them into a 0-100 composite score with adjustable weights and shows the sharpness/exposure/contrast breakdown per photo, a full ranked list with load-more, and a side-by-side compare of the top shots.",
       howToUse: [
         "Select a batch of burst photos taken in similar lighting from your camera roll.",
-        "The heuristic engine evaluates edge gradients across 160x160 sample grids in Canvas.",
-        "Inspect the ranked gallery showing the sharpest #1 top-rated photo at the top.",
-        "Keep the highest-scoring crisp photographs and safely delete blurry candidate shots."
+        "Each image is downsampled to 256 px, then a 3x3 Laplacian kernel measures sharpness while exposure and contrast are scored.",
+        "Inspect the ranked list, per-photo breakdown and compare view, and adjust the weighting sliders to taste.",
+        "Export the ranking as CSV or copy the winning filename to keep the crispest frame."
       ],
-      limits: "Uses edge-contrast heuristics for sharpness estimation. Does not evaluate aesthetic artistic composition or facial expression smiles.",
+      limits: "Edge-based sharpness and exposure heuristics only — artistic composition and facial expressions are not judged. Unsupported files are skipped and reported instead of stopping the batch.",
       privacy: "Pixel data is analyzed inside local Canvas memory buffers without external API calls or machine learning cloud server uploads."
     },
     {
@@ -531,16 +541,16 @@
       cat: "Images",
       name: "Photo Timeline Builder",
       keyword: "Photo Timeline Builder",
-      desc: "Sort photos by file date and generate a standalone offline HTML photo album.",
-      seoDesc: "Sort photos by date into standalone HTML albums in your browser. Generate offline chronological photo timelines with zero server uploads.",
-      whatItDoes: "Sorts collections of photographs by file modification timestamps and compiles them into a standalone, portable HTML chronological album. Generates an offline gallery timeline that can be archived, emailed, or opened in any browser without needing third-party photo software.",
+      desc: "Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file.",
+      seoDesc: "Build a chronological photo album from EXIF dates with embedded thumbnails in your browser. Export one self-contained offline photo-timeline.html with zero uploads.",
+      whatItDoes: "Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts (automatically switching to month or year groups for large sets). You get a click-to-open full-resolution lightbox, a per-file date-correction field with an EXIF / file / manual confidence badge, a total output-size report, and a single self-contained photo-timeline.html with lazy-loaded images and the original filenames as captions.",
       howToUse: [
-        "Drop a folder or batch of photo files from a family event, wedding, or vacation trip.",
-        "The timeline builder automatically orders them chronologically by file timestamp metadata.",
-        "Preview the structured chronological event list and picture order on your screen.",
-        "Download photo-timeline.html to preserve your standalone offline photo diary."
+        "Drop a folder or batch of photo files from a family event, wedding, or holiday.",
+        "Each JPEG's EXIF DateTimeOriginal is read first; files without EXIF fall back to the file date and are flagged for correction.",
+        "Review the day/month groups, click any thumbnail to open the full-resolution original, and fix any wrong dates inline.",
+        "Check the embedded album-size report, add an album title, and download the standalone photo-timeline.html photo diary."
       ],
-      limits: "Reads file system lastModified timestamps. Does not extract EXIF GPS coordinate metadata, camera lens models, or facial recognition tags.",
+      limits: "Photo dating prefers EXIF DateTimeOriginal then the file date; EXIF GPS, lens model and facial tags are not read. Thumbnails are re-encoded client-side as JPEG data URLs, so very large sets produce a large single file.",
       privacy: "Album generation runs entirely in client-side JavaScript. Your personal photo libraries and event memories remain completely confidential."
     },
     {
@@ -549,16 +559,16 @@
       cat: "Images",
       name: "Family Photo Date Organizer",
       keyword: "Family Photo Date Organizer",
-      desc: "Inspect and group family photos chronologically from file modification timestamps.",
-      seoDesc: "Organize family photos chronologically in your browser. Inspect and group picture files by timestamp locally with zero server uploads.",
-      whatItDoes: "Inspects batches of family pictures, sorts them chronologically by file date, and exports an offline summary album for simple archiving. Organizes decades of disorganized family pictures into structured yearly and monthly timeline groups.",
+      desc: "Organize family photos into a year-to-month-to-day tree and export a rename plan.",
+      seoDesc: "Organize family photos into a year, month and day tree with EXIF dating in your browser. Export an HTML archive index and a planned folder-rename CSV/JSON with zero uploads.",
+      whatItDoes: "Builds a collapsible year → month → day summary tree with per-group counts and a thumbnail contact strip per group, then previews a proposed folder structure from an editable rename pattern (default YYYY/MM/YYYY-MM-DD_title.ext) as a live old-name → new-path table. Dates prefer EXIF DateTimeOriginal, wrong timestamps can be corrected per file or in bulk per group, and every entry carries a date-confidence badge. Since browsers cannot move files on disk, it exports a self-contained family-organizer.html archive index plus a planned-folder CSV and JSON mapping (original → proposed path).",
       howToUse: [
-        "Select multiple family photos from your hard drive or digital camera backup.",
-        "The organizer sorts every photo in chronological date order based on file timestamps.",
-        "Review the timestamp sequence, chronological dates, and photo groupings on your screen.",
-        "Download the formatted HTML photo archive index to keep family albums organized."
+        "Select multiple family photos (and any other files) from your hard drive or camera backup.",
+        "Photos are dated from EXIF DateTimeOriginal first, then the file date; non-image files still appear in the tree without a thumbnail.",
+        "Inspect the year → month → day tree, fix wrong dates per file or in bulk per group, and tune the rename pattern to watch the proposed paths update live.",
+        "Download family-organizer.html plus the planned-folder CSV or JSON, then apply the rename plan with your own file manager."
       ],
-      limits: "Organizes files based on file date attributes. Does not rewrite binary EXIF header tags directly inside raw JPEG image files.",
+      limits: "Organizes and renames by date but never rewrites EXIF header tags or moves files on disk — it exports an HTML index and a rename plan instead. Thumbnails require browser-decodable image formats.",
       privacy: "All photo analysis and document compilation occur inside your local browser sandbox. No family pictures are ever uploaded to external servers."
     }
   ];

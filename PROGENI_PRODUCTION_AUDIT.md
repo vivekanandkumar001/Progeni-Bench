@@ -71,7 +71,7 @@ dist/
 - ✅ robots.txt: `Sitemap: https://progeni.live/sitemap.xml`, `Allow: /`
 - ✅ Open Graph metadata: title, description, type="website"
 - ✅ Schema.org JSON-LD: `WebApplication` with name, description, category
-- ✅ Theme color: `#0b1020` consistent across HTML/manifest/CSS
+- ✅ Theme color: `#f4f6f9` (light) consistent across HTML/manifest/CSS
 - ✅ Meta viewport: `width=device-width, initial-scale=1`
 - ✅ Mobile-friendly responsive design
 

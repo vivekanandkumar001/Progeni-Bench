@@ -8,6 +8,7 @@
     module.exports = factory();
   } else {
     root.ProgeniUtils = factory();
+    root.Utils = root.ProgeniUtils;
   }
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
 
@@ -267,6 +268,48 @@
     return y + "-" + mo + "-" + d;
   }
 
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function pad4(n) {
+    return String(n).padStart(4, "0");
+  }
+
+  function fmtTimeHMSms(seconds) {
+    const sec = Number(seconds) || 0;
+    let s = Math.max(0, Number(sec) || 0);
+    if (!Number.isFinite(s)) s = 0;
+    let ms = Math.round(s * 1000);
+    const h = Math.floor(ms / 3600000); ms -= h * 3600000;
+    const m = Math.floor(ms / 60000); ms -= m * 60000;
+    const ss = Math.floor(ms / 1000); ms -= ss * 1000;
+    return pad2(h) + ":" + pad2(m) + ":" + pad2(ss) + "." + String(ms).padStart(3, "0");
+  }
+
+  const fmtHmsMs = fmtTimeHMSms;
+
+  function parseTimecode(str) {
+    if (str === null || str === undefined) return null;
+    const s = String(str).trim();
+    if (!s) return null;
+    let m = s.match(/^(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/);
+    if (m) {
+      const h = +m[1], mn = +m[2], secv = +m[3], msv = m[4] ? +m[4] : 0;
+      if (mn >= 60 || secv >= 60) return null;
+      return h * 3600 + mn * 60 + secv + msv / 1000;
+    }
+    m = s.match(/^(\d{2}):(\d{2})(?:\.(\d{1,3}))?$/);
+    if (m) {
+      const mn = +m[1], secv = +m[2], msv = m[3] ? +m[3] : 0;
+      if (mn >= 60 || secv >= 60) return null;
+      return mn * 60 + secv + msv / 1000;
+    }
+    const n = Number(s);
+    if (!isNaN(n) && n >= 0) return n;
+    return null;
+  }
+
   return {
     esc: esc,
     csvParse: csvParse,
@@ -276,6 +319,11 @@
     filterBookmarkLinks: filterBookmarkLinks,
     cleanSVG: cleanSVG,
     parseVCF: parseVCF,
-    normalizeDate: normalizeDate
+    normalizeDate: normalizeDate,
+    pad2: pad2,
+    pad4: pad4,
+    fmtTimeHMSms: fmtTimeHMSms,
+    fmtHmsMs: fmtHmsMs,
+    parseTimecode: parseTimecode
   };
 });

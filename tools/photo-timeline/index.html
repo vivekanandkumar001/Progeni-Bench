@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Photo Timeline Builder: Free Online Tool | Progeni Bench</title>
-  <meta name="description" content="Sort photos by date into standalone HTML albums in your browser. Generate offline chronological photo timelines with zero server uploads.">
-  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Build a chronological photo album from EXIF dates with embedded thumbnails in your browser. Export one self-contained offline photo-timeline.html with zero uploads.">
+  <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="Progeni Bench">
   <meta property="og:title" content="Photo Timeline Builder: Free Online Tool | Progeni Bench">
-  <meta property="og:description" content="Sort photos by date into standalone HTML albums in your browser. Generate offline chronological photo timelines with zero server uploads.">
+  <meta property="og:description" content="Build a chronological photo album from EXIF dates with embedded thumbnails in your browser. Export one self-contained offline photo-timeline.html with zero uploads.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/photo-timeline/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
@@ -18,50 +18,51 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/photo-timeline/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Photo Timeline Builder","url":"https://bench.progeni.live/tools/photo-timeline/","description":"Sort photos by date into standalone HTML albums in your browser. Generate offline chronological photo timelines with zero server uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Photo Timeline Builder","item":"https://bench.progeni.live/tools/photo-timeline/"}]}]}</script>
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Photo Timeline Builder","url":"https://bench.progeni.live/tools/photo-timeline/","description":"Build a chronological photo album from EXIF dates with embedded thumbnails in your browser. Export one self-contained offline photo-timeline.html with zero uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Photo Timeline Builder","item":"https://bench.progeni.live/tools/photo-timeline/"}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
   <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
-  <nav aria-label="Primary navigation">
+  <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
     <span class="eyebrow">Images · 100% Private Client-Side</span>
     <h1>Photo Timeline Builder</h1>
-    <p>Sort photos by file date and generate a standalone offline HTML photo album. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
   </section>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
     <section class="toolbox">
       <h2>About Photo Timeline Builder</h2>
-      <p>Sort photos by file date and generate a standalone offline HTML photo album.</p>
+      <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file.</p>
       <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
     </section>
   </noscript>
 
   <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
-    <p>Sorts collections of photographs by file modification timestamps and compiles them into a standalone, portable HTML chronological album. Generates an offline gallery timeline that can be archived, emailed, or opened in any browser without needing third-party photo software.</p>
+    <p>Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts (automatically switching to month or year groups for large sets). You get a click-to-open full-resolution lightbox, a per-file date-correction field with an EXIF / file / manual confidence badge, a total output-size report, and a single self-contained photo-timeline.html with lazy-loaded images and the original filenames as captions.</p>
 
     <h2>How to use</h2>
     <ol>
-      <li>Drop a folder or batch of photo files from a family event, wedding, or vacation trip.</li>
-      <li>The timeline builder automatically orders them chronologically by file timestamp metadata.</li>
-      <li>Preview the structured chronological event list and picture order on your screen.</li>
-      <li>Download photo-timeline.html to preserve your standalone offline photo diary.</li>
+      <li>Drop a folder or batch of photo files from a family event, wedding, or holiday.</li>
+      <li>Each JPEG's EXIF DateTimeOriginal is read first; files without EXIF fall back to the file date and are flagged for correction.</li>
+      <li>Review the day/month groups, click any thumbnail to open the full-resolution original, and fix any wrong dates inline.</li>
+      <li>Check the embedded album-size report, add an album title, and download the standalone photo-timeline.html photo diary.</li>
     </ol>
 
     <h2>Limits & Considerations</h2>
-    <p>Reads file system lastModified timestamps. Does not extract EXIF GPS coordinate metadata, camera lens models, or facial recognition tags.</p>
+    <p>Photo dating prefers EXIF DateTimeOriginal then the file date; EXIF GPS, lens model and facial tags are not read. Thumbnails are re-encoded client-side as JPEG data URLs, so very large sets produce a large single file.</p>
 
     <h2>Privacy & Security</h2>
     <p>Album generation runs entirely in client-side JavaScript. Your personal photo libraries and event memories remain completely confidential.</p>
@@ -90,6 +91,16 @@
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/sticker-studio.js"></script>
+<script src="/label-studio.js"></script>
+<script src="/sheet-studio.js"></script>
+<script src="/data/dmc.js"></script>
+<script src="/pattern-studio.js"></script>
+<script src="/image-studio.js"></script>
+<script src="/photo-batch-studio.js"></script>
+<script src="/album-studio.js"></script>
+<script src="/media-studio.js"></script>
+<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
