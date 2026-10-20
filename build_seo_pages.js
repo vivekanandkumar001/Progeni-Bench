@@ -380,7 +380,7 @@ function generateToolPageHtml(tool) {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -572,7 +572,7 @@ function generateHomePageHtml() {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -718,7 +718,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
