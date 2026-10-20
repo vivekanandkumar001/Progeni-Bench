@@ -32,6 +32,55 @@ const {
 // (The shared DMC floss table now lives in data/dmc.js — loaded as window.DMC_PALETTE
 // and consumed by pattern-studio.js for the cross-stitch / diamond / embroidery tools.)
 
+/*
+ * Lazily load the studio engine scripts. The home page (and every non-tool page)
+ * only pulls in site.config.js / utils.js / app.js, but the SPA router re-renders
+ * tool pages client-side. Without this loader, clicking a tool link from the home
+ * page would hit `window.StickerStudio.mount` while the studio global is undefined.
+ */
+const STUDIO_SCRIPTS = {
+  sticker: "/sticker-studio.js",
+  label: "/label-studio.js",
+  sheet: "/sheet-studio.js",
+  pattern: "/pattern-studio.js",
+  image: "/image-studio.js",
+  photobatch: "/photo-batch-studio.js",
+  album: "/album-studio.js",
+  media: "/media-studio.js",
+  subtitle: "/subtitle-studio.js",
+  dmc: "/data/dmc.js"
+};
+const loadedScripts = new Map();
+
+function loadScript(src) {
+  if (loadedScripts.has(src)) return loadedScripts.get(src);
+  // Already present in the document (studio pages preload all engines).
+  if (document.querySelector(`script[src="${src}"]`)) {
+    const done = Promise.resolve();
+    loadedScripts.set(src, done);
+    return done;
+  }
+  const p = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(s);
+  });
+  loadedScripts.set(src, p);
+  return p;
+}
+
+async function ensureStudios(...keys) {
+  // Sequential on purpose: some engines read globals defined by an earlier one at
+  // module-evaluation time (e.g. pattern-studio.js reads window.DMC_PALETTE from
+  // data/dmc.js). Promise.all would race those two and intermittently break the
+  // pattern tool. Load in order and await each before the next.
+  for (const k of keys) {
+    await loadScript(STUDIO_SCRIPTS[k]);
+  }
+}
+
 const $ = s => document.querySelector(s);
 const app = $("#app");
 
@@ -66,7 +115,10 @@ const imageFromFile = async f => {
 
 function layout({ tool, body }) {
   const related = TOOLS.filter(t => t.id !== tool.id && (t.cat === tool.cat || (["Images","Print & Craft"].includes(t.cat) && ["Images","Print & Craft"].includes(tool.cat)))).slice(0, 6);
-  
+
+  // Release any object URLs from the previous tool view before we replace #app.
+  if (app) revokeResultURLs(app);
+
   let pageTitle = `${tool.name}: Free Online, No Upload | ${SITE_NAME}`;
   if (pageTitle.length > 60) pageTitle = `${tool.name}: Free Online | ${SITE_NAME}`;
   if (pageTitle.length > 60) pageTitle = `${tool.name} | ${SITE_NAME}`;
@@ -78,32 +130,49 @@ function layout({ tool, body }) {
     canonicalEl.href = `${SITE_URL}/tools/${tool.id}/`;
   }
 
+  const faqList = (tool.faq && tool.faq.length) ? tool.faq : [];
+  const useCasesList = (tool.useCases && tool.useCases.length) ? tool.useCases : [];
+
   app.innerHTML = `
     <section class="tool-head">
       <span class="eyebrow">${esc(tool.cat)} · 100% Private Client-Side</span>
-      <h1>${esc(tool.icon)} ${esc(tool.name)}</h1>
+      <h1>${esc(tool.keyword || tool.name)}</h1>
       <p>${esc(tool.desc)} <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
     </section>
 
     <section class="toolbox">${body}</section>
 
     <!-- Rich SEO & User Guide Section -->
-    <section class="seo-section">
-      <h2>What It Does</h2>
+    <section class="seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+      <h2>What it does</h2>
       <p>${esc(tool.whatItDoes || tool.desc)}</p>
 
-      <h2>How to Use</h2>
+      ${useCasesList.length > 0 ? `
+      <h2>Common use cases</h2>
+      <ul>
+        ${useCasesList.map(u => `<li>${esc(u)}</li>`).join("")}
+      </ul>
+      ` : ""}
+
+      <h2>How to use</h2>
       <ol>
         ${(tool.howToUse || []).map(step => `<li>${esc(step)}</li>`).join("")}
       </ol>
 
-      <h2>Limitations & Scope</h2>
+      <h2>Limits & Considerations</h2>
       <p>${esc(tool.limits || "Processes standard files client-side.")}</p>
+
+      ${faqList.length > 0 ? `
+      <h2>Frequently asked questions</h2>
+      <div class="faq-list">
+        ${faqList.map(f => `<div class="faq-item" style="margin: 14px 0;"><strong>${esc(f.q)}</strong><p style="margin: 4px 0 0 0; color: var(--muted);">${esc(f.a)}</p></div>`).join("")}
+      </div>
+      ` : ""}
 
       <h2>Privacy & Security</h2>
       <p>${esc(tool.privacy || "Processed locally in your browser.")}</p>
 
-      <h3>Related Utilities</h3>
+      <h2>Related ${esc(tool.cat)} Tools</h2>
       <div class="tool-links">
         ${related.map(t => `<a href="/tools/${t.id}/">${esc(t.icon)} ${esc(t.name)}</a>`).join("")}
       </div>
@@ -111,50 +180,8 @@ function layout({ tool, body }) {
   `;
 }
 
-function home() {
-  document.title = "Progeni — 30 Free, Privacy-First Browser Tools & Utilities";
-  app.innerHTML = `
-    <section class="hero">
-      <span class="eyebrow">30 Global Utilities · 100% Private</span>
-      <h1>Free Online PDF Tools</h1>
-      <p>Merge, split, compress, convert, and edit PDFs instantly — all client-side, zero uploads.</p>
-      <div class="drop" id="drop">
-        <strong>Drop PDF files here</strong>
-        <span>or click to browse from device</span>
-        <input id="file" type="file" multiple accept=".pdf">
-      </div>
-    </section>
-
-    <section id="grid" class="grid"></section>
-  `;
-
-  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
-  $("#cats").innerHTML = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
-
-  const render = (cat = "All", q = "") => {
-    $("#grid").innerHTML = TOOLS.filter(t => (cat === "All" || t.cat === cat) && (`${t.name} ${t.desc} ${t.cat}`.toLowerCase().includes(q.toLowerCase()))).map(t => `
-      <a class="tool-card" href="/tools/${t.id}">
-        <div class="icon">${t.icon}</div>
-        <h2>${esc(t.name)}</h2>
-        <p>${esc(t.desc)}</p>
-        <span class="tag">${esc(t.cat)}</span>
-      </a>
-    `).join("") || `<div class="empty">No matching tools found.</div>`;
-  };
-
-  let cat = "All";
-  render();
-  document.querySelectorAll(".pill").forEach(b => b.onclick = () => {
-    document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
-    b.classList.add("active");
-    cat = b.dataset.cat;
-    render(cat, $("#search").value);
-  });
-  $("#search").oninput = e => render(cat, e.target.value);
-}
-
 function picker(multiple = false, accept = "*/*") {
-  return `<div class="drop" id="drop">
+  return `<div class="drop" id="drop" role="button" tabindex="0" aria-label="Choose ${multiple ? "files" : "a file"} to process">
     <strong>Drop ${multiple ? "files" : "a file"} here</strong>
     <span>or click to browse from device</span>
     <input id="file" type="file" ${multiple ? "multiple" : ""} accept="${accept}" hidden>
@@ -164,11 +191,32 @@ function picker(multiple = false, accept = "*/*") {
 function bindPicker(cb) {
   const d = $("#drop"), f = $("#file");
   if (!d || !f) return;
+  const fire = files => {
+    if (!files || !files.length) return;
+    try {
+      const r = cb(files);
+      if (r && typeof r.catch === "function") r.catch(err => console.error(err));
+    } catch (err) {
+      console.error(err);
+    }
+  };
   d.onclick = () => f.click();
+  d.onkeydown = e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); f.click(); }
+  };
   ["dragenter", "dragover"].forEach(x => d.addEventListener(x, e => { e.preventDefault(); d.classList.add("drag"); }));
   ["dragleave", "drop"].forEach(x => d.addEventListener(x, e => { e.preventDefault(); d.classList.remove("drag"); }));
-  d.addEventListener("drop", e => cb([...e.dataTransfer.files]));
-  f.onchange = () => cb([...f.files]);
+  d.addEventListener("drop", e => fire([...(e.dataTransfer ? e.dataTransfer.files : [])]));
+  f.onchange = () => fire([...f.files]);
+}
+
+function closeMobileNav() {
+  const nav = document.querySelector("nav");
+  if (nav && nav.classList.contains("open")) {
+    nav.classList.remove("open");
+    const hamburger = document.getElementById("hamburger");
+    if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+  }
 }
 
 // Mobile navigation toggle
@@ -177,10 +225,17 @@ document.getElementById("hamburger")?.addEventListener("click", () => {
   if (nav) {
     nav.classList.toggle("open");
     const hamburger = document.getElementById("hamburger");
-    if (hamburger) {
-      hamburger.setAttribute("aria-expanded", nav.classList.contains("open"));
-    }
+    if (hamburger) hamburger.setAttribute("aria-expanded", nav.classList.contains("open"));
   }
+});
+
+// Close the mobile nav on Escape or when clicking outside it.
+addEventListener("keydown", e => { if (e.key === "Escape") closeMobileNav(); });
+document.addEventListener("click", e => {
+  const nav = document.querySelector("nav");
+  if (!nav || !nav.classList.contains("open")) return;
+  if (nav.contains(e.target) || (e.target.closest && e.target.closest("#hamburger"))) return;
+  closeMobileNav();
 });
 
 function resultBox(html = "") {
@@ -198,13 +253,34 @@ function canvasBlob(canvas, type = "image/png", quality = 0.95) {
 }
 
 /* Tool Handlers */
+let processToken = 0;
 async function processTool(id, files) {
   const f = files[0];
-  let rs = $("#result");
-  if (!rs) rs = resultBox();
+  const token = ++processToken;
+  let rsReal = $("#result");
+  if (!rsReal) rsReal = resultBox();
+
+  // Guard writes so a slow earlier run can never overwrite a newer one.
+  const rs = new Proxy(rsReal, {
+    get(target, prop, recv) {
+      const val = Reflect.get(target, prop, recv);
+      if (typeof val === "function") {
+        return (...args) => {
+          if (token !== processToken) return undefined;
+          if (prop === "querySelectorAll") return val.apply(target, args);
+          return val.apply(target, args);
+        };
+      }
+      return val;
+    },
+    set(target, prop, value) {
+      if (token !== processToken) return true;
+      return Reflect.set(target, prop, value);
+    }
+  });
 
   // Show loading state
-  if (rs) {
+  if (token === processToken) {
     rs.innerHTML = `
       <div class="loading-result">
         <div class="loader">Processing...</div>
@@ -215,10 +291,22 @@ async function processTool(id, files) {
   try {
     switch (id) {
       case "bookmark-cleaner": {
-        const t = await readText(f), doc = new DOMParser().parseFromString(t, "text/html"), seen = new Set(), links = [...doc.querySelectorAll("a[href]")];
+        const t = await readText(f), doc = new DOMParser().parseFromString(t, "text/html"), links = [...doc.querySelectorAll("a[href]")];
+        // Normalize URL for comparison: strip query/fragment, lowercase host, remove www.
+        function normalizeUrl(u) {
+          try {
+            const p = new URL(u, "https://progeni.invalid");
+            p.hash = ""; p.search = "";
+            let h = p.hostname.toLowerCase();
+            if (h.startsWith("www.")) h = h.slice(4);
+            p.hostname = h;
+            return p.toString();
+          } catch (e) { return u; }
+        }
         let dup = 0;
+        const seen = new Set();
         links.forEach(a => {
-          let u = a.href;
+          let u = normalizeUrl(a.href);
           if (seen.has(u)) { a.remove(); dup++; } else { seen.add(u); }
         });
         const out = "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" + doc.documentElement.outerHTML;
@@ -234,7 +322,15 @@ async function processTool(id, files) {
           if (inside) event += l + "\n";
           if (l === "END:VEVENT") {
             inside = false;
-            const key = event.replace(/\s+/g, "");
+            // Component-aware dedupe: extract SUMMARY, DTSTART, DTEND as the key
+            const summaryMatch = event.match(/SUMMARY:[^\n]*/);
+            const dtstartMatch = event.match(/DTSTART[^:]*?:([^\n]*)/);
+            const dtendMatch = event.match(/DTEND[^:]*?:([^\n]*)/);
+            const key = [
+              (summaryMatch ? summaryMatch[0] : "").trim(),
+              (dtstartMatch ? dtstartMatch[1] : "").trim(),
+              (dtendMatch ? dtendMatch[1] : "").trim()
+            ].join("|");
             if (seen.has(key)) dup.push(event); else { seen.add(key); out.push(event); }
           }
         }
@@ -259,18 +355,31 @@ async function processTool(id, files) {
           let d = date >= 0 && r[date] ? new Date(r[date]) : nextDay(days[(r[day] || "").toLowerCase()]);
           if (!d) return;
           const [sh, sm] = (r[start] || "09:00").split(":").map(Number), [eh, em] = (r[end] || "10:00").split(":").map(Number);
-          const fmt = x => x.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-          let a = new Date(d); a.setHours(sh, sm, 0, 0);
-          let b = new Date(d); b.setHours(eh, em, 0, 0);
-          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@${hostDomain}`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
+          // ICS timezone fix: treat times as UTC so the "Z" suffix is correct.
+          // Use Date.UTC() to construct dates from year/month/day + hour:minute,
+          // then format with explicit UTC components and a trailing "Z".
+          const fmt = x => {
+            const d = new Date(x);
+            const ms = d.getMilliseconds();
+            const paddedMs = String(ms).padStart(3, "0");
+            return d.getUTCFullYear()
+              + String(d.getUTCMonth() + 1).padStart(2, "0")
+              + String(d.getUTCDate()).padStart(2, "0")
+              + "T"
+              + String(d.getUTCHours()).padStart(2, "0")
+              + String(d.getUTCMinutes()).padStart(2, "0")
+              + String(d.getUTCSeconds()).padStart(2, "0")
+              + "."
+              + paddedMs
+              + "Z";
+          };
+          let a = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), sh, sm, 0));
+          let b = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), eh, em, 0));
+          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@${hostDomain}`, `DTSTAMP:${fmt(a)}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
         });
         ics.push("END:VCALENDAR");
         rs.innerHTML = `<div class="notice">Created ${rows.length - 1} recurring calendar events from your CSV.</div><button class="btn" id="dl">Download timetable.ics</button>`;
         $("#dl").onclick = () => textDownload(ics.join("\r\n"), "timetable.ics", "text/calendar");
-        break;
-      }
-      case "sticker-sheet": case "print-layout": case "ironon-sheet": {
-        await sheetMaker(id, files, rs);
         break;
       }
       case "svg-cleaner": {
@@ -289,22 +398,20 @@ async function processTool(id, files) {
         const as = safeLinks.map(a => `<li><a href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.text)}</a></li>`).join("");
         const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Offline Reading List</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6}li{margin:10px 0}a{color:#1d4ed8;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><h1>Reading List</h1><p>Exported from Progeni.</p><ul>${as}</ul></body></html>`;
         rs.innerHTML = `<div class="notice">${safeLinks.length} valid links converted into clean offline reading list.</div><button class="btn" id="dl">Download reading-list.html</button>`;
-        // Remove loading state
-        $("#result.loading-result")?.remove();
         $("#dl").onclick = () => textDownload(out, "reading-list.html", "text/html");
         break;
       }
       case "csv-splitter": { csvTool(id, await readText(f), rs); break; }
       case "csv-date": { csvTool(id, await readText(f), rs); break; }
       case "contact-dedupe": { contactDedupe(await readText(f), rs); break; }
-      case "vcard": { vcardTool(files, rs); break; }
-      case "panorama": { panorama(f, rs); break; }
+      case "vcard": { await vcardTool(files, rs); break; }
+      case "panorama": { await panorama(f, rs); break; }
       default: rs.innerHTML = `<div class="warn">Ready for processing. Drop files to begin.</div>`;
     }
   } catch (e) {
     console.error(e);
     // Remove loading state on error
-    if (rs) rs.innerHTML = `<div class="error">${esc(e.message || e)}</div>`;
+    if (token === processToken && rs) rs.innerHTML = `<div class="error">${esc(e.message || e)}</div>`;
   }
 }
 
@@ -356,7 +463,7 @@ async function sheetMaker(id, files, rs) {
 
   rs.innerHTML = `
     ${note}
-    <img style="max-width:100%;max-height:420px;border:1px solid #cbd5e1;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
+    <img alt="Preview of the generated print sheet" style="max-width:100%;max-height:420px;border:1px solid #cbd5e1;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
     <button class="btn" id="dl">Download High-Res Print Sheet (.PNG)</button>
   `;
   $("#dl").onclick = () => downloadBlob(b, `${id}-${pSize}-sheet.png`);
@@ -433,7 +540,7 @@ async function safeZone(f, rs) {
   const b = await canvasBlob(c);
   rs.innerHTML = `
     <div class="notice">Red zones show areas obscured by <strong>${pName} UI</strong> (captions, right action buttons, header tabs). Keep critical text inside the center safe area!</div>
-    <img style="max-width:100%;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
+    <img alt="Safe-zone overlay preview for ${esc(pName)}" style="max-width:100%;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
     <button class="btn" id="dl-overlay">Download Overlay PNG</button>
   `;
   $("#dl-overlay").onclick = () => downloadBlob(b, "video-safe-zone-overlay.png");
@@ -532,6 +639,7 @@ function csvTool(id, t, rs) {
       $("#dl").onclick = () => textDownload(csvOut(out), "cleaned.csv", "text/csv");
     };
   } else {
+    // csv-date or csv-date-preview mode
     rs.innerHTML = `
       <div class="controls">
         <label>Date Column<select id="col">${h.map((x, i) => `<option value="${i}">${esc(x)}</option>`).join("")}</select></label>
@@ -541,9 +649,81 @@ function csvTool(id, t, rs) {
     `;
     $("#go").onclick = () => {
       const c = +$("#col").value, fmt = $("#fmt").value;
-      const out = rows.map((r, i) => i ? r.map((v, j) => j === c ? normalizeDate(v, fmt) : v) : r);
-      rs.insertAdjacentHTML("beforeend", `<div class="notice" style="margin-top:16px;">Dates standardized to ${fmt}.</div><div class="warn" style="margin-top:8px;">Ambiguous date warning: values with day and month <= 12 are parsed using standard format order.</div><button class="btn secondary" id="dl">Download Normalized CSV</button>`);
-      $("#dl").onclick = () => textDownload(csvOut(out), "normalized.csv", "text/csv");
+      // First pass: identify ambiguous dates (where day and month both <= 12)
+      const ambiguous = [];
+      const rowIsAmbiguous = new Map();
+      rows.slice(1).forEach((r, i) => {
+        const v = r[c] || "";
+        const m = String(v).match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+        if (m) {
+          const a = +m[1], b = +m[2]; // a could be day or month
+          if (a >= 1 && a <= 12 && b >= 1 && b <= 12) {
+            // Ambiguous: both interpretations valid
+            ambiguous.push({ rowIndex: i, original: v, val1: a, val2: b, year: m[3] });
+            rowIsAmbiguous.set(i, true);
+          }
+        }
+      });
+
+      // normalizeDate() defaults ambiguous values to US MM/DD/YYYY. When the user
+      // picks the European option we pre-swap the ambiguous cell to a canonical
+      // DD/MM/YYYY value first so the normalization honors their choice.
+      const buildOut = resolve => rows.map((r, i) => {
+        if (!i) return r;
+        return r.map((v, j) => {
+          if (j !== c) return v;
+          if (resolve === "eu" && rowIsAmbiguous.has(i)) {
+            const m = String(v).match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+            if (m) v = `${m[2]}/${m[1]}/${m[3]}`; // swap day/month -> unambiguous DMY
+          }
+          return normalizeDate(v, fmt);
+        });
+      });
+
+      const writeResult = out => {
+        const existing = $("#csv-date-out");
+        if (existing) existing.remove();
+        rs.insertAdjacentHTML("beforeend", `<div id="csv-date-out"><div class="notice" style="margin-top:16px;">Dates standardized to ${fmt}.</div><button class="btn secondary" id="dl">Download Normalized CSV</button></div>`);
+        $("#dl").onclick = () => textDownload(csvOut(out), "normalized.csv", "text/csv");
+      };
+
+      if (ambiguous.length === 0) { writeResult(buildOut("us")); return; }
+
+      // Preview + explicit choice for ambiguous dates
+      const previewHtml = `
+        <div id="ambiguous-preview" style="margin: 16px 0; padding: 12px; background: #fffbeb; border: 1px solid #f6e05e; border-radius: 8px; margin-bottom: 12px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Date Ambiguity Preview</div>
+          <p style="font-size:13px;margin-bottom:8px;">${ambiguous.length} date(s) could be parsed as either US (MM/DD/YYYY) or European (DD/MM/YYYY) format. These have day and month both ≤ 12:</p>
+          <div style="max-height:200px;overflow-y:auto;font-size:13px;background:#fff;padding:8px;border:1px solid #f6e05e;border-radius:4px;">
+            ${ambiguous.map(a => `
+              <div style="margin: 6px 0; padding: 4px; border-bottom: 1px solid #fee678;">
+                <div style="font-weight:600;margin-bottom:2px;">Row ${a.rowIndex + 1}: <code>${esc(a.original)}</code></div>
+                <div style="font-size:11px;color:#64748b;">
+                  <span style="margin-right:6px;">Parsed as US (MM/DD/YYYY): <strong>${a.val1}/${a.val2}/${a.year}</strong></span>
+                  <span style="margin-right:6px;">Parsed as European (DD/MM/YYYY): <strong>${a.val2}/${a.val1}/${a.year}</strong></span>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+          <div style="margin-top:8px;">
+            <select id="resolveAmbiguous" style="padding:4px 8px;font-size:12px;margin-right:8px;">
+              <option value="us">Apply US format (MM/DD/YYYY) to all ambiguous</option>
+              <option value="eu">Apply European format (DD/MM/YYYY) to all ambiguous</option>
+            </select>
+            <button class="btn tiny" id="confirmAmbiguous" style="font-size:11px;">Continue</button>
+          </div>
+        </div>
+      `;
+
+      const old = $("#ambiguous-preview");
+      if (old) old.remove();
+      rs.insertAdjacentHTML("afterbegin", previewHtml);
+      $("#confirmAmbiguous").onclick = () => {
+        const resolve = $("#resolveAmbiguous").value === "eu" ? "eu" : "us";
+        const preview = $("#ambiguous-preview");
+        if (preview) preview.remove();
+        writeResult(buildOut(resolve));
+      };
     };
   }
 }
@@ -565,66 +745,161 @@ async function vcardTool(files, rs) {
   const fullText = texts.join("\r\n");
   const cards = parseVCF(fullText);
 
-  rs.innerHTML = `
-    <div class="notice">Found <strong>${cards.length}</strong> valid vCard contact cards across ${files.length} file(s).</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="btn" id="dl-merge">Download All Merged (.VCF)</button>
-    </div>
-    <div style="max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;">
-      <strong style="display:block;margin-bottom:8px;font-size:13px;">Individual Contact Cards:</strong>
-      ${cards.map((c, i) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
-          <span>👤 ${esc(c.name)}</span>
-          <button class="btn secondary" style="padding:4px 10px;font-size:12px;" id="dl-card-${i}">Save .vcf</button>
-        </div>
-      `).join("")}
-    </div>
-  `;
+  // Extract and normalize phone numbers from each card
+  function extractPhone(raw) {
+    const m = raw.match(/TEL[^:]*?:(.*)/i);
+    if (!m) return null;
+    return normalizePhone(m[1].trim());
+  }
 
-  $("#dl-merge").onclick = () => textDownload(cards.map(c => c.raw).join("\r\n"), "merged-contacts.vcf", "text/vcard");
-  cards.forEach((c, i) => {
-    const btn = $(`#dl-card-${i}`);
-    if (btn) btn.onclick = () => textDownload(c.raw, `${c.name.replace(/[^a-zA-Z0-9_-]/g, "_")}.vcf`, "text/vcard");
+  cards.forEach((c, i) => { c._phone = extractPhone(c.raw); c._index = i; });
+
+  // Group cards that share a phone number (candidates for merging).
+  const groupMap = new Map();
+  cards.forEach(c => {
+    if (!c._phone) return;
+    if (!groupMap.has(c._phone)) groupMap.set(c._phone, []);
+    groupMap.get(c._phone).push(c._index);
   });
+  const dedupeGroups = [...groupMap.entries()]
+    .filter(([, members]) => members.length > 1)
+    .map(([phone, members], gi) => ({ phone, members, gi, action: "merge" }));
+
+  const render = () => {
+    rs.innerHTML = `
+      <div class="notice">Found <strong>${cards.length}</strong> valid vCard contact cards.</div>
+      ${dedupeGroups.length > 0 ? `
+        <div style="margin: 16px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Deduplication Preview</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${dedupeGroups.map(g => {
+              const keep = g.action === "merge" ? g.members[0] : null;
+              return `
+              <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+                <div style="font-size:12px;color: #64748b;margin-bottom:4px;">Duplicate group #${g.gi + 1} · shares phone ${esc(g.phone)}</div>
+                <div style="font-size:13px;margin-bottom:6px;">
+                  ${g.members.map(i => `👤 ${esc(cards[i].name)}`).join(", ")}
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="btn tiny" style="padding:4px 8px;font-size:11px;" data-act="merge" data-g="${g.gi}">Merge into one</button>
+                  <button class="btn secondary" style="padding:4px 8px;font-size:11px;" data-act="keep" data-g="${g.gi}">Keep separate</button>
+                </div>
+                <div style="font-size:11px;color:#64748b;margin-top:6px;">Action: <strong>${keep === null ? "keep separate" : `merge → keeping ${esc(cards[keep].name)}`}</strong></div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
+      ` : ""}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn" id="dl-merge">Download Merged (.VCF)</button>
+      </div>
+      <div style="max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;">
+        <strong style="display:block;margin-bottom:8px;font-size:13px;">Individual Contact Cards:</strong>
+        ${cards.map((c, i) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
+            <span>👤 ${esc(c.name)} ${c._phone ? `<span style="font-size:11px;color:#64748b;">${esc(c._phone)}</span>` : ""}</span>
+            <button class="btn secondary" style="padding:4px 10px;font-size:12px;" data-save="${i}">Save .vcf</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    rs.querySelectorAll("[data-act]").forEach(btn => {
+      btn.onclick = () => {
+        const g = dedupeGroups[+btn.dataset.g];
+        g.action = btn.dataset.act === "keep" ? "keep" : "merge";
+        render();
+      };
+    });
+    rs.querySelectorAll("[data-save]").forEach(btn => {
+      btn.onclick = () => {
+        const c = cards[+btn.dataset.save];
+        textDownload(c.raw, `${(c.name || "contact").replace(/[^a-zA-Z0-9_-]/g, "_")}.vcf`, "text/vcard");
+      };
+    });
+
+    // Merge: within a "merge" group keep the first card and drop the rest.
+    $("#dl-merge").onclick = () => {
+      const kept = new Set();
+      const dropped = new Set();
+      dedupeGroups.forEach(g => {
+        if (g.action !== "merge") return;
+        g.members.slice(1).forEach(i => dropped.add(i));
+      });
+      const merged = cards.filter(c => !dropped.has(c._index));
+      textDownload(merged.map(c => c.raw).join("\r\n"), "merged-contacts.vcf", "text/vcard");
+    };
+  };
+
+  render();
 }
 
 async function panorama(f, rs) {
   const im = await imageFromFile(f);
+  // Allow parts selection 2-6; default to 3 if no selector
   const partsEl = $("#panoramaParts");
-  const parts = partsEl ? parseInt(partsEl.value, 10) : 3;
-  const tileWidth = Math.floor(im.width / parts);
-  const tileHeight = tileWidth; // square tiles
-  const c = document.createElement("canvas"), ctx = c.getContext("2d");
-  c.width = tileWidth; c.height = tileHeight;
-  let html = `<div class="notice">Panorama split into ${parts} square carousel tiles (height = width/parts):</div>`;
-  if (tileHeight > im.height) {
-    html = `<div class="warn">Cannot yield square tiles (tile height ${tileHeight}px > image height ${im.height}px). Using rectangular tiles instead.</div>`;
+  const partsDefault = partsEl ? parseInt(partsEl.value, 10) : 3;
+  const parts = Math.max(2, Math.min(6, partsDefault || 3));
+
+  const tileW = im.width / parts;
+  const tileH = im.height / parts; // keep aspect per row; overall sheets stay rectangular
+
+  // If the user wants square tiles, compute max parts that keeps height >= width per tile
+  const requestedSquare = true;
+  let actualParts = parts;
+  let tileWidth, tileHeight;
+  if (requestedSquare) {
+    // Max parts such that tileHeight (im.height / parts) >= tileWidth (im.width / parts)
+    // i.e. parts <= sqrt(im.height / im.width * parts) ... simpler: just check if we can do square
+    const maxSquareParts = Math.floor(im.height / im.width * parts);
+    actualParts = Math.max(2, Math.min(parts, maxSquareParts > 0 ? maxSquareParts : 2));
+    tileWidth = Math.floor(im.width / actualParts);
+    tileHeight = Math.floor(im.height / actualParts);
+  } else {
+    tileWidth = Math.floor(im.width / actualParts);
+    tileHeight = Math.floor(im.height / actualParts);
   }
+
+  const c = document.createElement("canvas"), ctx = c.getContext("2d");
+
+  let html = `<div class="notice">Panorama split into <strong>${actualParts}</strong> tile${actualParts !== 1 ? "s" : ""}${
+    requestedSquare ? " (square)" : ""
+  }</strong>:</div>`;
+
+  // Check if square tiles fit
+  if (tileHeight > im.height) {
+    html = `<div class="warn">Cannot yield square tiles (tile height ${tileHeight}px > image height ${im.height}px). Using rectangular tiles with per-row aspect ratio.</div>`;
+    // Fall back to rectangular: each row gets its portion, tiles are width-justified
+    tileWidth = Math.floor(im.width / parts);
+    tileHeight = Math.floor(im.height / parts);
+  }
+
   html += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;" id="pg"></div>`;
   rs.innerHTML = html;
   const tileBlobs = [];
-  for (let i = 0; i < parts; i++) {
+  for (let i = 0; i < actualParts; i++) {
     c.width = tileWidth;
-    c.height = tileHeight > im.height ? im.height : tileHeight;
+    c.height = tileHeight;
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.drawImage(im, i * tileWidth, 0, tileWidth, c.height, 0, 0, c.width, c.height);
+    ctx.drawImage(im, i * tileWidth, 0, tileWidth, im.height, 0, 0, c.width, c.height);
     let b = await canvasBlob(c);
     tileBlobs.push(b);
     let img = document.createElement("img");
     img.src = URL.createObjectURL(b);
-    img.style.width = "30%"; img.style.borderRadius = "8px"; img.style.cursor = "pointer";
+    img.alt = `Panorama tile ${i + 1} of ${actualParts}`;
+    img.style.width = "28%"; img.style.borderRadius = "8px"; img.style.cursor = "pointer";
     img.title = `Click to download Tile ${i + 1}`;
-    img.onclick = () => downloadBlob(b, `carousel-tile-${i + 1}.png`);
+    img.onclick = () => downloadBlob(b, `panorama-tile-${i + 1}.png`);
     $("#pg").appendChild(img);
   }
   let dlAll = document.createElement("button");
   dlAll.className = "btn";
   dlAll.id = "dl-all-tiles";
-  dlAll.textContent = "Download All Tiles";
+  dlAll.textContent = `Download All ${actualParts} Tiles`;
   rs.appendChild(dlAll);
   dlAll.onclick = async () => {
     for (let i = 0; i < tileBlobs.length; i++) {
-      downloadBlob(tileBlobs[i], `carousel-tile-${i + 1}.png`);
+      downloadBlob(tileBlobs[i], `panorama-tile-${i + 1}.png`);
       await new Promise(r => setTimeout(r, 100));
     }
   };
@@ -646,41 +921,125 @@ function home() {
     canonicalEl.href = `${SITE_URL}/`;
   }
 
-  app.innerHTML = `
-    <section class="hero">
-      <span class="eyebrow">30 Global Utilities · 100% Private</span>
-      <h1>Fix everyday digital problems in seconds.</h1>
-      <p>${esc(TAGLINE)} Instant client-side tools for crafters, creators, and professionals. Make Avery labels, sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts, and convert CSVs without uploading your data to external servers.</p>
-      <input id="search" class="search" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
-      <div id="cats" class="categories"></div>
-    </section>
+  const existingGrid = $("#grid");
+  const existingSearch = $("#search");
+  const existingCats = $("#cats");
 
-    <section id="grid" class="grid"></section>
-  `;
+  const wireFilters = (searchEl, catContainer) => {
+    let cat = "All";
+    const render = (c = "All", q = "") => {
+      const qLower = q.trim().toLowerCase();
+      document.querySelectorAll("#grid .tool-card").forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const cardCat = card.dataset.cat || "";
+        const matchesCat = (c === "All" || cardCat === c);
+        const matchesQuery = (!qLower || text.includes(qLower));
+        card.style.display = (matchesCat && matchesQuery) ? "" : "none";
+      });
+    };
 
-  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
-  $("#cats").innerHTML = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+    catContainer.querySelectorAll(".pill").forEach(b => {
+      b.onclick = () => {
+        catContainer.querySelectorAll(".pill").forEach(x => {
+          x.classList.remove("active");
+          x.setAttribute("aria-pressed", "false");
+        });
+        b.classList.add("active");
+        b.setAttribute("aria-pressed", "true");
+        cat = b.dataset.cat;
+        render(cat, searchEl.value);
+      };
+    });
 
-  const render = (cat = "All", q = "") => {
-    $("#grid").innerHTML = TOOLS.filter(t => (cat === "All" || t.cat === cat) && (`${t.name} ${t.desc} ${t.cat}`.toLowerCase().includes(q.toLowerCase()))).map(t => `
-      <a class="tool-card" href="/tools/${t.id}/">
-        <div class="icon">${t.icon}</div>
-        <h2>${esc(t.name)}</h2>
-        <p>${esc(t.desc)}</p>
-        <span class="tag">${esc(t.cat)}</span>
-      </a>
-    `).join("") || `<div class="empty">No matching tools found.</div>`;
+    searchEl.oninput = e => render(cat, e.target.value);
   };
 
-  let cat = "All";
-  render();
-  document.querySelectorAll(".pill").forEach(b => b.onclick = () => {
-    document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
-    b.classList.add("active");
-    cat = b.dataset.cat;
-    render(cat, $("#search").value);
-  });
-  $("#search").oninput = e => render(cat, e.target.value);
+  if (existingGrid && existingSearch && existingCats) {
+    wireFilters(existingSearch, existingCats);
+    return;
+  }
+
+  const trustHtml = [
+    { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
+    { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
+    { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
+    { ico: "🧰", title: "30 focused utilities", body: "Crafters, creators and desk workers — labels, subtitles, CSVs, images and more." }
+  ].map(f => `
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">${f.ico}</span>
+      <div><b>${esc(f.title)}</b><span>${esc(f.body)}</span></div>
+    </div>
+  `).join("");
+
+  app.innerHTML = `
+    <section class="hero">
+      <div class="hero-inner">
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+        <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
+        <p class="hero-lede">${esc(TAGLINE)} Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
+        <div class="hero-search">
+          <label class="sr-only" for="search">Search tools</label>
+          <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+        </div>
+        <div id="cats" class="categories" role="group" aria-label="Filter tools by category"></div>
+      </div>
+    </section>
+
+    <section class="trust" aria-label="Why use ${esc(SITE_NAME)}">
+      ${trustHtml}
+    </section>
+
+    <section class="tools-section" aria-label="Browser utility grid">
+      <div class="section-head">
+        <h2>All tools</h2>
+        <p class="grid-count">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} tools</p>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <section class="privacy-band">
+      <h2>100% private, client-side architecture</h2>
+      <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, ${esc(SITE_NAME)} runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+      <div class="privacy-points">
+        <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+        <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
+        <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
+      </div>
+    </section>
+
+    <section class="category-directory">
+      <h2>Browse utilities by category</h2>
+      <p>Every utility runs 100% client-side in your web browser. Pick a category below to jump straight to a specialised file tool.</p>
+      <div class="category-blocks"></div>
+    </section>
+  `;
+
+  const categories = [...new Set(TOOLS.map(t => t.cat))];
+  $(".category-blocks").innerHTML = categories.map(cat => `
+    <div class="category-block" id="category-${esc(cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}">
+      <h3>${esc(cat)}</h3>
+      <ul>
+        ${TOOLS.filter(t => t.cat === cat).map(t => `
+          <li><a href="/tools/${t.id}/">${t.icon} ${esc(t.name)}</a> — <span class="cat-desc">${esc(t.desc.slice(0, 70))}…</span></li>
+        `).join('')}
+      </ul>
+    </div>
+  `).join("");
+
+  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
+  $("#cats").innerHTML = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${esc(c)}" aria-pressed="${i === 0 ? "true" : "false"}">${esc(c)}</button>`).join("");
+
+  $("#grid").innerHTML = TOOLS.map(t => `
+    <a class="tool-card" href="/tools/${t.id}/" data-cat="${esc(t.cat)}">
+      <span class="go" aria-hidden="true">&rarr;</span>
+      <div class="icon" aria-hidden="true">${t.icon}</div>
+      <h2>${esc(t.name)}</h2>
+      <p>${esc(t.desc)}</p>
+      <span class="tag">${esc(t.cat)}</span>
+    </a>
+  `).join("");
+
+  wireFilters($("#search"), $("#cats"));
 }
 
 function toolPage(id) {
@@ -709,8 +1068,10 @@ function toolPage(id) {
   // (live layout controls, drag-to-reorder preview, PNG/PDF/SVG export).
   if (id === "sticker-sheet") {
     layout({ tool, body: body + `<div class="studio" id="studio"></div>` });
-    const studio = window.StickerStudio.mount(document.getElementById("studio"));
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("sticker").then(() => {
+      const studio = window.StickerStudio.mount(document.getElementById("studio"));
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -718,11 +1079,13 @@ function toolPage(id) {
   // (multi-line builder, sheet preview, PNG/HTML/Print export — see docs/LABELS_PLAN.md).
   if (id === "labels") {
     layout({ tool, body: body + `<div class="studio" id="studio"></div>` });
-    const studio = window.LabelStudio.mount(document.getElementById("studio"));
-    bindPicker(files => {
-      const f = files[0];
-      if (f) readText(f).then(t => studio.addCsv(t, f.name)).catch(() => studio.addCsv("", ""));
-    });
+    ensureStudios("label").then(() => {
+      const studio = window.LabelStudio.mount(document.getElementById("studio"));
+      bindPicker(files => {
+        const f = files[0];
+        if (f) readText(f).then(t => studio.addCsv(t, f.name)).catch(() => studio.addCsv("", ""));
+      });
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -732,10 +1095,12 @@ function toolPage(id) {
   // 1.7–1.9).
   if (id === "cross-stitch" || id === "diamond-painting" || id === "embroidery") {
     layout({ tool, body: body + `<div class="studio" id="patternstudio"></div>` });
-    const studio = window.PatternStudio.mount(document.getElementById("patternstudio"), {
-      mode: id === "cross-stitch" ? "cross-stitch" : id === "diamond-painting" ? "diamond" : "embroidery"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("dmc", "pattern").then(() => {
+      const studio = window.PatternStudio.mount(document.getElementById("patternstudio"), {
+        mode: id === "cross-stitch" ? "cross-stitch" : id === "diamond-painting" ? "diamond" : "embroidery"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -745,10 +1110,12 @@ function toolPage(id) {
   // imageTransform() helper that used to serve these three was removed.
   if (id === "tshirt-mirror" || id === "print-border" || id === "wallpaper") {
     layout({ tool, body: body + `<div class="studio" id="imagestudio"></div>` });
-    const studio = window.ImageStudio.mount(document.getElementById("imagestudio"), {
-      mode: id === "tshirt-mirror" ? "mirror" : id === "print-border" ? "border" : "wallpaper"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("image").then(() => {
+      const studio = window.ImageStudio.mount(document.getElementById("imagestudio"), {
+        mode: id === "tshirt-mirror" ? "mirror" : id === "print-border" ? "border" : "wallpaper"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -758,10 +1125,12 @@ function toolPage(id) {
   // docs/TOOLS_ROADMAP.md 2.3 / 2.4).
   if (id === "duplicate-finder" || id === "best-shot") {
     layout({ tool, body: body + `<div class="studio" id="photobatch"></div>` });
-    const studio = window.PhotoBatch.mount(document.getElementById("photobatch"), {
-      mode: id === "duplicate-finder" ? "dedupe" : "best-shot"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("photobatch").then(() => {
+      const studio = window.PhotoBatch.mount(document.getElementById("photobatch"), {
+        mode: id === "duplicate-finder" ? "dedupe" : "best-shot"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -771,10 +1140,12 @@ function toolPage(id) {
   // album-studio.js). The legacy shared photoTimeline() was retired.
   if (id === "photo-timeline" || id === "family-organizer") {
     layout({ tool, body: body + `<div class="studio" id="albumstudio"></div>` });
-    const studio = window.AlbumStudio.mount(document.getElementById("albumstudio"), {
-      mode: id === "photo-timeline" ? "timeline" : "organizer"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("album").then(() => {
+      const studio = window.AlbumStudio.mount(document.getElementById("albumstudio"), {
+        mode: id === "photo-timeline" ? "timeline" : "organizer"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -785,10 +1156,12 @@ function toolPage(id) {
   // (see media-studio.js). The legacy videoThumbs() / silenceMap() were retired.
   if (id === "video-thumbnails" || id === "silence-map") {
     layout({ tool, body: body + `<div class="studio" id="mediastudio"></div>` });
-    const studio = window.MediaStudio.mount(document.getElementById("mediastudio"), {
-      mode: id === "video-thumbnails" ? "thumbs" : "silence"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("media").then(() => {
+      const studio = window.MediaStudio.mount(document.getElementById("mediastudio"), {
+        mode: id === "video-thumbnails" ? "thumbs" : "silence"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -839,9 +1212,11 @@ function toolPage(id) {
   // sticker-sheet fallbacks, but these two tools never use it anymore.
   if (id === "ironon-sheet" || id === "print-layout") {
     layout({ tool, body: body + `<div class="studio" id="sheetstudio"></div>` });
-    const studio = window.SheetStudio.mount(document.getElementById("sheetstudio"),
-      id === "ironon-sheet" ? "ironon" : "printlayout");
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("sheet").then(() => {
+      const studio = window.SheetStudio.mount(document.getElementById("sheetstudio"),
+        id === "ironon-sheet" ? "ironon" : "printlayout");
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -849,12 +1224,14 @@ function toolPage(id) {
   // shared Subtitle Studio engine — profile-based CPS/duration/line/overlap
   // audits with CSV + annotated SRT exports, plus a two-pass rewrap with a
   // diff preview and fixed-SRT download (see subtitle-studio.js).
-  if (id === "subtitle-speed" || id === "subtitle-linefix" || id === "subtitle-fix") {
+  if (id === "subtitle-speed" || id === "subtitle-linefix") {
     layout({ tool, body: body + `<div class="studio" id="subtitleapp"></div>` });
-    const studio = window.SubtitleStudio.mount(document.getElementById("subtitleapp"), {
-      mode: id === "subtitle-speed" ? "speed" : "fix"
-    });
-    bindPicker(files => studio.addFiles(files));
+    ensureStudios("subtitle").then(() => {
+      const studio = window.SubtitleStudio.mount(document.getElementById("subtitleapp"), {
+        mode: id === "subtitle-speed" ? "speed" : "fix"
+      });
+      bindPicker(files => studio.addFiles(files));
+    }).catch(err => console.error(err));
     return;
   }
 
@@ -902,34 +1279,6 @@ function toolPage(id) {
   });
 }
 
-function about(kind) {
-  const canonicalEl = document.querySelector('link[rel="canonical"]');
-  if (canonicalEl) {
-    canonicalEl.href = `${SITE_URL}/${kind}/`;
-  }
-  document.title = kind === "privacy" ? `Privacy Policy: ${SITE_NAME} Zero-Upload Guarantee` : kind === "terms" ? `Terms of Service: ${SITE_NAME} Online Utilities` : kind === "contact" ? `Contact Us: ${SITE_NAME} Support & Inquiries` : `About ${SITE_NAME}: Privacy-First Browser Tools`;
-  const title = kind === "privacy" ? "Privacy Policy" : kind === "terms" ? "Terms of Service" : kind === "contact" ? "Contact Support" : `About ${SITE_NAME}`;
-  let content = `
-    <h2>Browser-First Global Architecture</h2>
-    <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
-  `;
-  if (kind === "contact") {
-    content = `
-      <h2>Direct Email Inquiries</h2>
-      <p>For general support, feedback, and inquiries: <a href="mailto:${SUPPORT_EMAIL}" style="color:var(--brand);font-weight:700;">${SUPPORT_EMAIL}</a></p>
-    `;
-  }
-  app.innerHTML = `
-    <section class="tool-head">
-      <span class="eyebrow">${PARENT_BRAND}</span>
-      <h1>${title}</h1>
-    </section>
-    <section class="toolbox" style="line-height:1.8;">
-      ${content}
-    </section>
-  `;
-}
-
 function setActiveNav() {
   const path = location.pathname;
   document.querySelectorAll("nav a").forEach(a => {
@@ -949,15 +1298,37 @@ function route() {
   p = p.replace(/\/+$/, "") || "/";
 
   if (p === "/" || p === "") { home(); setActiveNav(); return; }
-  if (p === "/about") { about("about"); return; }
-  if (p === "/privacy") { about("privacy"); return; }
-  if (p === "/terms") { about("terms"); return; }
-  if (p === "/contact") { about("contact"); return; }
+  // Legal / info pages are fully server-rendered. Re-rendering them client-side
+  // with a single generic paragraph destroyed their real content (privacy
+  // sections, terms clauses, contact guidance). Leave the static markup in place
+  // and only sync the active nav state.
+  if (p === "/about" || p === "/privacy" || p === "/terms" || p === "/contact") {
+    setActiveNav();
+    return;
+  }
+  // The 404 document is static and must not be replaced by the homepage.
+  if (p === "/404.html" || p === "/404") { return; }
   if (p.startsWith("/tools/")) {
     const tid = p.split("/")[2];
-    if (tid) { toolPage(tid); return; }
+    if (tid) return toolPage(tid);
   }
   home();
+}
+
+function subtitleCheck(srtText) {
+  const cues = parseSRT(srtText);
+  let issues = 0;
+  const report = [];
+  cues.forEach((cue, i) => {
+    const dur = cue.end - cue.start;
+    if (dur <= 0) {
+      issues++;
+      report.push(`Cue ${i+1}: Zero duration (start=${cue.start}, end=${cue.end})`);
+    }
+  });
+  rs.innerHTML = `<div class="notice">Zero-duration cues: ${issues}/${cues.length}</div>`;
+  if (report.length) report.forEach(r => console.log(r));
+  return issues;
 }
 
 addEventListener("hashchange", route);
@@ -973,5 +1344,6 @@ document.addEventListener("click", e => {
   if (!href || href.startsWith("//") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
   e.preventDefault();
   history.pushState(null, "", href);
+  closeMobileNav();
   route();
 });

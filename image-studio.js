@@ -217,7 +217,9 @@
   /* Vector passthrough: wrap the SVG body in a <g transform="…"> group so the
      artwork is mirrored without ever rasterising it. Text in, text out. */
   function wrapSvg(svgText, mode) {
-    const src = String(svgText || "");
+    let src = String(svgText || "");
+    const U = (typeof window !== "undefined" && window.ProgeniUtils) ? window.ProgeniUtils : null;
+    if (U && typeof U.cleanSVG === "function") src = U.cleanSVG(src);
     const open = src.match(/<svg\b[^>]*>/i);
     if (!open) return src;
     const size = svgSize(src);
@@ -276,6 +278,7 @@
   };
   let uid = 0;
   let afterUrl = null;
+  let afterToken = 0;
 
   const $ = sel => (state.root ? state.root.querySelector(sel) : null);
   const $$ = sel => (state.root ? Array.from(state.root.querySelectorAll(sel)) : []);
@@ -543,9 +546,11 @@
     if (!after) return;
     if (!item) { after.removeAttribute("src"); return; }
     if (item.isSvg && state.opts.vector) {
+      afterToken++;
       afterUrl = URL.createObjectURL(new Blob([wrapSvg(item.svgText, state.opts.axis)], { type: "image/svg+xml" }));
       after.src = afterUrl;
     } else if (item.img) {
+      const myToken = ++afterToken;
       const c = document.createElement("canvas");
       c.width = item.w; c.height = item.h;
       const ctx = c.getContext("2d");
@@ -554,7 +559,15 @@
       ctx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
       ctx.drawImage(item.img, 0, 0, c.width, c.height);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      after.src = c.toDataURL("image/png");
+      // Prefer a blob URL over a full-resolution data URL (avoids a large
+      // synchronous base64 encode on every option change).
+      c.toBlob(blob => {
+        if (myToken !== afterToken) return; // a newer render superseded this one
+        if (!blob) { after.src = c.toDataURL("image/png"); return; }
+        if (afterUrl) { URL.revokeObjectURL(afterUrl); afterUrl = null; }
+        afterUrl = URL.createObjectURL(blob);
+        after.src = afterUrl;
+      }, "image/png");
     } else {
       after.removeAttribute("src");
     }

@@ -228,6 +228,48 @@ test.describe('Progeni E2E Browser Suite', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('REG: SPA navigation from home page loads studio tools without crashes (no console errors)', async ({ page }) => {
+    const consoleErrors = [];
+    page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+    page.on('pageerror', err => consoleErrors.push(err.message));
+
+    await page.goto('/');
+    // Click a studio tool link on the homepage grid (e.g. sticker sheet)
+    const sticker = page.locator('a.tool-card[href="/tools/sticker-sheet/"]');
+    await expect(sticker).toBeVisible();
+    await sticker.click();
+    await expect(page).toHaveURL(/.*\/tools\/sticker-sheet\/$/);
+    await expect(page.locator('#app')).toBeVisible();
+    await expect(page.locator('.toolbox')).toBeVisible();
+    // Studio either mounts or at least shows its container / picker
+    await expect(page.locator('.studio, #studio, .drop')).toBeVisible();
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('REG: 404 page leaves static content intact and shows app (not home rewrite)', async ({ page }) => {
+    await page.goto('/non-existent-page-xyz');
+    await expect(page).toHaveURL(/.*\/non-existent-page-xyz/);
+    // When built, 404 is served at /404.html; but in this SPA context the static
+    // file content is still present in the document when loaded directly? Or
+    // we test the 404.html behavior via the SPA fallback — the route guard
+    // should prevent rewriting.
+    await expect(page.locator('body')).toBeVisible();
+    // The 404 page should contain the 404 heading
+    const html = await page.innerHTML('body');
+    expect(html).toContain('Page Not Found');
+  });
+
+  test('REG: legal/info pages are not rewritten client-side (static content preserved)', async ({ page }) => {
+    const paths = ['/privacy/', '/terms/'];
+    for (const p of paths) {
+      await page.goto(p);
+      const text = await page.textContent('body');
+      // Assert key phrases from the generated static pages
+      if (p.includes('privacy')) expect(text).toContain('Zero-Upload Guarantee');
+      if (p.includes('terms')) expect(text).toContain('Terms of Service');
+    }
+  });
+
   test('E12: View-source style check: raw HTML contains JSON-LD, h1, and body text without JS', async ({ request }) => {
     const res = await request.get('/tools/bookmark-cleaner/');
     expect(res.status()).toBe(200);

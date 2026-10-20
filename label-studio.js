@@ -160,6 +160,16 @@
       const seqM = nk.match(/^seq(?::(\d+))?$/i);
       if (seqM) return padNum(idx + 1, clamp(parseInt(seqM[1], 10) || 1, 1, 10));
       if (/^seqtotal$/i.test(nk)) return String(total);
+      if (key.startsWith("qr:")) {
+        // {{qr:data}} - QR code token; render as placeholder if no library
+        if (unresolved) unresolved.add(key);
+        return "[QR]";
+      }
+      if (key.startsWith("code128:")) {
+        // {{code128:data}} - Code128 barcode token; render as placeholder
+        if (unresolved) unresolved.add(key);
+        return "[Barcode]";
+      }
       if (!row) return ""; // manual mode: tokens collapse, literal text stays
       const i = headerIndex(headers, key);
       if (i < 0) { if (unresolved && !unresolved.has(key)) unresolved.add(key); return ""; }
@@ -367,12 +377,15 @@
 
   function sheetCss(scope, family) {
     const s = scope ? scope + " " : "";
+    // Guard against CSS injection: font-family may originate from an imported
+    // preset. Keep only safe family-list characters and forbid braces/semicolons.
+    const safeFamily = String(family == null ? "" : family).replace(/[^A-Za-z0-9 \-_,'"\.]/g, "").slice(0, 200) || "sans-serif";
     return s + "*{margin:0;padding:0;box-sizing:border-box}\n" +
       s + ".sheet{position:relative;background:#fff;overflow:hidden;page-break-after:always;break-after:page}\n" +
       s + ".sheet:last-child{page-break-after:auto;break-after:auto}\n" +
       s + ".lbl{position:absolute;overflow:hidden}\n" +
       s + ".lbl.g{outline:0.25mm dashed #94a3b8;outline-offset:-0.25mm}\n" +
-      s + ".ln{position:absolute;white-space:pre;line-height:1.05;overflow:hidden;font-family:" + family + "}";
+      s + ".ln{position:absolute;white-space:pre;line-height:1.05;overflow:hidden;font-family:" + safeFamily + "}";
   }
 
   function renderHtml(L, opts) {
@@ -721,7 +734,9 @@
       shown.map(h => '<button type="button" class="lbl-chip" data-tok="' + esc("{{" + h + "}}") + '">' + esc(h) + "</button>").join("") +
       (state.headers.length > 30 ? '<span class="lbl-hint">+' + (state.headers.length - 30) + " more</span>" : "") +
       '<button type="button" class="lbl-chip" data-tok="{{seq}}"># seq</button>' +
-      '<button type="button" class="lbl-chip" data-tok="{{seqTotal}}">of seqTotal</button>';
+      '<button type="button" class="lbl-chip" data-tok="{{seqTotal}}">of seqTotal</button>' +
+      '<button type="button" class="lbl-chip" data-tok="{{qr:}}">QR</button>' +
+      '<button type="button" class="lbl-chip" data-tok="{{code128:}}">Bar</button>';
     box.querySelectorAll("[data-tok]").forEach(b => {
       b.onclick = () => insertToken(b.dataset.tok);
     });

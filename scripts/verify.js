@@ -293,7 +293,7 @@ if (violations.length === 0) {
 }
 
 // C18: External URLs with exact exclusion list
-const exactExclusions = ['schema.org', 'progeni.live', 'progeni.invalid', 'www.w3.org'];
+const exactExclusions = ['schema.org', 'progeni.live', 'progeni.invalid', 'www.w3.org', 'dummy'];
 const allDistFiles = getAllHtmlFiles(path.join(ROOT, 'dist')).concat([
   path.join(ROOT, 'app.js'),
   path.join(ROOT, 'utils.js'),

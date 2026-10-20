@@ -1012,13 +1012,14 @@
         // sub-rect centre must land at (0,0) of the translated group
         const offX = -(sx + sw / 2) * s, offY = -(sy + sh / 2) * s;
         defs.push(`<clipPath id="stclip${pageIndex}_${i}">${svgShape(artX, artY, g.art, g.art, o.shape, 0)}</clipPath>`);
+        const href = /^data:image\//i.test(it.url || "") ? it.url.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
         const flip = `scale(${it.flipX ? -1 : 1},${it.flipY ? -1 : 1})`;
         body.push(
           `<g clip-path="url(#stclip${pageIndex}_${i})">` +
           `<g transform="translate(${cx.toFixed(1)},${cy.toFixed(1)})">` +
           `<g transform="rotate(${it.rot || 0}) ${flip}">` +
           `<image x="${offX.toFixed(1)}" y="${offY.toFixed(1)}" width="${dw.toFixed(1)}" height="${dh.toFixed(1)}" ` +
-          `preserveAspectRatio="none" href="${it.url}"/>` +
+          `preserveAspectRatio="none" href="${href}"/>` +
           `</g></g></g>`
         );
       }
@@ -1114,7 +1115,7 @@ ${body.join("\n")}
       fill.style.width = Math.round(done / list.length * 100) + "%";
       label.textContent = `Loading image ${done} of ${list.length}…`;
     };
-    Promise.all(list.map(f =>
+    Promise.allSettled(list.map(f =>
       readDataURL(f).then(async url => {
         const img = await loadImage(url);
         if (!img.naturalWidth) throw new Error(`"${f.name}" has no usable pixel data`);
@@ -1128,11 +1129,17 @@ ${body.join("\n")}
         tick();
         return item;
       })
-    )).then(loaded => {
+    )).then(results => {
       prog.hidden = true;
+      const loaded = results.filter(r => r.status === "fulfilled").map(r => r.value);
+      const failed = results.length - loaded.length;
       state.items.push(...loaded);
       commit();
       render();
+      if (failed > 0 && loaded.length === 0) {
+        const first = results.find(r => r.status === "rejected");
+        showHintError(first ? (first.reason && first.reason.message) || String(first.reason) : "No images could be loaded");
+      }
     }).catch(e => {
       prog.hidden = true;
       showHintError(e.message || String(e));

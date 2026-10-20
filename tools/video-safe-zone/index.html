@@ -12,17 +12,25 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/video-safe-zone/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:alt" content="Progeni Bench - free, private browser tools">
+  <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Video Safe-Zone Checker: Free Online Tool | Progeni Bench">
+  <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/video-safe-zone/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Video Safe-Zone Checker","url":"https://bench.progeni.live/tools/video-safe-zone/","description":"Preview TikTok, Reels, and Shorts safe zones in your browser. Check video text overlays against social media UI with zero file uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Audio & Video","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Video Safe-Zone Checker","item":"https://bench.progeni.live/tools/video-safe-zone/"}]}]}</script>
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Video Safe-Zone Checker","url":"https://bench.progeni.live/tools/video-safe-zone/","description":"Preview TikTok, Reels, and Shorts safe zones in your browser. Check video text overlays against social media UI with zero file uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Audio & Video","item":"https://bench.progeni.live/#category-audio-video"},{"@type":"ListItem","position":3,"name":"Video Safe-Zone Checker","item":"https://bench.progeni.live/tools/video-safe-zone/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does this tool upload my video clips to a server for processing?","acceptedAnswer":{"@type":"Answer","text":"No. Video frames and stills are decoded entirely inside your browser using the HTML5 Video element and Canvas API without transmitting any video bytes."}},{"@type":"Question","name":"Can I inspect both still images and MP4/WebM video files?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can upload video files to scrub and capture frames directly, or drag-and-drop vertical JPEG/PNG graphics to test overlay margins."}},{"@type":"Question","name":"Are the platform UI overlays kept up to date?","acceptedAnswer":{"@type":"Answer","text":"Yes. The overlay templates reflect modern mobile user interface elements for TikTok, Instagram Reels, and YouTube Shorts."}}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -49,9 +57,18 @@
     </section>
   </noscript>
 
-  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
     <p>Overlays precise 9:16 vertical safe zone boundaries for TikTok, Instagram Reels, and YouTube Shorts over your videos or frame grabs. Highlights critical obstruction zones where usernames, engagement action buttons (likes, shares, comments), audio discs, and captions cover screen content.</p>
+
+    
+    <h2>Common use cases</h2>
+    <ul>
+      <li>TikTok UI Overlay Testing: Inspect 9:16 vertical video frames against TikTok's profile button, description, and audio disc safe margins.</li>
+      <li>Instagram Reels Caption Checking: Verify that lower-third titles and captions are not obscured by Reel comment icons and bottom navigation bars.</li>
+      <li>YouTube Shorts Title Alignment: Ensure critical subject matter and subtitles stay inside the visible window across various mobile screen aspect ratios.</li>
+    </ul>
+    
 
     <h2>How to use</h2>
     <ol>
@@ -63,6 +80,15 @@
 
     <h2>Limits & Considerations</h2>
     <p>Extracts and evaluates representative video frames for UI alignment. Does not re-render, compress, or re-encode full multi-minute video streams.</p>
+
+    
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item" style="margin: 14px 0;"><strong>Does this tool upload my video clips to a server for processing?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">No. Video frames and stills are decoded entirely inside your browser using the HTML5 Video element and Canvas API without transmitting any video bytes.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>Can I inspect both still images and MP4/WebM video files?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. You can upload video files to scrub and capture frames directly, or drag-and-drop vertical JPEG/PNG graphics to test overlay margins.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>Are the platform UI overlays kept up to date?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. The overlay templates reflect modern mobile user interface elements for TikTok, Instagram Reels, and YouTube Shorts.</p></div>
+    </div>
+    
 
     <h2>Privacy & Security</h2>
     <p>Video frames are extracted locally using HTML5 Video elements and Canvas. Video files never travel across the network to external servers.</p>
@@ -77,6 +103,17 @@
         <li><a href="/tools/labels/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">📦 Avery 5160 / Label Maker</a></li>
       </ul>
     </div>
+
+    <h2>Browse All Audio & Video Tools</h2>
+    <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of audio & video tools:</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+      <a href="/tools/video-thumbnails/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🎞️ Video Thumbnail Contact Sheet</a>
+      <a href="/tools/audio-chapters/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🎧 Chapter Timestamp Formatter</a>
+      <a href="/tools/silence-map/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🔇 Podcast Silence Map</a>
+    </div>
   </article>
 </main>
 
@@ -88,19 +125,125 @@
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
+  
+  <div class="footer-directory">
+    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="category-blocks">
+      
+        <div class="category-block">
+          <h3>Print & Craft</h3>
+          <ul>
+            
+              <li><a href="/tools/sticker-sheet/">🏷️ Sticker Sheet Maker</a></li>
+            
+              <li><a href="/tools/labels/">📦 Avery 5160 / Label Maker</a></li>
+            
+              <li><a href="/tools/tshirt-mirror/">👕 T-Shirt Print Mirror</a></li>
+            
+              <li><a href="/tools/ironon-sheet/">🧲 Iron-on Transfer Sheet Maker</a></li>
+            
+              <li><a href="/tools/print-layout/">🖨️ Print Layout Optimizer</a></li>
+            
+              <li><a href="/tools/print-border/">📐 Photo Print Border Calculator</a></li>
+            
+              <li><a href="/tools/cross-stitch/">🧵 Cross-Stitch Pattern Maker</a></li>
+            
+              <li><a href="/tools/diamond-painting/">💎 Diamond Painting Pattern Maker</a></li>
+            
+              <li><a href="/tools/embroidery/">🪡 Embroidery Pattern Simplifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Audio & Video</h3>
+          <ul>
+            
+              <li><a href="/tools/video-safe-zone/">📱 Video Safe-Zone Checker</a></li>
+            
+              <li><a href="/tools/video-thumbnails/">🎞️ Video Thumbnail Contact Sheet</a></li>
+            
+              <li><a href="/tools/audio-chapters/">🎧 Chapter Timestamp Formatter</a></li>
+            
+              <li><a href="/tools/silence-map/">🔇 Podcast Silence Map</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Text & Subtitles</h3>
+          <ul>
+            
+              <li><a href="/tools/subtitle-speed/">💬 Subtitle Reading-Speed Checker</a></li>
+            
+              <li><a href="/tools/subtitle-linefix/">📝 Subtitle Line-Break Fixer</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Data</h3>
+          <ul>
+            
+              <li><a href="/tools/contact-dedupe/">👥 Contact CSV Deduplicator</a></li>
+            
+              <li><a href="/tools/csv-splitter/">↔️ CSV Column Splitter</a></li>
+            
+              <li><a href="/tools/csv-date/">📆 CSV Date Normalizer</a></li>
+            
+              <li><a href="/tools/vcard/">📇 vCard (VCF) Split & Merge</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Files</h3>
+          <ul>
+            
+              <li><a href="/tools/bookmark-cleaner/">🔖 Chrome Bookmark Cleaner</a></li>
+            
+              <li><a href="/tools/bookmark-reading/">📚 Bookmark → Reading List</a></li>
+            
+              <li><a href="/tools/svg-cleaner/">✦ SVG Cleanup & Minifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Productivity</h3>
+          <ul>
+            
+              <li><a href="/tools/calendar-cleaner/">📅 iCal Calendar Deduplicator</a></li>
+            
+              <li><a href="/tools/timetable-calendar/">🗓️ Timetable → Calendar (.ics)</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Images</h3>
+          <ul>
+            
+              <li><a href="/tools/wallpaper/">🖼️ Wallpaper Photo Cropper</a></li>
+            
+              <li><a href="/tools/panorama/">🌄 Panorama Carousel Splitter</a></li>
+            
+              <li><a href="/tools/duplicate-finder/">♻️ Photo Duplicate Finder</a></li>
+            
+              <li><a href="/tools/best-shot/">✨ Photo Best-Shot Finder</a></li>
+            
+              <li><a href="/tools/photo-timeline/">🕒 Photo Timeline Builder</a></li>
+            
+              <li><a href="/tools/family-organizer/">🗂️ Family Photo Date Organizer</a></li>
+            
+          </ul>
+        </div>
+      
+    </div>
+  </div>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
-<script src="/sticker-studio.js"></script>
-<script src="/label-studio.js"></script>
-<script src="/sheet-studio.js"></script>
-<script src="/data/dmc.js"></script>
-<script src="/pattern-studio.js"></script>
-<script src="/image-studio.js"></script>
-<script src="/photo-batch-studio.js"></script>
-<script src="/album-studio.js"></script>
-<script src="/media-studio.js"></script>
-<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

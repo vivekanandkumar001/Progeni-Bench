@@ -6,7 +6,13 @@
   "scripts": {
     "build": "node build_seo_pages.js",
     "test": "node --test",
-    "start": "python3 -m http.server 3000 --directory dist"
+    "test:e2e": "playwright test",
+    "verify": "node scripts/verify.js",
+    "start": "node scripts/serve.js 3000 dist",
+    "serve": "node scripts/serve.js 3000 dist"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

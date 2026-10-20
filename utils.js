@@ -138,6 +138,9 @@
         throw new Error("Invalid SVG document");
       }
       const dangerousTags = ["script", "foreignobject", "iframe", "object", "embed"];
+      // Collapse whitespace/control characters before scheme checks so that
+      // obfuscated values such as "java\tscript:" or "  javascript:" are caught.
+      const normalizeVal = v => String(v).replace(/[\u0000-\u0020]+/g, "").toLowerCase();
       Array.from(doc.querySelectorAll("*")).forEach(function (el) {
         const tag = el.tagName.toLowerCase();
         if (dangerousTags.includes(tag)) {
@@ -146,15 +149,22 @@
         }
         Array.from(el.attributes).forEach(function (attr) {
           const name = attr.name.toLowerCase();
-          const val = attr.value.trim().toLowerCase();
+          const val = normalizeVal(attr.value);
           if (name.startsWith("on")) {
             el.removeAttribute(attr.name);
-          } else if ((name === "href" || name === "xlink:href") && (val.startsWith("javascript:") || val.startsWith("data:text/html") || val.startsWith("data:image/svg+xml"))) {
+          } else if ((name === "href" || name === "xlink:href") && (val.startsWith("javascript:") || val.startsWith("data:text/html") || val.startsWith("data:image/svg+xml") || val.startsWith("vbscript:"))) {
+            el.removeAttribute(attr.name);
+          } else if (name === "style" && (val.includes("javascript:") || val.includes("expression(") || val.includes("@import"))) {
             el.removeAttribute(attr.name);
           } else if (name.startsWith("inkscape:") || name.startsWith("sodipodi:") || name.startsWith("sketch:")) {
             el.removeAttribute(attr.name);
           }
         });
+      });
+      // <style> blocks can smuggle @import / url() payloads.
+      Array.from(doc.querySelectorAll("style")).forEach(function (st) {
+        const css = normalizeVal(st.textContent || "");
+        if (css.includes("javascript:") || css.includes("expression(") || css.includes("@import")) st.remove();
       });
       const serializer = new XMLSerializer();
       return serializer.serializeToString(doc.documentElement).trim();
@@ -310,6 +320,29 @@
     return null;
   }
 
+  function normalizePhone(n) {
+    if (!n) return "";
+    const s = String(n).replace(/\D/g, "");
+    // US/Canada: 1 + 10 digits -> (NXX) NXX-XXXX
+    // International: keep as-is with plus
+    if (s.length === 11 && s[0] === "1") s = s.slice(1);
+    if (s.length === 10) {
+      return "(" + s.slice(0, 3) + ") " + s.slice(3, 6) + "-" + s.slice(6);
+    }
+    if (s.length > 0 && s[0] === "+") return "+" + s.slice(1).replace(/\D/g, "").match(/^(\d{1,3})(\d{3})(\d{3})(\d{4})/) ? "+$1 $2 $3-$4" : "+" + s.slice(1);
+    return s;
+  }
+
+  function formatPhone(n) {
+    if (!n) return "";
+    // Strip to digits only
+    const s = String(n).replace(/\D/g, "");
+    if (s.length === 10) return "(" + s.slice(0, 3) + ") " + s.slice(3, 6) + "-" + s.slice(6);
+    if (s.length === 11 && s[0] === "1") return "(" + s.slice(1, 4) + ") " + s.slice(4, 7) + "-" + s.slice(7, 10);
+    if (s.length > 0 && s[0] === "+") return "+" + s.slice(1).replace(/\D/g, "").match(/^(\d{1,3})(\d{3})(\d{3})(\d{4})/) ? "+$1 $2 $3-$4" : "+" + s.slice(1);
+    return s;
+  }
+
   return {
     esc: esc,
     csvParse: csvParse,
@@ -320,6 +353,8 @@
     cleanSVG: cleanSVG,
     parseVCF: parseVCF,
     normalizeDate: normalizeDate,
+    normalizePhone: normalizePhone,
+    formatPhone: formatPhone,
     pad2: pad2,
     pad4: pad4,
     fmtTimeHMSms: fmtTimeHMSms,

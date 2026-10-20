@@ -29,20 +29,8 @@ function crc32(buf) {
   return (crc ^ (-1)) >>> 0;
 }
 
-// Encodes raw RGB pixels (drawn via a setPx callback) into a PNG buffer
-function encodePng(width, height, drawFn) {
-  const rowSize = 1 + width * 3;
-  const rawData = Buffer.alloc(rowSize * height);
-  for (let y = 0; y < height; y++) rawData[y * rowSize] = 0; // scanline filter: none
-  const setPx = (x, y, r, g, b) => {
-    if (x < 0 || y < 0 || x >= width || y >= height) return;
-    const p = y * rowSize + 1 + x * 3;
-    rawData[p] = r;
-    rawData[p + 1] = g;
-    rawData[p + 2] = b;
-  };
-  drawFn(setPx, width, height);
-  const compressed = zlib.deflateSync(rawData);
+// Assembles a PNG buffer from already-deflated raw scanline data.
+function assemblePng(width, height, compressed, colorType) {
   function chunk(type, data) {
     const len = Buffer.alloc(4);
     len.writeUInt32BE(data.length, 0);
@@ -56,12 +44,69 @@ function encodePng(width, height, drawFn) {
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(width, 0);
   ihdrData.writeUInt32BE(height, 4);
-  ihdrData[8] = 8;
-  ihdrData[9] = 2;
+  ihdrData[8] = 8;          // bit depth
+  ihdrData[9] = colorType;  // 2 = RGB, 6 = RGBA
   ihdrData[10] = 0;
   ihdrData[11] = 0;
   ihdrData[12] = 0;
   return Buffer.concat([signature, chunk('IHDR', ihdrData), chunk('IDAT', compressed), chunk('IEND', Buffer.alloc(0))]);
+}
+
+// Encodes raw RGB pixels (drawn via a setPx callback) into a PNG buffer
+function encodePng(width, height, drawFn) {
+  const rowSize = 1 + width * 3;
+  const rawData = Buffer.alloc(rowSize * height);
+  const setPx = (x, y, r, g, b) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return;
+    const p = y * rowSize + 1 + x * 3;
+    rawData[p] = r;
+    rawData[p + 1] = g;
+    rawData[p + 2] = b;
+  };
+  drawFn(setPx, width, height);
+  return assemblePng(width, height, zlib.deflateSync(rawData), 2);
+}
+
+// Encodes raw RGBA pixels (drawn via a setPx callback with alpha) into a PNG
+// buffer. Used for favicons so the rounded tile has a transparent surround.
+function encodePngRGBA(width, height, drawFn) {
+  const rowSize = 1 + width * 4;
+  const rawData = Buffer.alloc(rowSize * height);
+  const setPx = (x, y, r, g, b, a) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return;
+    const p = y * rowSize + 1 + x * 4;
+    rawData[p] = r;
+    rawData[p + 1] = g;
+    rawData[p + 2] = b;
+    rawData[p + 3] = a;
+  };
+  drawFn(setPx, width, height);
+  return assemblePng(width, height, zlib.deflateSync(rawData), 6);
+}
+
+// Wraps one or more PNG buffers into a .ico container. Modern browsers (and
+// Googlebot) accept PNG-compressed ICO entries, so we embed the PNGs directly.
+function encodeIco(entries) {
+  const count = entries.length;
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(count, 4);
+  const dir = Buffer.alloc(16 * count);
+  let offset = 6 + 16 * count;
+  entries.forEach((e, i) => {
+    const o = i * 16;
+    dir[o] = e.size >= 256 ? 0 : e.size;
+    dir[o + 1] = e.size >= 256 ? 0 : e.size;
+    dir[o + 2] = 0;                // palette size
+    dir[o + 3] = 0;                // reserved
+    dir.writeUInt16LE(1, o + 4);   // colour planes
+    dir.writeUInt16LE(32, o + 6);  // bits per pixel
+    dir.writeUInt32LE(e.png.length, o + 8);
+    dir.writeUInt32LE(offset, o + 12);
+    offset += e.png.length;
+  });
+  return Buffer.concat([header, dir, ...entries.map(e => e.png)]);
 }
 
 function pointInPoly(px, py, poly) {
@@ -107,6 +152,55 @@ function drawBrandMark(setPx, width, height) {
   }
 }
 
+// Favicon art: transparent surround + a full-bleed rounded brand-blue tile with
+// a white bolt. Supersampled 2x2 for smooth edges at small sizes.
+function drawFaviconMark(setPx, width, height) {
+  const brand = [29, 78, 216];
+  const white = [255, 255, 255];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) setPx(x, y, 0, 0, 0, 0);
+  }
+
+  const pad = Math.max(0, Math.round(width * 0.03));
+  const tile = width - pad * 2;
+  const half = tile / 2;
+  const rad = tile * 0.22;
+  const inner = half - rad;
+  const bolt = [
+    [0.58, 0.16], [0.33, 0.55], [0.49, 0.55],
+    [0.33, 0.85], [0.67, 0.45], [0.50, 0.45]
+  ];
+
+  for (let y = 0; y < tile; y++) {
+    for (let x = 0; x < tile; x++) {
+      let hits = 0;
+      let boltHits = 0;
+      for (let sy = 0; sy < 2; sy++) {
+        for (let sx = 0; sx < 2; sx++) {
+          const px = x + (sx + 0.5) / 2;
+          const py = y + (sy + 0.5) / 2;
+          const qx = Math.abs(px - half) - inner;
+          const qy = Math.abs(py - half) - inner;
+          const dx = Math.max(qx, 0);
+          const dy = Math.max(qy, 0);
+          if (Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) > rad) continue;
+          hits++;
+          if (pointInPoly(px / tile, py / tile, bolt)) boltHits++;
+        }
+      }
+      if (!hits) continue;
+      const w = boltHits / hits;
+      setPx(
+        pad + x, pad + y,
+        Math.round(brand[0] * (1 - w) + white[0] * w),
+        Math.round(brand[1] * (1 - w) + white[1] * w),
+        Math.round(brand[2] * (1 - w) + white[2] * w),
+        Math.round((hits / 4) * 255)
+      );
+    }
+  }
+}
+
 const assetsDir = path.join(baseDir, 'assets');
 const distAssetsDir = path.join(distDir, 'assets');
 if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
@@ -119,11 +213,34 @@ fs.writeFileSync(path.join(distAssetsDir, 'og-image.png'), ogPng);
 fs.writeFileSync(path.join(assetsDir, 'apple-touch-icon.png'), iconPng);
 fs.writeFileSync(path.join(distAssetsDir, 'apple-touch-icon.png'), iconPng);
 
+// Raster favicons. Google Search does NOT support SVG favicons — it accepts
+// BMP/GIF/ICO/PNG/JPEG/PPM/TIFF and wants a square that is a multiple of 48px,
+// so we ship 48/96/192/512 PNGs plus a /favicon.ico fallback for browsers.
+const faviconSizes = [48, 96, 192, 512];
+const faviconPngs = {};
+faviconSizes.forEach(size => {
+  const png = encodePngRGBA(size, size, drawFaviconMark);
+  faviconPngs[size] = png;
+  fs.writeFileSync(path.join(assetsDir, `favicon-${size}.png`), png);
+  fs.writeFileSync(path.join(distAssetsDir, `favicon-${size}.png`), png);
+});
+
+// /favicon.ico — classic fallback requested by browsers and used by Googlebot.
+// Embed 16/32/48 PNG entries (48 satisfies Google's "multiple of 48" rule).
+const faviconIco = encodeIco([
+  { size: 16, png: encodePngRGBA(16, 16, drawFaviconMark) },
+  { size: 32, png: encodePngRGBA(32, 32, drawFaviconMark) },
+  { size: 48, png: faviconPngs[48] }
+]);
+fs.writeFileSync(path.join(baseDir, 'favicon.ico'), faviconIco);
+fs.writeFileSync(path.join(distDir, 'favicon.ico'), faviconIco);
+
 function getToolTitle(tool) {
   let title = `${tool.name}: Free Online, No Upload | ${SITE_NAME}`;
   if (title.length > 60) title = `${tool.name}: Free Online Tool | ${SITE_NAME}`;
-  if (title.length > 60) title = `${tool.name}: Free Online, No Upload`;
+  if (title.length > 60) title = `${tool.name}: Free Online | ${SITE_NAME}`;
   if (title.length > 60) title = `${tool.name} | ${SITE_NAME}`;
+  if (title.length > 60) title = tool.name.slice(0, 60);
   return title;
 }
 
@@ -134,59 +251,100 @@ function getRelatedTools(currentTool) {
   return selected;
 }
 
+function getFooterDirectoryHtml() {
+  const categories = [...new Set(TOOLS.map(t => t.cat))];
+  return `
+  <div class="footer-directory">
+    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="category-blocks">
+      ${categories.map(cat => `
+        <div class="category-block">
+          <h3>${cat}</h3>
+          <ul>
+            ${TOOLS.filter(t => t.cat === cat).map(t => `
+              <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a></li>
+            `).join('')}
+          </ul>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
 function generateToolPageHtml(tool) {
   const title = getToolTitle(tool);
   const canonicalUrl = `${SITE_URL}/tools/${tool.id}/`;
   const related = getRelatedTools(tool);
+  const faq = tool.faq || [];
+  const useCases = tool.useCases || [];
+  const catSlug = tool.cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  const graph = [
+    {
+      "@type": "WebApplication",
+      "name": tool.name,
+      "url": canonicalUrl,
+      "description": tool.seoDesc,
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires modern JavaScript-enabled web browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "isAccessibleForFree": true,
+      "provider": {
+        "@type": "Organization",
+        "name": PARENT_BRAND,
+        "url": PARENT_URL
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": `${SITE_URL}/`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": tool.cat,
+          "item": `${SITE_URL}/#category-${catSlug}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": tool.name,
+          "item": canonicalUrl
+        }
+      ]
+    }
+  ];
+
+  if (faq.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      "mainEntity": faq.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.a
+        }
+      }))
+    });
+  }
 
   const schema = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebApplication",
-        "name": tool.name,
-        "url": canonicalUrl,
-        "description": tool.seoDesc,
-        "applicationCategory": "UtilitiesApplication",
-        "operatingSystem": "Any",
-        "browserRequirements": "Requires modern JavaScript-enabled web browser",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "INR"
-        },
-        "isAccessibleForFree": true,
-        "provider": {
-          "@type": "Organization",
-          "name": PARENT_BRAND,
-          "url": PARENT_URL
-        }
-      },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": `${SITE_URL}/`
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": tool.cat,
-            "item": `${SITE_URL}/`
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": tool.name,
-            "item": canonicalUrl
-          }
-        ]
-      }
-    ]
+    "@graph": graph
   };
+
+  const footerDir = getFooterDirectoryHtml();
 
   return `<!doctype html>
 <html lang="${LOCALE}">
@@ -202,9 +360,17 @@ function generateToolPageHtml(tool) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
+  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="${canonicalUrl}">
@@ -212,7 +378,7 @@ function generateToolPageHtml(tool) {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -239,9 +405,16 @@ function generateToolPageHtml(tool) {
     </section>
   </noscript>
 
-  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
     <p>${tool.whatItDoes}</p>
+
+    ${useCases.length > 0 ? `
+    <h2>Common use cases</h2>
+    <ul>
+      ${useCases.map(u => `<li>${u}</li>`).join('\n      ')}
+    </ul>
+    ` : ''}
 
     <h2>How to use</h2>
     <ol>
@@ -251,6 +424,13 @@ function generateToolPageHtml(tool) {
     <h2>Limits & Considerations</h2>
     <p>${tool.limits}</p>
 
+    ${faq.length > 0 ? `
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      ${faq.map(f => `<div class="faq-item" style="margin: 14px 0;"><strong>${f.q}</strong><p style="margin: 4px 0 0 0; color: var(--muted);">${f.a}</p></div>`).join('\n      ')}
+    </div>
+    ` : ''}
+
     <h2>Privacy & Security</h2>
     <p>${tool.privacy}</p>
 
@@ -259,6 +439,13 @@ function generateToolPageHtml(tool) {
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         ${related.map(r => `<li><a href="/tools/${r.id}/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">${r.icon} ${r.name}</a></li>`).join('\n        ')}
       </ul>
+    </div>
+
+    <h2>Browse All ${tool.cat} Tools</h2>
+    <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+      ${TOOLS.filter(t => t.cat === tool.cat && t.id !== tool.id).map(t => `<a href="/tools/${t.id}/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+${t.icon} ${t.name}</a>`).join('\n      ')}
     </div>
   </article>
 </main>
@@ -271,19 +458,10 @@ function generateToolPageHtml(tool) {
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
+  ${footerDir}
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
-<script src="/sticker-studio.js"></script>
-<script src="/label-studio.js"></script>
-<script src="/sheet-studio.js"></script>
-<script src="/data/dmc.js"></script>
-<script src="/pattern-studio.js"></script>
-<script src="/image-studio.js"></script>
-<script src="/photo-batch-studio.js"></script>
-<script src="/album-studio.js"></script>
-<script src="/media-studio.js"></script>
-<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -294,6 +472,42 @@ function generateHomePageHtml() {
   const title = `${SITE_NAME}: Free Private File Tools in Your Browser`;
   const desc = `Fix everyday digital file tasks in your browser with ${SITE_NAME}. Convert CSVs, repair subtitles, format Avery labels, and crop photos with zero uploads.`;
   const canonicalUrl = `${SITE_URL}/`;
+  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
+  const catsHtml = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${c}" aria-pressed="${i === 0 ? "true" : "false"}">${c}</button>`).join("");
+  const gridHtml = TOOLS.map(t => `
+      <a class="tool-card" href="/tools/${t.id}/" data-cat="${t.cat}">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">${t.icon}</div>
+        <h2>${t.name}</h2>
+        <p>${t.desc}</p>
+        <span class="tag">${t.cat}</span>
+      </a>
+    `).join("");
+
+  const trustHtml = [
+    { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
+    { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
+    { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
+    { ico: "🧰", title: "30 focused utilities", body: "Crafters, creators and desk workers — labels, subtitles, CSVs, images and more." }
+  ].map(f => `
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">${f.ico}</span>
+      <div><b>${f.title}</b><span>${f.body}</span></div>
+    </div>
+  `).join("");
+
+  const categories = [...new Set(TOOLS.map(t => t.cat))];
+  const categoryBlocksHtml = categories.map(cat => `
+      <div class="category-block" id="category-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
+        <h3>${cat}</h3>
+        <ul>
+          ${TOOLS.filter(t => t.cat === cat).map(t => `
+            <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${t.desc.slice(0, 70)}…</span></li>
+          `).join('')}
+        </ul>
+      </div>
+    `).join("");
+  const footerDir = getFooterDirectoryHtml();
 
   const schema = {
     "@context": "https://schema.org",
@@ -338,9 +552,17 @@ function generateHomePageHtml() {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
+  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="${canonicalUrl}">
@@ -348,7 +570,7 @@ function generateHomePageHtml() {
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -359,11 +581,50 @@ function generateHomePageHtml() {
   <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
-<main id="app" class="container">
+<main id="app" class="container" tabindex="-1">
   <section class="hero">
-    <span class="eyebrow">30 Global Utilities · 100% Private</span>
-    <h1>Free Private File Tools in Your Browser</h1>
-    <p>Instant client-side tools for crafters, creators, and professionals. Make Avery labels, sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts, and convert CSVs without uploading your data to external servers.</p>
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+      <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
+      <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
+      <div class="hero-search">
+        <label class="sr-only" for="search">Search tools</label>
+        <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+      </div>
+      <div id="cats" class="categories" role="group" aria-label="Filter tools by category">${catsHtml}</div>
+    </div>
+  </section>
+
+  <section class="trust" aria-label="Why use ${SITE_NAME}">
+    ${trustHtml}
+  </section>
+
+  <section class="tools-section" aria-label="Browser utility grid">
+    <div class="section-head">
+      <h2>All tools</h2>
+      <p class="grid-count">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} tools</p>
+    </div>
+    <div id="grid" class="grid">
+      ${gridHtml}
+    </div>
+  </section>
+
+  <section class="privacy-band">
+    <h2>100% private, client-side architecture</h2>
+    <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, ${SITE_NAME} runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+    <div class="privacy-points">
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
+    </div>
+  </section>
+
+  <section class="category-directory">
+    <h2>Browse utilities by category</h2>
+    <p>Every utility runs 100% client-side in your web browser. Pick a category below to jump straight to a specialised file tool.</p>
+    <div class="category-blocks">
+      ${categoryBlocksHtml}
+    </div>
   </section>
 </main>
 
@@ -375,6 +636,7 @@ function generateHomePageHtml() {
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
+  ${footerDir}
 </footer>
 
 <script src="/site.config.js"></script>
@@ -387,6 +649,40 @@ function generateHomePageHtml() {
 
 function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   const canonicalUrl = `${SITE_URL}/${pageId}/`;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": title,
+        "url": canonicalUrl,
+        "description": desc,
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": SITE_NAME,
+          "url": `${SITE_URL}/`
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": `${SITE_URL}/`
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": h1,
+            "item": canonicalUrl
+          }
+        ]
+      }
+    ]
+  };
 
   return `<!doctype html>
 <html lang="${LOCALE}">
@@ -402,16 +698,25 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
+  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="${canonicalUrl}">
+  <script type="application/ld+json" id="schema">${JSON.stringify(schema)}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME} Logo" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -463,12 +768,16 @@ function generate404Html() {
   <meta name="description" content="${desc}">
   <meta name="theme-color" content="#f4f6f9">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body><a class="skip-link" href="#main">Skip to main content</a>
-<main id="main" class="container" style="text-align: center; padding: 60px 20px;">
+<body><a class="skip-link" href="#app">Skip to main content</a>
+<main id="app" class="container" tabindex="-1" style="text-align: center; padding: 60px 20px;">
   <h1>Page Not Found</h1>
   <p>The page you are looking for does not exist on ${SITE_NAME}.</p>
   <p>The link might be outdated or mistyped.</p>
@@ -488,7 +797,7 @@ function generate404Html() {
 }
 
 function generateSitemapXml() {
-  const lastmod = "2026-10-05";
+  const lastmod = new Date().toISOString().split('T')[0];
   const urls = [
     `${SITE_URL}/`,
     `${SITE_URL}/about/`,
@@ -522,6 +831,24 @@ function generateManifestJson() {
     "theme_color": "#f4f6f9",
     "icons": [
       {
+        "src": "/assets/favicon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/assets/favicon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/assets/favicon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      },
+      {
         "src": "/assets/favicon.svg",
         "sizes": "any",
         "type": "image/svg+xml"
@@ -554,9 +881,9 @@ const aboutContent = `
   <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> dedicated to building fast, zero-bloat web utilities.</p>
   <h2>Who is ${SITE_NAME} Built For?</h2>
   <ul>
-    <li><strong>Crafters & Creators:</strong> Make sticker sheets, mirror T-shirt prints, create cross-stitch patterns, and test video safe zones.</li>
-    <li><strong>Professionals & Marketers:</strong> Clean browser bookmarks, split large CSVs, deduplicate contact databases, and format vCards.</li>
-    <li><strong>Everyday Power Users:</strong> Convert timetables to iCal, check subtitle reading speed, find duplicate photos, and optimize print layouts.</li>
+    <li><strong>Crafters & Creators:</strong> Make <a href="/tools/sticker-sheet/">sticker sheets</a>, mirror <a href="/tools/tshirt-mirror/">T-shirt prints</a>, create <a href="/tools/cross-stitch/">cross-stitch patterns</a>, and test <a href="/tools/video-safe-zone/">video safe zones</a>.</li>
+    <li><strong>Professionals & Marketers:</strong> Clean <a href="/tools/bookmark-cleaner/">browser bookmarks</a>, split large <a href="/tools/csv-splitter/">CSVs</a>, deduplicate <a href="/tools/contact-dedupe/">contact databases</a>, and format <a href="/tools/vcard/">vCards</a>.</li>
+    <li><strong>Everyday Power Users:</strong> Convert <a href="/tools/timetable-calendar/">timetables to iCal</a>, check <a href="/tools/subtitle-speed/">subtitle reading speed</a>, find <a href="/tools/duplicate-finder/">duplicate photos</a>, and optimize <a href="/tools/print-layout/">print layouts</a>.</li>
   </ul>
 `;
 const aboutHtml = generateStaticPageHtml('about', `About ${SITE_NAME}: Privacy-First Browser Tools`, `Learn about ${SITE_NAME}, a fast client-side web utility suite with 30 tools. We process digital tasks privately in your browser with zero data uploads.`, `About ${SITE_NAME}`, aboutContent);
@@ -598,7 +925,7 @@ fs.writeFileSync(path.join(baseDir, 'terms', 'index.html'), termsHtml, 'utf8');
 fs.writeFileSync(path.join(distDir, 'terms', 'index.html'), termsHtml, 'utf8');
 
 const contactContent = `
-  <div style="background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; box-shadow: var(--shadow); max-width: 680px;">
+  <div style="background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; box-shadow: var(--shadow-sm); max-width: 680px;">
     <h2>Direct Email Inquiries</h2>
     <p>For general support, feedback, and inquiries regarding ${SITE_NAME}:</p>
     <p style="font-size: 18px; font-weight: 700; color: var(--brand);">
@@ -606,6 +933,9 @@ const contactContent = `
     </p>
     <h3>Feature Suggestions & Bug Reports</h3>
     <p>${SITE_NAME} is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
+    <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
+    <h3>Why there is no contact form</h3>
+    <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
     <p style="margin-top: 24px; color: var(--muted); font-size: 14px;">We usually respond to all inquiries within 24 to 48 business hours.</p>
   </div>
 `;

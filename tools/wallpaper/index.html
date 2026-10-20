@@ -4,25 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Wallpaper Photo Cropper: Free Online Tool | Progeni Bench</title>
-  <meta name="description" content="Crop photos to phone wallpaper sizes in your browser: iPhone 1170×2532, Android 1080×2400, 16:9 desktop or a custom ratio and pixel size, a draggable focal point, blur padding, batch PNG/JPEG/WebP. Zero uploads.">
+  <meta name="description" content="Crop photos to wallpaper sizes: iPhone, Android, desktop, custom ratio. Blur padding, batch PNG/JPEG/WebP. Zero uploads.">
   <meta name="theme-color" content="#f4f6f9">
   <meta property="og:site_name" content="Progeni Bench">
   <meta property="og:title" content="Wallpaper Photo Cropper: Free Online Tool | Progeni Bench">
-  <meta property="og:description" content="Crop photos to phone wallpaper sizes in your browser: iPhone 1170×2532, Android 1080×2400, 16:9 desktop or a custom ratio and pixel size, a draggable focal point, blur padding, batch PNG/JPEG/WebP. Zero uploads.">
+  <meta property="og:description" content="Crop photos to wallpaper sizes: iPhone, Android, desktop, custom ratio. Blur padding, batch PNG/JPEG/WebP. Zero uploads.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/wallpaper/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:alt" content="Progeni Bench - free, private browser tools">
+  <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Wallpaper Photo Cropper: Free Online Tool | Progeni Bench">
+  <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/wallpaper/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Wallpaper Photo Cropper","url":"https://bench.progeni.live/tools/wallpaper/","description":"Crop photos to phone wallpaper sizes in your browser: iPhone 1170×2532, Android 1080×2400, 16:9 desktop or a custom ratio and pixel size, a draggable focal point, blur padding, batch PNG/JPEG/WebP. Zero uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Wallpaper Photo Cropper","item":"https://bench.progeni.live/tools/wallpaper/"}]}]}</script>
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Wallpaper Photo Cropper","url":"https://bench.progeni.live/tools/wallpaper/","description":"Crop photos to wallpaper sizes: iPhone, Android, desktop, custom ratio. Blur padding, batch PNG/JPEG/WebP. Zero uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/#category-images"},{"@type":"ListItem","position":3,"name":"Wallpaper Photo Cropper","item":"https://bench.progeni.live/tools/wallpaper/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is blur pad mode and how does it prevent image cropping?","acceptedAnswer":{"@type":"Answer","text":"Blur pad mode fits your entire uncropped photo in the center while filling side margins with a blurred, color-matched version of the background."}},{"@type":"Question","name":"Can I adjust which part of the photo stays visible?","acceptedAnswer":{"@type":"Answer","text":"Yes. An interactive focal point controller lets you drag the crop box to center faces, horizons, or key subjects."}},{"@type":"Question","name":"What image formats can I export?","acceptedAnswer":{"@type":"Answer","text":"You can download full-resolution PNG or high-quality JPEG wallpapers sized to match your screen resolution."}}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -49,9 +57,18 @@
     </section>
   </noscript>
 
-  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
     <p>Runs an Image Studio wallpaper engine that crops a photo to an exact screen aspect and pixel size. Choose a device preset (iPhone 1170×2532 and 1290×2796, Android 1080×2400, 16:9 desktop 1920×1080, 9:16 social, 4:3 tablet or 19.5:9 wide), or enter a custom ratio and custom output pixels. A crop box overlays the preview and you drag it to set the focal point, so the important part of the shot — a face, a landmark — stays in frame instead of being blindly centre-cropped. In Cover-crop mode the photo fills the output edge to edge with no distortion; in Blur-padding mode the crop is fitted and the leftover space is filled with a blurred, darkened copy of the image so nothing is cut off. Everything exports as PNG, JPEG or WebP with a quality slider, one photo at a time or as a batch with a shared ratio.</p>
+
+    
+    <h2>Common use cases</h2>
+    <ul>
+      <li>Device Wallpaper Formatting: Crop personal photos to exact smartphone screen ratios (iPhone, Samsung Galaxy, Pixel) without stretching.</li>
+      <li>Desktop Wallpaper Resizing: Fit vertical or square photos onto 16:9 or 21:9 ultrawide desktop monitors using aesthetic blur padding.</li>
+      <li>Tablet Lock Screen Preparation: Center subjects with custom focal point positioning for iPad and Android tablet aspect ratios.</li>
+    </ul>
+    
 
     <h2>How to use</h2>
     <ol>
@@ -64,6 +81,15 @@
 
     <h2>Limits & Considerations</h2>
     <p>Processes common raster photos (PNG, JPEG, WebP) up to 30 files per session and does not render animated live wallpapers. Blur padding relies on the browser's canvas blur filter, so the padding look varies slightly between browsers.</p>
+
+    
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item" style="margin: 14px 0;"><strong>What is blur pad mode and how does it prevent image cropping?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Blur pad mode fits your entire uncropped photo in the center while filling side margins with a blurred, color-matched version of the background.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>Can I adjust which part of the photo stays visible?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. An interactive focal point controller lets you drag the crop box to center faces, horizons, or key subjects.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>What image formats can I export?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">You can download full-resolution PNG or high-quality JPEG wallpapers sized to match your screen resolution.</p></div>
+    </div>
+    
 
     <h2>Privacy & Security</h2>
     <p>Cropping, blur padding and canvas rendering happen entirely in local browser memory. Your personal photos remain 100% private.</p>
@@ -78,6 +104,21 @@
         <li><a href="/tools/family-organizer/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">🗂️ Family Photo Date Organizer</a></li>
       </ul>
     </div>
+
+    <h2>Browse All Images Tools</h2>
+    <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of images tools:</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+      <a href="/tools/panorama/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🌄 Panorama Carousel Splitter</a>
+      <a href="/tools/duplicate-finder/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+♻️ Photo Duplicate Finder</a>
+      <a href="/tools/best-shot/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+✨ Photo Best-Shot Finder</a>
+      <a href="/tools/photo-timeline/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🕒 Photo Timeline Builder</a>
+      <a href="/tools/family-organizer/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🗂️ Family Photo Date Organizer</a>
+    </div>
   </article>
 </main>
 
@@ -89,19 +130,125 @@
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
+  
+  <div class="footer-directory">
+    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="category-blocks">
+      
+        <div class="category-block">
+          <h3>Print & Craft</h3>
+          <ul>
+            
+              <li><a href="/tools/sticker-sheet/">🏷️ Sticker Sheet Maker</a></li>
+            
+              <li><a href="/tools/labels/">📦 Avery 5160 / Label Maker</a></li>
+            
+              <li><a href="/tools/tshirt-mirror/">👕 T-Shirt Print Mirror</a></li>
+            
+              <li><a href="/tools/ironon-sheet/">🧲 Iron-on Transfer Sheet Maker</a></li>
+            
+              <li><a href="/tools/print-layout/">🖨️ Print Layout Optimizer</a></li>
+            
+              <li><a href="/tools/print-border/">📐 Photo Print Border Calculator</a></li>
+            
+              <li><a href="/tools/cross-stitch/">🧵 Cross-Stitch Pattern Maker</a></li>
+            
+              <li><a href="/tools/diamond-painting/">💎 Diamond Painting Pattern Maker</a></li>
+            
+              <li><a href="/tools/embroidery/">🪡 Embroidery Pattern Simplifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Audio & Video</h3>
+          <ul>
+            
+              <li><a href="/tools/video-safe-zone/">📱 Video Safe-Zone Checker</a></li>
+            
+              <li><a href="/tools/video-thumbnails/">🎞️ Video Thumbnail Contact Sheet</a></li>
+            
+              <li><a href="/tools/audio-chapters/">🎧 Chapter Timestamp Formatter</a></li>
+            
+              <li><a href="/tools/silence-map/">🔇 Podcast Silence Map</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Text & Subtitles</h3>
+          <ul>
+            
+              <li><a href="/tools/subtitle-speed/">💬 Subtitle Reading-Speed Checker</a></li>
+            
+              <li><a href="/tools/subtitle-linefix/">📝 Subtitle Line-Break Fixer</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Data</h3>
+          <ul>
+            
+              <li><a href="/tools/contact-dedupe/">👥 Contact CSV Deduplicator</a></li>
+            
+              <li><a href="/tools/csv-splitter/">↔️ CSV Column Splitter</a></li>
+            
+              <li><a href="/tools/csv-date/">📆 CSV Date Normalizer</a></li>
+            
+              <li><a href="/tools/vcard/">📇 vCard (VCF) Split & Merge</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Files</h3>
+          <ul>
+            
+              <li><a href="/tools/bookmark-cleaner/">🔖 Chrome Bookmark Cleaner</a></li>
+            
+              <li><a href="/tools/bookmark-reading/">📚 Bookmark → Reading List</a></li>
+            
+              <li><a href="/tools/svg-cleaner/">✦ SVG Cleanup & Minifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Productivity</h3>
+          <ul>
+            
+              <li><a href="/tools/calendar-cleaner/">📅 iCal Calendar Deduplicator</a></li>
+            
+              <li><a href="/tools/timetable-calendar/">🗓️ Timetable → Calendar (.ics)</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Images</h3>
+          <ul>
+            
+              <li><a href="/tools/wallpaper/">🖼️ Wallpaper Photo Cropper</a></li>
+            
+              <li><a href="/tools/panorama/">🌄 Panorama Carousel Splitter</a></li>
+            
+              <li><a href="/tools/duplicate-finder/">♻️ Photo Duplicate Finder</a></li>
+            
+              <li><a href="/tools/best-shot/">✨ Photo Best-Shot Finder</a></li>
+            
+              <li><a href="/tools/photo-timeline/">🕒 Photo Timeline Builder</a></li>
+            
+              <li><a href="/tools/family-organizer/">🗂️ Family Photo Date Organizer</a></li>
+            
+          </ul>
+        </div>
+      
+    </div>
+  </div>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
-<script src="/sticker-studio.js"></script>
-<script src="/label-studio.js"></script>
-<script src="/sheet-studio.js"></script>
-<script src="/data/dmc.js"></script>
-<script src="/pattern-studio.js"></script>
-<script src="/image-studio.js"></script>
-<script src="/photo-batch-studio.js"></script>
-<script src="/album-studio.js"></script>
-<script src="/media-studio.js"></script>
-<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

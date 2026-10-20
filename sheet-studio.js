@@ -759,7 +759,7 @@
       if (fill) fill.style.width = Math.round(done / Math.max(1, used.length) * 100) + "%";
       if (label) label.textContent = "Loading image " + done + " of " + used.length + "…";
     };
-    return Promise.all(used.map(f =>
+    return Promise.allSettled(used.map(f =>
       readDataURL(f).then(async url => {
         const img = await loadImage(url);
         if (!img.naturalWidth) throw new Error('"' + f.name + '" has no usable pixel data');
@@ -767,13 +767,23 @@
         tick();
         return item;
       })
-    )).then(loaded => {
+    )).then(results => {
       if (prog) prog.hidden = true;
+      const loaded = results.filter(r => r.status === "fulfilled").map(r => r.value);
+      const failed = results.length - loaded.length;
       state.items.push(...loaded);
       state.page = 0;
       render();
-      if (skipped > 0) flash("Loaded " + state.items.length + " images — " + skipped + " skipped (max " + MAX_ITEMS + ")");
-      else flash(loaded.length + " image" + (loaded.length === 1 ? "" : "s") + " added (" + state.items.length + "/" + MAX_ITEMS + ")");
+      if (failed > 0 && loaded.length === 0) {
+        const first = results.find(r => r.status === "rejected");
+        showHintError(first ? (first.reason && first.reason.message) || String(first.reason) : "No images could be loaded");
+      } else if (failed > 0) {
+        flash("Loaded " + loaded.length + " images — " + failed + " failed to load");
+      } else if (skipped > 0) {
+        flash("Loaded " + state.items.length + " images — " + skipped + " skipped (max " + MAX_ITEMS + ")");
+      } else {
+        flash(loaded.length + " image" + (loaded.length === 1 ? "" : "s") + " added (" + state.items.length + "/" + MAX_ITEMS + ")");
+      }
       return loaded.length;
     }).catch(e => {
       if (prog) prog.hidden = true;

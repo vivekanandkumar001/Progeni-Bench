@@ -12,9 +12,17 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:alt" content="Progeni Bench - free, private browser tools">
+  <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Progeni Bench: Free Private File Tools in Your Browser">
+  <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/">
@@ -22,7 +30,7 @@
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -33,11 +41,419 @@
   <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
 </header>
 
-<main id="app" class="container">
+<main id="app" class="container" tabindex="-1">
   <section class="hero">
-    <span class="eyebrow">30 Global Utilities · 100% Private</span>
-    <h1>Free Private File Tools in Your Browser</h1>
-    <p>Instant client-side tools for crafters, creators, and professionals. Make Avery labels, sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts, and convert CSVs without uploading your data to external servers.</p>
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+      <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
+      <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
+      <div class="hero-search">
+        <label class="sr-only" for="search">Search tools</label>
+        <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+      </div>
+      <div id="cats" class="categories" role="group" aria-label="Filter tools by category"><button class="pill active" data-cat="All" aria-pressed="true">All</button><button class="pill " data-cat="Print & Craft" aria-pressed="false">Print & Craft</button><button class="pill " data-cat="Audio & Video" aria-pressed="false">Audio & Video</button><button class="pill " data-cat="Text & Subtitles" aria-pressed="false">Text & Subtitles</button><button class="pill " data-cat="Data" aria-pressed="false">Data</button><button class="pill " data-cat="Files" aria-pressed="false">Files</button><button class="pill " data-cat="Productivity" aria-pressed="false">Productivity</button><button class="pill " data-cat="Images" aria-pressed="false">Images</button></div>
+    </div>
+  </section>
+
+  <section class="trust" aria-label="Why use Progeni Bench">
+    
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">🔒</span>
+      <div><b>Nothing leaves your device</b><span>Files are processed in-browser with Web APIs — zero uploads, zero network transfer.</span></div>
+    </div>
+  
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">⚡</span>
+      <div><b>Instant, no waiting</b><span>No queues, no render farms. Results appear as soon as you drop a file.</span></div>
+    </div>
+  
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">🙅</span>
+      <div><b>No account, ever</b><span>No signup, no passwords, no subscriptions. Open a tool and get to work.</span></div>
+    </div>
+  
+    <div class="trust-item">
+      <span class="t-ico" aria-hidden="true">🧰</span>
+      <div><b>30 focused utilities</b><span>Crafters, creators and desk workers — labels, subtitles, CSVs, images and more.</span></div>
+    </div>
+  
+  </section>
+
+  <section class="tools-section" aria-label="Browser utility grid">
+    <div class="section-head">
+      <h2>All tools</h2>
+      <p class="grid-count">Showing <strong>30</strong> of 30 tools</p>
+    </div>
+    <div id="grid" class="grid">
+      
+      <a class="tool-card" href="/tools/sticker-sheet/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🏷️</div>
+        <h2>Sticker Sheet Maker</h2>
+        <p>Build printable sticker sheets in your browser — custom grids, shapes, kiss-cut lines, and PNG / PDF / SVG die-line export for Cricut, Silhouette, or home printers.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/labels/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📦</div>
+        <h2>Avery 5160 / Label Maker</h2>
+        <p>Build printable Avery 5160, 5163, 5167, L7160 and custom label sheets from CSV, pasted rows, or a single manual label — multi-line builder with live sheet preview.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/tshirt-mirror/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">👕</div>
+        <h2>T-Shirt Print Mirror</h2>
+        <p>Flip art horizontally, vertically or 180° for heat-transfer paper — SVG passthrough, before/after preview, batch download and PNG/JPEG/WebP export.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/ironon-sheet/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🧲</div>
+        <h2>Iron-on Transfer Sheet Maker</h2>
+        <p>Lay out iron-on transfer designs on US Letter or A4 with one-click mirroring, paper presets, cut lines and 300 DPI PNG or print export.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/print-layout/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🖨️</div>
+        <h2>Print Layout Optimizer</h2>
+        <p>Pack up to 40 photos onto Letter, A4, 4×6 or A3 paper with aspect-aware grids, auto-pack rows, mm borders and a printed-size report.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/print-border/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📐</div>
+        <h2>Photo Print Border Calculator</h2>
+        <p>Add a precise mat border for 4×6, 5×7, 8×10, 8×11 or A4 frames at 200/300 DPI — fixed mm or % borders, custom colour and an optional mat keyline.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/cross-stitch/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🧵</div>
+        <h2>Cross-Stitch Pattern Maker</h2>
+        <p>Turn any photo into a printable cross-stitch chart — 20–200 stitches wide, median-cut colours snapped to a 300-colour DMC floss palette, symbol charts, 10×10 grid lines and a skein shopping list.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/diamond-painting/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">💎</div>
+        <h2>Diamond Painting Pattern Maker</h2>
+        <p>Generate symbol-coded diamond painting drill charts — round or square drills, DMC drill counts per colour, a cm canvas planner and a CSV kit shopping list.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/embroidery/" data-cat="Print & Craft">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🪡</div>
+        <h2>Embroidery Pattern Simplifier</h2>
+        <p>Reduce artwork to a simplified thread palette — median-cut to N colours, optional DMC matching or a pasted custom hex palette, with a side-by-side smooth preview and skein estimates.</p>
+        <span class="tag">Print & Craft</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/video-safe-zone/" data-cat="Audio & Video">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📱</div>
+        <h2>Video Safe-Zone Checker</h2>
+        <p>Preview TikTok, Instagram Reels, and YouTube Shorts UI overlays to avoid cropped text.</p>
+        <span class="tag">Audio & Video</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/video-thumbnails/" data-cat="Audio & Video">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🎞️</div>
+        <h2>Video Thumbnail Contact Sheet</h2>
+        <p>Extract 4–48 timestamped frames into a configurable PNG/JPEG contact sheet.</p>
+        <span class="tag">Audio & Video</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/audio-chapters/" data-cat="Audio & Video">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🎧</div>
+        <h2>Chapter Timestamp Formatter</h2>
+        <p>Format YouTube & podcast chapter timestamps with clean text export.</p>
+        <span class="tag">Audio & Video</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/silence-map/" data-cat="Audio & Video">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🔇</div>
+        <h2>Podcast Silence Map</h2>
+        <p>Detect dead air with a dBFS threshold slider, waveform view and CSV/TXT gap export.</p>
+        <span class="tag">Audio & Video</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/subtitle-speed/" data-cat="Text & Subtitles">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">💬</div>
+        <h2>Subtitle Reading-Speed Checker</h2>
+        <p>Audit SRT subtitles for reading speed (CPS), duration, line length and overlaps against Netflix, BBC or custom limits.</p>
+        <span class="tag">Text & Subtitles</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/subtitle-linefix/" data-cat="Text & Subtitles">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📝</div>
+        <h2>Subtitle Line-Break Fixer</h2>
+        <p>Rebalance and rewrap long SRT subtitle lines to your chosen characters-per-line and line-count limits.</p>
+        <span class="tag">Text & Subtitles</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/contact-dedupe/" data-cat="Data">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">👥</div>
+        <h2>Contact CSV Deduplicator</h2>
+        <p>Merge and clean duplicate CRM contacts using email and international phone numbers.</p>
+        <span class="tag">Data</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/csv-splitter/" data-cat="Data">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">↔️</div>
+        <h2>CSV Column Splitter</h2>
+        <p>Split names, addresses, or delimited data in CSV spreadsheets without Excel.</p>
+        <span class="tag">Data</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/csv-date/" data-cat="Data">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📆</div>
+        <h2>CSV Date Normalizer</h2>
+        <p>Standardize mixed dates into US (MM/DD/YYYY), ISO (YYYY-MM-DD), or European formats.</p>
+        <span class="tag">Data</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/vcard/" data-cat="Data">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📇</div>
+        <h2>vCard (VCF) Split & Merge</h2>
+        <p>Merge multiple .vcf contact cards or inspect contact files privately.</p>
+        <span class="tag">Data</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/bookmark-cleaner/" data-cat="Files">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🔖</div>
+        <h2>Chrome Bookmark Cleaner</h2>
+        <p>Remove duplicate bookmarks, dead links, and empty folders from exported bookmarks.html.</p>
+        <span class="tag">Files</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/bookmark-reading/" data-cat="Files">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📚</div>
+        <h2>Bookmark → Reading List</h2>
+        <p>Convert messy browser bookmark HTML files into a distraction-free offline reading list.</p>
+        <span class="tag">Files</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/svg-cleaner/" data-cat="Files">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">✦</div>
+        <h2>SVG Cleanup & Minifier</h2>
+        <p>Strip Illustrator, Inkscape metadata, and comments to shrink SVG file sizes.</p>
+        <span class="tag">Files</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/calendar-cleaner/" data-cat="Productivity">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">📅</div>
+        <h2>iCal Calendar Deduplicator</h2>
+        <p>Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars.</p>
+        <span class="tag">Productivity</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/timetable-calendar/" data-cat="Productivity">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🗓️</div>
+        <h2>Timetable → Calendar (.ics)</h2>
+        <p>Convert school or work class timetable CSVs into recurring weekly iCal events.</p>
+        <span class="tag">Productivity</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/wallpaper/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🖼️</div>
+        <h2>Wallpaper Photo Cropper</h2>
+        <p>Crop photos to exact phone, tablet and desktop wallpapers — device presets, custom ratio and pixels, a draggable focal crop box, cover-crop or blur padding, PNG/JPEG/WebP export.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/panorama/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🌄</div>
+        <h2>Panorama Carousel Splitter</h2>
+        <p>Seamlessly slice wide panoramic photos into 3 seamless square Instagram carousel tiles.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/duplicate-finder/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">♻️</div>
+        <h2>Photo Duplicate Finder</h2>
+        <p>Find exact and near-duplicate photos by hash, with a keep recommendation.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/best-shot/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">✨</div>
+        <h2>Photo Best-Shot Finder</h2>
+        <p>Rank burst photos by Laplacian sharpness, exposure and contrast.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/photo-timeline/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🕒</div>
+        <h2>Photo Timeline Builder</h2>
+        <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+      <a class="tool-card" href="/tools/family-organizer/" data-cat="Images">
+        <span class="go" aria-hidden="true">&rarr;</span>
+        <div class="icon" aria-hidden="true">🗂️</div>
+        <h2>Family Photo Date Organizer</h2>
+        <p>Organize family photos into a year-to-month-to-day tree and export a rename plan.</p>
+        <span class="tag">Images</span>
+      </a>
+    
+    </div>
+  </section>
+
+  <section class="privacy-band">
+    <h2>100% private, client-side architecture</h2>
+    <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, Progeni Bench runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+    <div class="privacy-points">
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
+    </div>
+  </section>
+
+  <section class="category-directory">
+    <h2>Browse utilities by category</h2>
+    <p>Every utility runs 100% client-side in your web browser. Pick a category below to jump straight to a specialised file tool.</p>
+    <div class="category-blocks">
+      
+      <div class="category-block" id="category-print-craft">
+        <h3>Print & Craft</h3>
+        <ul>
+          
+            <li><a href="/tools/sticker-sheet/">🏷️ Sticker Sheet Maker</a> — <span class="cat-desc">Build printable sticker sheets in your browser — custom grids, shapes,…</span></li>
+          
+            <li><a href="/tools/labels/">📦 Avery 5160 / Label Maker</a> — <span class="cat-desc">Build printable Avery 5160, 5163, 5167, L7160 and custom label sheets …</span></li>
+          
+            <li><a href="/tools/tshirt-mirror/">👕 T-Shirt Print Mirror</a> — <span class="cat-desc">Flip art horizontally, vertically or 180° for heat-transfer paper — SV…</span></li>
+          
+            <li><a href="/tools/ironon-sheet/">🧲 Iron-on Transfer Sheet Maker</a> — <span class="cat-desc">Lay out iron-on transfer designs on US Letter or A4 with one-click mir…</span></li>
+          
+            <li><a href="/tools/print-layout/">🖨️ Print Layout Optimizer</a> — <span class="cat-desc">Pack up to 40 photos onto Letter, A4, 4×6 or A3 paper with aspect-awar…</span></li>
+          
+            <li><a href="/tools/print-border/">📐 Photo Print Border Calculator</a> — <span class="cat-desc">Add a precise mat border for 4×6, 5×7, 8×10, 8×11 or A4 frames at 200/…</span></li>
+          
+            <li><a href="/tools/cross-stitch/">🧵 Cross-Stitch Pattern Maker</a> — <span class="cat-desc">Turn any photo into a printable cross-stitch chart — 20–200 stitches w…</span></li>
+          
+            <li><a href="/tools/diamond-painting/">💎 Diamond Painting Pattern Maker</a> — <span class="cat-desc">Generate symbol-coded diamond painting drill charts — round or square …</span></li>
+          
+            <li><a href="/tools/embroidery/">🪡 Embroidery Pattern Simplifier</a> — <span class="cat-desc">Reduce artwork to a simplified thread palette — median-cut to N colour…</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-audio-video">
+        <h3>Audio & Video</h3>
+        <ul>
+          
+            <li><a href="/tools/video-safe-zone/">📱 Video Safe-Zone Checker</a> — <span class="cat-desc">Preview TikTok, Instagram Reels, and YouTube Shorts UI overlays to avo…</span></li>
+          
+            <li><a href="/tools/video-thumbnails/">🎞️ Video Thumbnail Contact Sheet</a> — <span class="cat-desc">Extract 4–48 timestamped frames into a configurable PNG/JPEG contact s…</span></li>
+          
+            <li><a href="/tools/audio-chapters/">🎧 Chapter Timestamp Formatter</a> — <span class="cat-desc">Format YouTube & podcast chapter timestamps with clean text export.…</span></li>
+          
+            <li><a href="/tools/silence-map/">🔇 Podcast Silence Map</a> — <span class="cat-desc">Detect dead air with a dBFS threshold slider, waveform view and CSV/TX…</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-text-subtitles">
+        <h3>Text & Subtitles</h3>
+        <ul>
+          
+            <li><a href="/tools/subtitle-speed/">💬 Subtitle Reading-Speed Checker</a> — <span class="cat-desc">Audit SRT subtitles for reading speed (CPS), duration, line length and…</span></li>
+          
+            <li><a href="/tools/subtitle-linefix/">📝 Subtitle Line-Break Fixer</a> — <span class="cat-desc">Rebalance and rewrap long SRT subtitle lines to your chosen characters…</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-data">
+        <h3>Data</h3>
+        <ul>
+          
+            <li><a href="/tools/contact-dedupe/">👥 Contact CSV Deduplicator</a> — <span class="cat-desc">Merge and clean duplicate CRM contacts using email and international p…</span></li>
+          
+            <li><a href="/tools/csv-splitter/">↔️ CSV Column Splitter</a> — <span class="cat-desc">Split names, addresses, or delimited data in CSV spreadsheets without …</span></li>
+          
+            <li><a href="/tools/csv-date/">📆 CSV Date Normalizer</a> — <span class="cat-desc">Standardize mixed dates into US (MM/DD/YYYY), ISO (YYYY-MM-DD), or Eur…</span></li>
+          
+            <li><a href="/tools/vcard/">📇 vCard (VCF) Split & Merge</a> — <span class="cat-desc">Merge multiple .vcf contact cards or inspect contact files privately.…</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-files">
+        <h3>Files</h3>
+        <ul>
+          
+            <li><a href="/tools/bookmark-cleaner/">🔖 Chrome Bookmark Cleaner</a> — <span class="cat-desc">Remove duplicate bookmarks, dead links, and empty folders from exporte…</span></li>
+          
+            <li><a href="/tools/bookmark-reading/">📚 Bookmark → Reading List</a> — <span class="cat-desc">Convert messy browser bookmark HTML files into a distraction-free offl…</span></li>
+          
+            <li><a href="/tools/svg-cleaner/">✦ SVG Cleanup & Minifier</a> — <span class="cat-desc">Strip Illustrator, Inkscape metadata, and comments to shrink SVG file …</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-productivity">
+        <h3>Productivity</h3>
+        <ul>
+          
+            <li><a href="/tools/calendar-cleaner/">📅 iCal Calendar Deduplicator</a> — <span class="cat-desc">Scan .ics calendar exports for duplicate VEVENT entries and export cle…</span></li>
+          
+            <li><a href="/tools/timetable-calendar/">🗓️ Timetable → Calendar (.ics)</a> — <span class="cat-desc">Convert school or work class timetable CSVs into recurring weekly iCal…</span></li>
+          
+        </ul>
+      </div>
+    
+      <div class="category-block" id="category-images">
+        <h3>Images</h3>
+        <ul>
+          
+            <li><a href="/tools/wallpaper/">🖼️ Wallpaper Photo Cropper</a> — <span class="cat-desc">Crop photos to exact phone, tablet and desktop wallpapers — device pre…</span></li>
+          
+            <li><a href="/tools/panorama/">🌄 Panorama Carousel Splitter</a> — <span class="cat-desc">Seamlessly slice wide panoramic photos into 3 seamless square Instagra…</span></li>
+          
+            <li><a href="/tools/duplicate-finder/">♻️ Photo Duplicate Finder</a> — <span class="cat-desc">Find exact and near-duplicate photos by hash, with a keep recommendati…</span></li>
+          
+            <li><a href="/tools/best-shot/">✨ Photo Best-Shot Finder</a> — <span class="cat-desc">Rank burst photos by Laplacian sharpness, exposure and contrast.…</span></li>
+          
+            <li><a href="/tools/photo-timeline/">🕒 Photo Timeline Builder</a> — <span class="cat-desc">Build a chronological photo album with EXIF dates and embedded thumbna…</span></li>
+          
+            <li><a href="/tools/family-organizer/">🗂️ Family Photo Date Organizer</a> — <span class="cat-desc">Organize family photos into a year-to-month-to-day tree and export a r…</span></li>
+          
+        </ul>
+      </div>
+    
+    </div>
   </section>
 </main>
 
@@ -48,6 +464,122 @@
     <a href="/terms/">Terms</a>
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
+  </div>
+  
+  <div class="footer-directory">
+    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="category-blocks">
+      
+        <div class="category-block">
+          <h3>Print & Craft</h3>
+          <ul>
+            
+              <li><a href="/tools/sticker-sheet/">🏷️ Sticker Sheet Maker</a></li>
+            
+              <li><a href="/tools/labels/">📦 Avery 5160 / Label Maker</a></li>
+            
+              <li><a href="/tools/tshirt-mirror/">👕 T-Shirt Print Mirror</a></li>
+            
+              <li><a href="/tools/ironon-sheet/">🧲 Iron-on Transfer Sheet Maker</a></li>
+            
+              <li><a href="/tools/print-layout/">🖨️ Print Layout Optimizer</a></li>
+            
+              <li><a href="/tools/print-border/">📐 Photo Print Border Calculator</a></li>
+            
+              <li><a href="/tools/cross-stitch/">🧵 Cross-Stitch Pattern Maker</a></li>
+            
+              <li><a href="/tools/diamond-painting/">💎 Diamond Painting Pattern Maker</a></li>
+            
+              <li><a href="/tools/embroidery/">🪡 Embroidery Pattern Simplifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Audio & Video</h3>
+          <ul>
+            
+              <li><a href="/tools/video-safe-zone/">📱 Video Safe-Zone Checker</a></li>
+            
+              <li><a href="/tools/video-thumbnails/">🎞️ Video Thumbnail Contact Sheet</a></li>
+            
+              <li><a href="/tools/audio-chapters/">🎧 Chapter Timestamp Formatter</a></li>
+            
+              <li><a href="/tools/silence-map/">🔇 Podcast Silence Map</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Text & Subtitles</h3>
+          <ul>
+            
+              <li><a href="/tools/subtitle-speed/">💬 Subtitle Reading-Speed Checker</a></li>
+            
+              <li><a href="/tools/subtitle-linefix/">📝 Subtitle Line-Break Fixer</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Data</h3>
+          <ul>
+            
+              <li><a href="/tools/contact-dedupe/">👥 Contact CSV Deduplicator</a></li>
+            
+              <li><a href="/tools/csv-splitter/">↔️ CSV Column Splitter</a></li>
+            
+              <li><a href="/tools/csv-date/">📆 CSV Date Normalizer</a></li>
+            
+              <li><a href="/tools/vcard/">📇 vCard (VCF) Split & Merge</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Files</h3>
+          <ul>
+            
+              <li><a href="/tools/bookmark-cleaner/">🔖 Chrome Bookmark Cleaner</a></li>
+            
+              <li><a href="/tools/bookmark-reading/">📚 Bookmark → Reading List</a></li>
+            
+              <li><a href="/tools/svg-cleaner/">✦ SVG Cleanup & Minifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Productivity</h3>
+          <ul>
+            
+              <li><a href="/tools/calendar-cleaner/">📅 iCal Calendar Deduplicator</a></li>
+            
+              <li><a href="/tools/timetable-calendar/">🗓️ Timetable → Calendar (.ics)</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Images</h3>
+          <ul>
+            
+              <li><a href="/tools/wallpaper/">🖼️ Wallpaper Photo Cropper</a></li>
+            
+              <li><a href="/tools/panorama/">🌄 Panorama Carousel Splitter</a></li>
+            
+              <li><a href="/tools/duplicate-finder/">♻️ Photo Duplicate Finder</a></li>
+            
+              <li><a href="/tools/best-shot/">✨ Photo Best-Shot Finder</a></li>
+            
+              <li><a href="/tools/photo-timeline/">🕒 Photo Timeline Builder</a></li>
+            
+              <li><a href="/tools/family-organizer/">🗂️ Family Photo Date Organizer</a></li>
+            
+          </ul>
+        </div>
+      
+    </div>
   </div>
 </footer>
 

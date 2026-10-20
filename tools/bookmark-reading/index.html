@@ -12,17 +12,25 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/bookmark-reading/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:alt" content="Progeni Bench - free, private browser tools">
+  <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Bookmark → Reading List: Free Online Tool | Progeni Bench">
+  <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/bookmark-reading/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Bookmark → Reading List","url":"https://bench.progeni.live/tools/bookmark-reading/","description":"Convert browser bookmark HTML exports into clean offline reading lists in your browser. Filter out dangerous URIs with zero server uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Files","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":3,"name":"Bookmark → Reading List","item":"https://bench.progeni.live/tools/bookmark-reading/"}]}]}</script>
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Bookmark → Reading List","url":"https://bench.progeni.live/tools/bookmark-reading/","description":"Convert browser bookmark HTML exports into clean offline reading lists in your browser. Filter out dangerous URIs with zero server uploads.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Files","item":"https://bench.progeni.live/#category-files"},{"@type":"ListItem","position":3,"name":"Bookmark → Reading List","item":"https://bench.progeni.live/tools/bookmark-reading/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What output formats can I generate from my bookmarks?","acceptedAnswer":{"@type":"Answer","text":"You can copy or download your reading list as clean Markdown, structured HTML, or plain text link summaries."}},{"@type":"Question","name":"Does the tool group links by website domain?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can toggle domain-based grouping to categorize articles and tools by their source publication."}},{"@type":"Question","name":"Can I copy the formatted reading list directly to my clipboard?","acceptedAnswer":{"@type":"Answer","text":"Yes. A single-click copy button allows instant pasting into your favorite note-taking application or document editor."}}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench Logo" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt="Progeni Bench" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/about/">About</a>
@@ -49,9 +57,18 @@
     </section>
   </noscript>
 
-  <article class="tool-content" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
+  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
     <h2>What it does</h2>
     <p>Extracts valid HTTP and HTTPS links from complex bookmark exports and compiles them into a clean, minimalist, offline HTML reading list document. Filters out dangerous URI schemes and excessive nested folder tags, creating an uncluttered reading dashboard for long-form articles.</p>
+
+    
+    <h2>Common use cases</h2>
+    <ul>
+      <li>Reading List Digest Creation: Convert cluttered browser bookmark folders into a clean Markdown checklist for reading later in Obsidian or Notion.</li>
+      <li>Domain-Grouped Research Lists: Group saved research bookmarks by website domain to organize sources for research papers and articles.</li>
+      <li>Curated Resource Sharing: Format saved web links into shareable text summaries for team wikis, newsletters, and email digests.</li>
+    </ul>
+    
 
     <h2>How to use</h2>
     <ol>
@@ -63,6 +80,15 @@
 
     <h2>Limits & Considerations</h2>
     <p>Filters out internal browser schemes (javascript:, data:, chrome:, file:). Does not scrape or archive the full offline text content of linked web pages.</p>
+
+    
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item" style="margin: 14px 0;"><strong>What output formats can I generate from my bookmarks?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">You can copy or download your reading list as clean Markdown, structured HTML, or plain text link summaries.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>Does the tool group links by website domain?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. You can toggle domain-based grouping to categorize articles and tools by their source publication.</p></div>
+      <div class="faq-item" style="margin: 14px 0;"><strong>Can I copy the formatted reading list directly to my clipboard?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. A single-click copy button allows instant pasting into your favorite note-taking application or document editor.</p></div>
+    </div>
+    
 
     <h2>Privacy & Security</h2>
     <p>Your saved articles and reading links never leave your browser sandbox. Complete privacy and local offline storage guaranteed.</p>
@@ -77,6 +103,15 @@
         <li><a href="/tools/tshirt-mirror/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">👕 T-Shirt Print Mirror</a></li>
       </ul>
     </div>
+
+    <h2>Browse All Files Tools</h2>
+    <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of files tools:</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
+      <a href="/tools/bookmark-cleaner/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+🔖 Chrome Bookmark Cleaner</a>
+      <a href="/tools/svg-cleaner/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
+✦ SVG Cleanup & Minifier</a>
+    </div>
   </article>
 </main>
 
@@ -88,19 +123,125 @@
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
+  
+  <div class="footer-directory">
+    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="category-blocks">
+      
+        <div class="category-block">
+          <h3>Print & Craft</h3>
+          <ul>
+            
+              <li><a href="/tools/sticker-sheet/">🏷️ Sticker Sheet Maker</a></li>
+            
+              <li><a href="/tools/labels/">📦 Avery 5160 / Label Maker</a></li>
+            
+              <li><a href="/tools/tshirt-mirror/">👕 T-Shirt Print Mirror</a></li>
+            
+              <li><a href="/tools/ironon-sheet/">🧲 Iron-on Transfer Sheet Maker</a></li>
+            
+              <li><a href="/tools/print-layout/">🖨️ Print Layout Optimizer</a></li>
+            
+              <li><a href="/tools/print-border/">📐 Photo Print Border Calculator</a></li>
+            
+              <li><a href="/tools/cross-stitch/">🧵 Cross-Stitch Pattern Maker</a></li>
+            
+              <li><a href="/tools/diamond-painting/">💎 Diamond Painting Pattern Maker</a></li>
+            
+              <li><a href="/tools/embroidery/">🪡 Embroidery Pattern Simplifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Audio & Video</h3>
+          <ul>
+            
+              <li><a href="/tools/video-safe-zone/">📱 Video Safe-Zone Checker</a></li>
+            
+              <li><a href="/tools/video-thumbnails/">🎞️ Video Thumbnail Contact Sheet</a></li>
+            
+              <li><a href="/tools/audio-chapters/">🎧 Chapter Timestamp Formatter</a></li>
+            
+              <li><a href="/tools/silence-map/">🔇 Podcast Silence Map</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Text & Subtitles</h3>
+          <ul>
+            
+              <li><a href="/tools/subtitle-speed/">💬 Subtitle Reading-Speed Checker</a></li>
+            
+              <li><a href="/tools/subtitle-linefix/">📝 Subtitle Line-Break Fixer</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Data</h3>
+          <ul>
+            
+              <li><a href="/tools/contact-dedupe/">👥 Contact CSV Deduplicator</a></li>
+            
+              <li><a href="/tools/csv-splitter/">↔️ CSV Column Splitter</a></li>
+            
+              <li><a href="/tools/csv-date/">📆 CSV Date Normalizer</a></li>
+            
+              <li><a href="/tools/vcard/">📇 vCard (VCF) Split & Merge</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Files</h3>
+          <ul>
+            
+              <li><a href="/tools/bookmark-cleaner/">🔖 Chrome Bookmark Cleaner</a></li>
+            
+              <li><a href="/tools/bookmark-reading/">📚 Bookmark → Reading List</a></li>
+            
+              <li><a href="/tools/svg-cleaner/">✦ SVG Cleanup & Minifier</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Productivity</h3>
+          <ul>
+            
+              <li><a href="/tools/calendar-cleaner/">📅 iCal Calendar Deduplicator</a></li>
+            
+              <li><a href="/tools/timetable-calendar/">🗓️ Timetable → Calendar (.ics)</a></li>
+            
+          </ul>
+        </div>
+      
+        <div class="category-block">
+          <h3>Images</h3>
+          <ul>
+            
+              <li><a href="/tools/wallpaper/">🖼️ Wallpaper Photo Cropper</a></li>
+            
+              <li><a href="/tools/panorama/">🌄 Panorama Carousel Splitter</a></li>
+            
+              <li><a href="/tools/duplicate-finder/">♻️ Photo Duplicate Finder</a></li>
+            
+              <li><a href="/tools/best-shot/">✨ Photo Best-Shot Finder</a></li>
+            
+              <li><a href="/tools/photo-timeline/">🕒 Photo Timeline Builder</a></li>
+            
+              <li><a href="/tools/family-organizer/">🗂️ Family Photo Date Organizer</a></li>
+            
+          </ul>
+        </div>
+      
+    </div>
+  </div>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
-<script src="/sticker-studio.js"></script>
-<script src="/label-studio.js"></script>
-<script src="/sheet-studio.js"></script>
-<script src="/data/dmc.js"></script>
-<script src="/pattern-studio.js"></script>
-<script src="/image-studio.js"></script>
-<script src="/photo-batch-studio.js"></script>
-<script src="/album-studio.js"></script>
-<script src="/media-studio.js"></script>
-<script src="/subtitle-studio.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
