@@ -12,6 +12,13 @@ if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
 if (!fs.existsSync(toolsDir)) fs.mkdirSync(toolsDir, { recursive: true });
 if (!fs.existsSync(distToolsDir)) fs.mkdirSync(distToolsDir, { recursive: true });
 
+// Ensure assets folder is copied to dist/
+const assetsDir = path.join(baseDir, 'assets');
+const distAssetsDir = path.join(distDir, 'assets');
+if (fs.existsSync(assetsDir)) {
+    fs.cpSync(assetsDir, distAssetsDir, { recursive: true });
+}
+
 // Ensure assets and OG / Icon images exist
 function crc32(buf) {
   let table = [];
@@ -200,11 +207,6 @@ function drawFaviconMark(setPx, width, height) {
     }
   }
 }
-
-const assetsDir = path.join(baseDir, 'assets');
-const distAssetsDir = path.join(distDir, 'assets');
-if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
-if (!fs.existsSync(distAssetsDir)) fs.mkdirSync(distAssetsDir, { recursive: true });
 
 const ogPng = encodePng(1200, 630, drawBrandMark);
 const iconPng = encodePng(180, 180, drawBrandMark);
