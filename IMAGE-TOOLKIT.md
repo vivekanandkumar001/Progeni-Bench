@@ -1,15 +1,20 @@
 # Bench Image Toolkit — Implementation Report
 
-> **Test-suite removal notice.** On user instruction the `test/`, `tests/`,
-> `playwright.config.js`, `test-results/` and `playwright-report/` directories
-> and the `@playwright/test` dev dependency were **removed from this repository**
-> before the Vercel deploy. The test counts quoted in §5 and §12 are the last
-> recorded run **before** removal (224 Node unit tests, 26 Chromium e2e tests,
-> all passing) and are retained as historical evidence only. They can no longer
-> be reproduced from the working tree. Statuses in §4 that read
-> "Implemented and tested" describe tools that *were* verified at that time; the
-> automated verification harness is no longer present. See §13 for how to
-> restore it from git history.
+> **Test-suite location notice.** The `main` branch ships *without* a test
+> harness so the deployed tree stays lean: `test/`, `tests/`,
+> `playwright.config.js` and the `@playwright/test` dev dependency were removed
+> from `main` before the Vercel deploy. The harness now lives on the **`tests`
+> branch** (pushed to `origin/tests`), restored from git history and extended
+> with new image-toolkit coverage.
+>
+> On the `tests` branch, verified green at commit `8c43605`:
+>
+> - `npm test` (**226 pass, 0 fail**) — 13 legacy unit suites + 19 image-toolkit unit tests
+> - `npx playwright test --project=chromium` (**26 pass, 0 fail**) — 17 legacy e2e + 9 image-toolkit e2e
+>
+> The counts in §5 and §12 reflect that branch. Statuses in §4 that read
+> "Implemented and tested" are backed by these tests. See §13 for how to
+> re-create the branch if needed.
 
 Ship-ready reference for the `/image/*` image toolkit added to Progeni Bench.
 It covers architecture, changed files, the full tool registry, per-tool status,
@@ -278,20 +283,23 @@ is present so a vetted local or hosted model can be added later."*
 
 ---
 
-## 5. Test results (historical — harness removed)
+## 5. Test results (on the `tests` branch)
 
-> The test suites were deleted from this repository before the Vercel deploy (see
-> the notice at the top of this file). The results below are the **last recorded
-> run before removal** and are no longer reproducible from the working tree.
+> The suites live on the **`tests` branch** (`origin/tests`), not on `main`.
+> Results below were verified at commit `8c43605` and **are** reproducible by
+> checking out that branch and running the commands shown.
 
-Last recorded run (all commands from the repo root on Windows/PowerShell;
-`npm run build` had to run first because the tests read generated `dist/` assets):
+All commands from the repo root on Windows/PowerShell; `npm run build` must run
+first because the page/SEO tests read generated files:
 
 | Suite | Command | Result |
 |---|---|---|
-| Unit / Node (`node --test`) | `npm test` | **224 pass, 0 fail** |
+| Unit / Node (`node --test`) | `npm test` | **226 pass, 0 fail** |
 | Image toolkit e2e | `npx playwright test tests/image-toolkit.e2e.spec.js --project=chromium` | **9 pass, 0 fail** |
 | Full Chromium e2e | `npx playwright test --project=chromium` | **26 pass, 0 fail** |
+
+The 226 unit tests = 13 legacy suites + `test/image-toolkit.test.js` (19).
+The 26 e2e tests = `tests/e2e.spec.js` (17) + `tests/image-toolkit.e2e.spec.js` (9).
 
 **Unit coverage highlights** (`test/image-toolkit.test.js`): registry
 consistency and counts; every public tool has a real processor **and** a
@@ -305,12 +313,12 @@ inspection; SHA-256.
 
 **e2e coverage highlights** (`tests/image-toolkit.e2e.spec.js`): hub loads the
 real registry + honest unavailable list; SPA navigation mounts the toolkit with
-no reload; compressor produces a real downloadable result and revokes its
-preview URL on leave; studio batch recipe resizes + converts every upload; QR
-generator lazy-loads its same-origin bundle and renders; QR reader decodes a
-locally generated code; **28 representative implemented tools produce real
-outputs with default settings**; generator tools (no source file) work;
-experimental pages are `noindex` and unavailable pages do not exist.
+no reload; compressor produces a real downloadable blob and the toolkit container
+is gone after leaving; studio batch recipe exports every upload; QR generator
+lazy-loads its same-origin bundle and renders; QR reader decodes a locally
+generated code; **28 representative implemented tools produce real outputs with
+default settings**; generator tools (no source file) work; experimental pages are
+`noindex` and unavailable pages do not exist.
 
 ---
 
@@ -496,22 +504,51 @@ npm run build          # writes root pages + dist/ (44 image pages, sitemap, dis
 npm run build          # generate pages + dist
 npm run build:vendor   # rebuild same-origin vendor bundles
 npm start              # serve dist/ on :3000
+# On the `tests` branch only:
+npm test                        # node --test  (226 pass)
+npm run test:e2e                # playwright  (26 pass, chromium)
 ```
 
-## 13. Restoring the removed test harness
+## 13. The `tests` branch
 
-The test suites were intentionally deleted before deploy. They are recoverable
-from git history (the commit that removed them still holds the prior tree):
+`main` intentionally ships without a test harness so the deployed tree stays
+lean. The full suite lives on the **`tests` branch**, pushed to `origin/tests`
+(HEAD `8c43605`). It was restored from git history and extended with new
+image-toolkit coverage.
 
 ```bash
-# find the removal commit
-git log --oneline --diff-filter=D -- test tests playwright.config.js
-# restore everything from the commit BEFORE the removal
-git checkout <removal-commit>^ -- test tests playwright.config.js
-npm install            # re-adds @playwright/test
-npm run build && npm test
-npx playwright test --project=chromium
+# use the harness
+git checkout tests
+npm install                    # restores @playwright/test
+npx playwright install chromium
+npm run build                  # page/SEO tests read generated files
+npm test                       # 226 pass
+npx playwright test --project=chromium   # 26 pass
 ```
+
+**What the branch adds beyond the legacy harness**
+
+- `test/image-toolkit.test.js` (19 tests) — registry invariants, generated
+  SEO/sitemap, and the pure byte core. Written against the runtime API:
+  `sha256Hex` is **async**; `averageHash(rgba,w,h)` returns a 64-entry **bit
+  array** (hex via `bitsToHex`); the deferral/unavailable text field is
+  `reason`.
+- `tests/image-toolkit.e2e.spec.js` (9 tests) — real browser coverage of the
+  toolkit, including a 28-tool sweep. It drives single-file vs multi-file
+  inputs off the input's real `multiple` attribute.
+
+**If the branch is ever lost**, re-create it:
+
+```bash
+git checkout -b tests main
+git checkout a3f2e19 -- test tests playwright.config.js   # legacy suite
+# re-add test/image-toolkit.test.js and tests/image-toolkit.e2e.spec.js from
+# origin/tests if present, otherwise regenerate from image-toolkit.js
+```
+
+> Note: the toolkit's own test files were never committed to `main` before the
+> removal, so they are **not** recoverable from `main`'s history. They now live
+> only on `origin/tests` — do not delete that branch without pushing elsewhere.
 
 Recommended: keep the harness on a branch rather than shipping a repo with no
 verification path.

@@ -81,9 +81,10 @@ account, no watermark.
 - Full architecture, inventory, per-tool status, security decisions and
   rollback notes: see **[IMAGE-TOOLKIT.md](./IMAGE-TOOLKIT.md)**.
 
-> **Note:** the automated test harness (`test/`, `tests/`, Playwright) was
-> removed from this repository before deploy. See §13 of `IMAGE-TOOLKIT.md` to
-> restore it from git history.
+> **Note:** `main` ships without a test harness so the deployed tree stays lean.
+> The full suite (226 Node unit tests + 26 Chromium e2e tests) lives on the
+> **`tests` branch** (`origin/tests`). See §13 of
+> `IMAGE-TOOLKIT.md` for how to use it.
 
 Regenerate vendor bundles with `npm run build:vendor`.
 
