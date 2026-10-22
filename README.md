@@ -9,8 +9,8 @@ Progeni Bench is a Progeni project delivering fast, zero-bloat browser utilities
 # Build static pages and distribution package
 npm run build
 
-# Run unit test suite
-npm test
+# Rebuild same-origin vendor bundles (only when vendor deps change)
+npm run build:vendor
 
 # Serve the dist folder
 npm start
@@ -47,15 +47,46 @@ The `dist/` folder contains everything needed for static production hosting:
 - **_headers** - Strict Content-Security-Policy & security headers
 - **_redirects** - Netlify 404 handler
 - **manifest.webmanifest** - PWA configuration
-- **sitemap.xml** - 35 crawlable URLs for `bench.progeni.live`
+- **sitemap.xml** - 76 crawlable URLs for `bench.progeni.live` (35 legacy + 41 image)
 - **robots.txt** - Crawler directives
 - **about/index.html** - About page
 - **privacy/index.html** - Privacy policy
 - **terms/index.html** - Terms of service
 - **contact/index.html** - Contact & support page
 - **tools/** - 30 pre-rendered static tool pages with Schema.org JSON-LD
+- **image/** - 44 pre-rendered Bench Image Toolkit pages (hub, studio, and 39 tools + experimental pages)
+- **image-tools.config.js** - Image toolkit registry (source of truth for tools, SEO and status)
+- **image-toolkit.js** - Image toolkit runtime (pure byte core + browser engine + UI mounts)
+- **vendor/** - Same-origin third-party bundles (QR, barcode, GIF, TIFF) — no CDN
 - **assets/** - favicon.svg
 - **vercel.json** - Vercel clean URL routing configuration
+
+## 🖼️ Bench Image Toolkit (63 tools · 42 public)
+
+A registry-driven image workspace at `/image/` with its own Studio and one
+stable page per tool. Everything runs locally in your browser — no uploads, no
+account, no watermark.
+
+- **Hub:** `/image/` · **Batch Studio:** `/image/studio/` · **Tools:** `/image/<slug>/`
+- **39 implemented**, **3 experimental** (`noindex, follow`), **10 deferred**,
+  **11 unavailable AI tools** listed honestly with no page and no fake output.
+- Categories: Compress, Resize & Prepare, Convert, Edit & Design, Documents &
+  Scan, Metadata & Privacy, Create & Developer, Animation & Batch, Diagnostics,
+  AI Processing.
+- Highlights: compressor with real before/after sizes, resize/crop with
+  app-preset starting points, format converter, EXIF/GPS remover, metadata
+  viewer, hash + duplicate finder, favicon/OG generators, QR create + read,
+  barcode generator, GIF Studio, sprite sheets, batch rename, scan cleanup and
+  corruption recovery.
+- Full architecture, inventory, per-tool status, security decisions and
+  rollback notes: see **[IMAGE-TOOLKIT.md](./IMAGE-TOOLKIT.md)**.
+
+> **Note:** the automated test harness (`test/`, `tests/`, Playwright) was
+> removed from this repository before deploy. See §13 of `IMAGE-TOOLKIT.md` to
+> restore it from git history.
+
+Regenerate vendor bundles with `npm run build:vendor`.
+
 
 ## 🛠️ Available Tools (30 Total)
 
@@ -105,3 +136,4 @@ The `dist/` folder contains everything needed for static production hosting:
 - **Zero Server Uploads** - All computations happen locally via HTML5 APIs
 - **Zero Third-Party Tracking** - No remote analytics, tracking cookies, or tracking scripts
 - **Strict CSP Headers** - Frame-ancestor and XSS protection enabled
+- **No Retention** - Image toolkit previews use temporary object URLs that are revoked on leave

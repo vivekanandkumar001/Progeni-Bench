@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Colour Palette &amp; Histogram: private browser tool | Bench</title>
+  <meta name="description" content="Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.">
+  <meta name="theme-color" content="#f4f6f9">
+  <meta property="og:site_name" content="Progeni Bench">
+  <meta property="og:title" content="Colour Palette &amp; Histogram: private browser tool | Bench">
+  <meta property="og:description" content="Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bench.progeni.live/image/palette/">
+  <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:alt" content="Progeni Bench - private browser image tools">
+  <meta property="og:locale" content="en-IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Colour Palette &amp; Histogram: private browser tool | Bench">
+  <meta name="twitter:description" content="Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.">
+  <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="canonical" href="https://bench.progeni.live/image/palette/">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Colour Palette & Histogram","url":"https://bench.progeni.live/image/palette/","description":"Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.","applicationCategory":"MultimediaApplication","operatingSystem":"Any","browserRequirements":"Requires a modern browser with Canvas support","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Image toolkit","item":"https://bench.progeni.live/image/"},{"@type":"ListItem","position":3,"name":"Colour Palette & Histogram","item":"https://bench.progeni.live/image/palette/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Colour Palette & Histogram upload my images?","acceptedAnswer":{"@type":"Answer","text":"Decoding, editing and encoding all run inside your browser using Canvas and File APIs. The file is never uploaded, logged or stored by Bench, and the result exists only in a temporary object URL until you download it or close the page."}},{"@type":"Question","name":"What limits apply to Colour Palette & Histogram?","acceptedAnswer":{"@type":"Answer","text":"Median-cut palettes are representative, not perceptually perfect; flat graphics give cleaner results than photos. The histogram counts decoded pixels after EXIF orientation is applied. Colour values are sRGB canvas values and are not converted from embedded ICC profiles."}},{"@type":"Question","name":"Is Colour Palette & Histogram free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes. The tool runs locally in your browser with no account, subscription or watermark on your output. Bench is supported by the rest of its free utility catalogue."}}]}]}</script>
+</head>
+<body><a class="skip-link" href="#app">Skip to main content</a>
+<header class="topbar" role="banner">
+  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="Progeni Bench" width="34" height="34" class="brand-logo"> Progeni Bench<span>.</span></a>
+  <nav id="primary-nav" aria-label="Primary navigation">
+    <a href="/">All tools</a>
+    <a href="/image/">Image toolkit</a>
+    <a href="/about/">About</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
+</header>
+
+<main id="app" class="container" tabindex="-1">
+<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/image/">Image toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">Colour Palette &amp; Histogram</span></nav>
+
+<section class="tool-head itk-head">
+  <span class="eyebrow">Bench Image Toolkit · <span class="itk-badge itk-badge-implemented">Implemented and tested</span></span>
+  <h1>Colour Palette &amp; Histogram</h1>
+  <p>Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image. <strong>Nothing is uploaded.</strong></p>
+  <div class="itk-meta">
+    <span class="itk-chip">JPEG</span><span class="itk-chip">PNG</span><span class="itk-chip">WebP</span><span class="itk-chip">GIF</span><span class="itk-chip">BMP</span><span class="itk-chip">TIFF</span><span class="itk-chip">SVG</span><span class="itk-chip">AVIF</span>
+    <span class="itk-chip">up to 5 files</span>
+    <span class="itk-chip">50 MB / file</span>
+  </div>
+</section>
+
+
+
+<section class="toolbox itk-fallback">
+    <h2>How this tool works without JavaScript</h2>
+    <p>Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.</p>
+    <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
+  </section>
+
+<section class="seo-section itk-seo">
+  <h2>What it does</h2>
+  <p>Extract a dominant colour palette, inspect RGB/luminance histograms and sample colours from an image.</p>
+  <h2>How to use</h2>
+  <ol><li>Upload an image. Bench downsamples it for analysis without altering the original.</li><li>Choose how many palette colours to extract; median-cut quantisation groups similar pixels.</li><li>Review hex values, RGB values and relative shares, and inspect the luminance histogram.</li><li>Download the palette report or a swatch image.</li></ol>
+  <h2>Common use cases</h2><ul><li>Pull a brand palette from a photo.</li><li>Choose matching colours for a design.</li><li>Inspect whether an image is mostly dark or blown out.</li></ul>
+  <h2>Limits &amp; considerations</h2>
+  <p>Median-cut palettes are representative, not perceptually perfect; flat graphics give cleaner results than photos. The histogram counts decoded pixels after EXIF orientation is applied. Colour values are sRGB canvas values and are not converted from embedded ICC profiles.</p>
+  <h2>Privacy &amp; security</h2>
+  <p>Decoding, editing and encoding all run inside your browser using Canvas and File APIs. The file is never uploaded, logged or stored by Bench, and the result exists only in a temporary object URL until you download it or close the page.</p>
+  <h2>Frequently asked questions</h2><div class="faq-list"><div class="faq-item"><strong>Does Colour Palette &amp; Histogram upload my images?</strong><p>Decoding, editing and encoding all run inside your browser using Canvas and File APIs. The file is never uploaded, logged or stored by Bench, and the result exists only in a temporary object URL until you download it or close the page.</p></div><div class="faq-item"><strong>What limits apply to Colour Palette &amp; Histogram?</strong><p>Median-cut palettes are representative, not perceptually perfect; flat graphics give cleaner results than photos. The histogram counts decoded pixels after EXIF orientation is applied. Colour values are sRGB canvas values and are not converted from embedded ICC profiles.</p></div><div class="faq-item"><strong>Is Colour Palette &amp; Histogram free to use?</strong><p>Yes. The tool runs locally in your browser with no account, subscription or watermark on your output. Bench is supported by the rest of its free utility catalogue.</p></div></div>
+  <h2>Related image tools</h2><div class="tool-links"><a href="/image/metadata-viewer/">Metadata &amp; EXIF Viewer</a><a href="/image/strip-metadata/">EXIF &amp; GPS Remover</a><a href="/image/image-hash/">Image Hash Generator</a><a href="/image/duplicate-finder/">Duplicate &amp; Similar Photo Finder</a></div>
+</section>
+</main>
+
+<footer role="contentinfo">
+  <div><strong>Progeni Bench</strong> — <a href="https://progeni.live" target="_blank" rel="noopener">A Progeni project</a> · Small file jobs, done privately in your browser.</div>
+  <div class="footer-links">
+    <a href="/image/">Image toolkit</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/about/">About</a>
+    <a href="/contact/">Contact</a>
+  </div>
+  <div class="footer-directory">
+    <div class="footer-directory-title">Image tools by category</div>
+    <div class="category-blocks">
+      <div class="category-block"><h3>Compress &amp; Optimize</h3><ul><li><a href="/image/compress/">Image Compressor</a></li><li><a href="/image/compress-to-size/">Compress to Target Size</a></li></ul></div><div class="category-block"><h3>Resize &amp; Prepare</h3><ul><li><a href="/image/resize/">Resize Image</a></li><li><a href="/image/crop/">Crop Image</a></li><li><a href="/image/application-photo/">Application Photo &amp; Signature Presets</a></li><li><a href="/image/social-resize/">Social Media &amp; YouTube Image Sizes</a></li><li><a href="/image/dpi/">DPI Inspector &amp; Setter</a></li><li><a href="/image/photo-signature/">Photo &amp; Signature Composition</a></li></ul></div><div class="category-block"><h3>Convert</h3><ul><li><a href="/image/convert/">Image Converter</a></li><li><a href="/image/image-to-pdf/">Image to PDF</a></li><li><a href="/image/base64/">Base64 &amp; Data URI Converter</a></li></ul></div><div class="category-block"><h3>Edit &amp; Design</h3><ul><li><a href="/image/transform/">Rotate, Flip &amp; Straighten</a></li><li><a href="/image/adjust/">Colour Adjustments</a></li><li><a href="/image/blur-redact/">Blur, Pixelate &amp; Redact</a></li><li><a href="/image/annotate/">Text, Captions &amp; Annotations</a></li><li><a href="/image/border-padding/">Border, Padding &amp; Rounded Corners</a></li><li><a href="/image/watermark/">Visible Watermark</a></li><li><a href="/image/meme/">Meme Generator</a></li><li><a href="/image/collage/">Collage Maker</a></li><li><a href="/image/splitter/">Image Splitter &amp; Grid Cutter</a></li><li><a href="/image/merge/">Side-by-Side Image Merge</a></li><li><a href="/image/compare/">Image Compare &amp; Similarity</a></li><li><a href="/image/product-shadow/">Product Photo Shadow &amp; Background</a></li></ul></div><div class="category-block"><h3>Documents &amp; Scan</h3><ul><li><a href="/image/scan-cleanup/">Scan Cleanup &amp; Deskew</a></li></ul></div><div class="category-block"><h3>Metadata &amp; Privacy</h3><ul><li><a href="/image/metadata-viewer/">Metadata &amp; EXIF Viewer</a></li><li><a href="/image/strip-metadata/">EXIF &amp; GPS Remover</a></li><li><a href="/image/image-hash/">Image Hash Generator</a></li><li><a href="/image/duplicate-finder/">Duplicate &amp; Similar Photo Finder</a></li><li><a href="/image/palette/">Colour Palette &amp; Histogram</a></li></ul></div><div class="category-block"><h3>Create &amp; Developer</h3><ul><li><a href="/image/favicon/">Favicon &amp; App Icon Generator</a></li><li><a href="/image/og-image/">Open Graph Image Generator</a></li><li><a href="/image/qr-code/">QR Code Generator</a></li><li><a href="/image/qr-decode/">QR Code Reader</a></li><li><a href="/image/barcode/">Barcode Generator</a></li><li><a href="/image/svg-optimizer/">SVG Optimizer &amp; Validator</a></li><li><a href="/image/placeholder/">Image Placeholder Generator</a></li><li><a href="/image/srcset/">Responsive Image srcset Generator</a></li></ul></div><div class="category-block"><h3>Animation &amp; Batch</h3><ul><li><a href="/image/gif-studio/">GIF Studio: Create &amp; Extract</a></li><li><a href="/image/sprite-sheet/">Sprite Sheet Generator</a></li><li><a href="/image/batch-rename/">Batch Rename &amp; Export</a></li></ul></div><div class="category-block"><h3>Diagnostics</h3><ul><li><a href="/image/inspection/">Image Inspector &amp; Diagnostics</a></li><li><a href="/image/recovery/">Corruption Recovery (Best Effort)</a></li></ul></div>
+    </div>
+  </div>
+</footer>
+<script src="/site.config.js"></script>
+<script src="/utils.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

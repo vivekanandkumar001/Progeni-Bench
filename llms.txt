@@ -49,6 +49,51 @@
 - Photo Timeline Builder (https://bench.progeni.live/tools/photo-timeline/): Sort photo collections chronologically into offline HTML event galleries.
 - Family Photo Date Organizer (https://bench.progeni.live/tools/family-organizer/): Group family photos by date and create structured timeline indices.
 
+## Bench Image Toolkit
+> A registry-driven, 100% client-side image workspace at https://bench.progeni.live/image/ with 39 working tools plus a batch Image Studio. Every tool runs locally in the browser using Canvas and File APIs; no image is ever uploaded. Tools without a real client-side handler are labelled unavailable or deferred instead of faking output.
+
+- Image Toolkit Hub (https://bench.progeni.live/image/): Browse every working image tool by category.
+- Image Studio (https://bench.progeni.live/image/studio/): Multi-file batch resize, convert, rename and ZIP export.
+- Image Compressor (https://bench.progeni.live/image/compress/): Re-encode JPEG/PNG/WebP/AVIF with real before/after byte sizes.
+- Compress to Target Size (https://bench.progeni.live/image/compress-to-size/): Binary-search quality to fit a target file size.
+- Resize Image (https://bench.progeni.live/image/resize/): Exact pixel dimensions with aspect-ratio locking.
+- Crop Image (https://bench.progeni.live/image/crop/): Ratio-locked cropping with a focal point.
+- Application Photo & Signature Presets (https://bench.progeni.live/image/application-photo/): Configurable starting dimensions for passport/visa style photos (no authority guarantee).
+- Social Media & YouTube Image Sizes (https://bench.progeni.live/image/social-resize/): Preset canvas sizes for social and YouTube artwork.
+- DPI Inspector & Setter (https://bench.progeni.live/image/dpi/): Read and rewrite PNG/JPEG DPI without re-encoding pixels.
+- Image Converter (https://bench.progeni.live/image/convert/): Convert between JPEG, PNG, WebP, BMP, TIFF, ICO and GIF.
+- Image to PDF (https://bench.progeni.live/image/image-to-pdf/): Raster pages assembled into a PDF (not searchable text).
+- Base64 & Data URI Converter (https://bench.progeni.live/image/base64/): Encode/decode images and data URIs locally.
+- Rotate, Flip & Straighten (https://bench.progeni.live/image/transform/): Rotate, flip and straighten images.
+- Colour Adjustments (https://bench.progeni.live/image/adjust/): Brightness, contrast, saturation and more.
+- Blur, Pixelate & Redact (https://bench.progeni.live/image/blur-redact/): Obscure regions before sharing.
+- Text, Captions & Annotations (https://bench.progeni.live/image/annotate/): Add captions and annotations.
+- Border, Padding & Rounded Corners (https://bench.progeni.live/image/border-padding/): Frame, pad or round image corners.
+- Visible Watermark (https://bench.progeni.live/image/watermark/): Apply a visible text or image watermark.
+- Meme Generator (https://bench.progeni.live/image/meme/): Classic top/bottom caption memes.
+- Collage Maker (https://bench.progeni.live/image/collage/): Grid collages from multiple images.
+- Image Splitter & Grid Cutter (https://bench.progeni.live/image/splitter/): Cut images into tiles and ZIP them.
+- Side-by-Side Image Merge (https://bench.progeni.live/image/merge/): Combine images horizontally or vertically.
+- Image Compare & Similarity (https://bench.progeni.live/image/compare/): Perceptual similarity between two images.
+- Product Photo Shadow & Background (https://bench.progeni.live/image/product-shadow/): Add shadows and clean backgrounds for listings.
+- Metadata & EXIF Viewer (https://bench.progeni.live/image/metadata-viewer/): Inspect EXIF, GPS and embedded metadata.
+- EXIF & GPS Remover (https://bench.progeni.live/image/strip-metadata/): Strip metadata for privacy.
+- Image Hash Generator (https://bench.progeni.live/image/image-hash/): SHA-256 and perceptual hashes for images.
+- Duplicate & Similar Photo Finder (https://bench.progeni.live/image/duplicate-finder/): Find exact and near-duplicate photos locally.
+- Colour Palette & Histogram (https://bench.progeni.live/image/palette/): Extract dominant colours and histograms.
+- Favicon & App Icon Generator (https://bench.progeni.live/image/favicon/): Generate favicon and app icon sets as a ZIP.
+- Open Graph Image Generator (https://bench.progeni.live/image/og-image/): Compose 1200x630 social share images.
+- QR Code Generator (https://bench.progeni.live/image/qr-code/): Create QR codes locally.
+- QR Code Reader (https://bench.progeni.live/image/qr-decode/): Decode QR codes from images.
+- Barcode Generator (https://bench.progeni.live/image/barcode/): Generate 1D barcodes (CODE128, EAN and more).
+- SVG Optimizer & Validator (https://bench.progeni.live/image/svg-optimizer/): Validate and sanitise SVG safely.
+- Image Placeholder Generator (https://bench.progeni.live/image/placeholder/): Generate placeholder images.
+- Responsive Image srcset Generator (https://bench.progeni.live/image/srcset/): Produce responsive srcset variants as a ZIP.
+- GIF Studio: Create & Extract (https://bench.progeni.live/image/gif-studio/): Build GIFs from frames or extract frames from GIFs.
+- Sprite Sheet Generator (https://bench.progeni.live/image/sprite-sheet/): Pack frames into a sprite sheet plus metadata.
+- Batch Rename & Export (https://bench.progeni.live/image/batch-rename/): Rename and export many images as a ZIP.
+- Image Inspector & Diagnostics (https://bench.progeni.live/image/inspection/): Byte-level inspection without full decoding.
+
 ## Primary Contact & Publisher Information
 - Publisher: Progeni (https://progeni.live)
 - Support Email: support@progeni.live

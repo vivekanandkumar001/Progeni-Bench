@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
+const imageConfig = require('./image-tools.config.js');
+const imagePages = require('./image-pages.js');
 
 const baseDir = __dirname;
 const distDir = path.join(baseDir, 'dist');
@@ -383,6 +385,7 @@ function generateToolPageHtml(tool) {
   <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
+    <a href="/image/">Image toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -498,6 +501,23 @@ function generateHomePageHtml() {
     </div>
   `).join("");
 
+  const imageWorking = imageConfig.TOOLS.filter(t => t.status === "implemented" || t.status === "experimental");
+  const imageFeatured = ["compress", "resize", "crop", "convert", "watermark", "metadata-viewer", "favicon", "qr-code"]
+    .map(id => imageConfig.getTool(id))
+    .filter(Boolean);
+  const imageBandHtml = `
+  <section class="image-band" aria-labelledby="image-toolkit-heading">
+    <div class="image-band-copy">
+      <span class="eyebrow">New · Bench Image Toolkit</span>
+      <h2 id="image-toolkit-heading">Image tools that never upload your files</h2>
+      <p>Compress, resize, convert, crop, annotate, inspect metadata, generate favicons and QR codes, and batch-export — all in your browser. ${imageWorking.length} tools have a real client-side handler; anything unavailable is labelled instead of faked.</p>
+      <p class="image-band-actions"><a class="btn btn-lg" href="/image/">Open the image toolkit</a> <a class="btn secondary" href="/image/studio/">Try Image Studio</a></p>
+    </div>
+    <div class="image-band-grid">
+      ${imageFeatured.map(t => `<a class="image-band-card" href="/image/${t.slug}/"><strong>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+    </div>
+  </section>`;
+
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   const categoryBlocksHtml = categories.map(cat => `
       <div class="category-block" id="category-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
@@ -575,6 +595,7 @@ function generateHomePageHtml() {
   <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
+    <a href="/image/">Image toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -610,6 +631,8 @@ function generateHomePageHtml() {
       ${gridHtml}
     </div>
   </section>
+
+  ${imageBandHtml}
 
   <section class="privacy-band">
     <h2>100% private, client-side architecture</h2>
@@ -721,6 +744,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
+    <a href="/image/">Image toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -778,7 +802,7 @@ function generate404Html() {
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body><a class="skip-link" href="#app">Skip to main content</a>
+<body data-page="404"><a class="skip-link" href="#app">Skip to main content</a>
 <main id="app" class="container" tabindex="-1" style="text-align: center; padding: 60px 20px;">
   <h1>Page Not Found</h1>
   <p>The page you are looking for does not exist on ${SITE_NAME}.</p>
@@ -806,6 +830,9 @@ function generateSitemapXml() {
     `${SITE_URL}/privacy/`,
     `${SITE_URL}/terms/`,
     `${SITE_URL}/contact/`,
+    `${SITE_URL}/image/`,
+    `${SITE_URL}/image/studio/`,
+    ...imagePages.IMPLEMENTED.map(t => `${SITE_URL}/image/${t.slug}/`),
     ...TOOLS.map(t => `${SITE_URL}/tools/${t.id}/`)
   ];
 
@@ -870,6 +897,10 @@ TOOLS.forEach(tool => {
   if (!fs.existsSync(dtDir)) fs.mkdirSync(dtDir, { recursive: true });
   fs.writeFileSync(path.join(dtDir, 'index.html'), html, 'utf8');
 });
+
+// 1b. Build Bench Image Toolkit pages (hub, studio, one page per public tool)
+const imagePageBuild = imagePages.buildImagePages(baseDir);
+console.log(`Generated ${imagePageBuild.count} image toolkit pages (${imagePageBuild.publicTools.length} public tools).`);
 
 // 2. Build home page
 const homeHtml = generateHomePageHtml();
@@ -969,7 +1000,7 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', '_headers', '_redirects', 'vercel.json', 'netlify.toml'
+  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -987,6 +1018,17 @@ filesToCopy.forEach(f => {
 if (fs.existsSync(assetsDir)) {
   fs.readdirSync(assetsDir).forEach(f => {
     fs.copyFileSync(path.join(assetsDir, f), path.join(distAssetsDir, f));
+  });
+}
+
+// Copy same-origin vendor bundles used lazily by image-toolkit.js
+const vendorDir = path.join(baseDir, 'vendor');
+if (fs.existsSync(vendorDir)) {
+  const distVendorDir = path.join(distDir, 'vendor');
+  fs.mkdirSync(distVendorDir, { recursive: true });
+  fs.readdirSync(vendorDir).forEach(f => {
+    const src = path.join(vendorDir, f);
+    if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(distVendorDir, f));
   });
 }
 

@@ -81,6 +81,64 @@ async function ensureStudios(...keys) {
   }
 }
 
+/*
+ * Bench Image Toolkit is lazy-loaded too. Only visitors entering /image/* pay
+ * for the registry and runtime; the rest of the site keeps its small payload.
+ * The registry must load before the runtime so image-toolkit.js can read
+ * window.ImageToolConfig at module-evaluation time.
+ */
+const IMAGE_SCRIPTS = {
+  config: "/image-tools.config.js",
+  toolkit: "/image-toolkit.js"
+};
+let imageLoadPromise = null;
+let imageRouteToken = 0;
+
+function ensureImageToolkit() {
+  if (typeof window !== "undefined" && window.ImageToolkit) return Promise.resolve(window.ImageToolkit);
+  if (!imageLoadPromise) {
+    imageLoadPromise = loadScript(IMAGE_SCRIPTS.config)
+      .then(() => loadScript(IMAGE_SCRIPTS.toolkit))
+      .then(() => {
+        if (!window.ImageToolkit) throw new Error("The image toolkit did not initialise.");
+        return window.ImageToolkit;
+      })
+      .catch(err => {
+        imageLoadPromise = null;
+        throw err;
+      });
+  }
+  return imageLoadPromise;
+}
+
+function leaveImageToolkit() {
+  imageRouteToken++;
+  if (typeof window !== "undefined" && window.ImageToolkit && typeof window.ImageToolkit.unmount === "function") {
+    window.ImageToolkit.unmount();
+  }
+}
+
+async function mountImageRoute(kind, slug) {
+  const token = ++imageRouteToken;
+  const pathAtStart = location.pathname;
+  const target = $("#app");
+  try {
+    const toolkit = await ensureImageToolkit();
+    if (token !== imageRouteToken || location.pathname !== pathAtStart) return;
+    if (kind === "studio") toolkit.mountStudio();
+    else if (kind === "hub") toolkit.mountHub();
+    else toolkit.mountTool(slug);
+    setActiveNav();
+  } catch (err) {
+    if (token !== imageRouteToken) return;
+    if (target) {
+      target.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Image toolkit could not load</h1><p>' +
+        esc(err && err.message ? err.message : String(err)) +
+        '</p><p><a class="btn" href="/image/">Try the image toolkit again</a> <a class="btn secondary" href="/">Return to all tools</a></p></section>';
+    }
+  }
+}
+
 const $ = s => document.querySelector(s);
 const app = $("#app");
 
@@ -1297,11 +1355,26 @@ function route() {
   let p = path || hash || "/";
   p = p.replace(/\/+$/, "") || "/";
 
+  leaveImageToolkit();
+
   if (p === "/" || p === "") { home(); setActiveNav(); return; }
-  // Legal / info pages are fully server-rendered. Re-rendering them client-side
-  // with a single generic paragraph destroyed their real content (privacy
-  // sections, terms clauses, contact guidance). Leave the static markup in place
-  // and only sync the active nav state.
+
+  // Bench Image Toolkit routes. Mounting is async because the registry and
+  // runtime are lazy-loaded; a navigation token prevents a slow load from
+  // overwriting a page the visitor has already moved on to.
+  if (p === "/image" || p.startsWith("/image/")) {
+    if (p === "/image" || p === "/image/studio") {
+      mountImageRoute(p === "/image" ? "hub" : "studio");
+    } else {
+      const slug = p.split("/")[2];
+      mountImageRoute("tool", slug);
+    }
+    return;
+  }
+
+  // The 404 document is static and must not be replaced by the homepage.
+  if (document.body && document.body.dataset.page === "404") { setActiveNav(); return; }
+  if (p === "/404.html" || p === "/404") { return; }
   if (p === "/about" || p === "/privacy" || p === "/terms" || p === "/contact") {
     setActiveNav();
     return;
@@ -1342,6 +1415,10 @@ document.addEventListener("click", e => {
   if (a.target === "_blank" || a.hasAttribute("download")) return;
   const href = a.getAttribute("href");
   if (!href || href.startsWith("//") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+  // Legal/info pages are fully server-rendered with their own content. A
+  // client-side route change would leave the previous page's body in place and
+  // keep its title/canonical, so let the browser load the real document.
+  if (/^\/(about|privacy|terms|contact)(\/|$)/.test(href)) return;
   e.preventDefault();
   history.pushState(null, "", href);
   closeMobileNav();
