@@ -91,8 +91,7 @@ A registry-driven audio workspace at `/audio/` with one stable page per tool.
 Everything runs locally in your browser — audio is never uploaded and never
 stored.
 
-- **Hub:** `/audio/` · **Tools:** `/audio/<slug>/` (`/audio/studio/` is reserved,
-  not shipped)
+- **Hub:** `/audio/` · **Tools:** `/audio/<slug>/`
 - **43 implemented**, **5 experimental** (`noindex, follow`), **6 deferred**,
   **2 unavailable** AI features listed honestly with no page and no fake output.
 - Categories: Convert & Compress, Cut/Join & Edit, Clean & Enhance,
@@ -110,6 +109,10 @@ stored.
   (`microphone=(self)`); every other route keeps `microphone=()`.
 - Full architecture, inventory, per-tool status, security decisions and
   rollback notes: see **[AUDIO-TOOLKIT.md](./AUDIO-TOOLKIT.md)**.
+
+> **Tests:** this branch ships the full harness. Run `npm test` for the Node
+> unit suite and `npm run test:e2e` for the Chromium end-to-end suite. See §13
+> of `IMAGE-TOOLKIT.md` and §13 of `AUDIO-TOOLKIT.md` for details.
 
 Regenerate vendor bundles with `npm run build:vendor`.
 

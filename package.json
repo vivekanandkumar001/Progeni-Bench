@@ -6,6 +6,8 @@
   "scripts": {
     "build": "node build_seo_pages.js",
     "build:vendor": "node scripts/build-vendor.js",
+    "test": "node --test",
+    "test:e2e": "playwright test",
     "verify": "node scripts/verify.js",
     "start": "node scripts/serve.js 3000 dist",
     "serve": "node scripts/serve.js 3000 dist"
@@ -14,6 +16,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "esbuild": "^0.25.0"
   },
   "dependencies": {
