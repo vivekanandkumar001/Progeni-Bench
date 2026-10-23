@@ -45,7 +45,7 @@
 </header>
 
 <main id="app" class="container" tabindex="-1">
-<section class="tool-head itk-head">
+<section class="tool-head itk-head atk-head">
   <span class="eyebrow">Bench Audio Toolkit</span>
   <h1>Private audio tools that run in your browser</h1>
   <p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
@@ -349,6 +349,9 @@
   
   <h2>How processing works</h2>
   <p>Simple editing, analysis, recording and WAV export use the Web Audio API directly in the tab. Format conversion and complex filters (loudness normalisation, denoise, speed, EQ) use a WebAssembly build of FFmpeg that runs on your device. Either way, the audio bytes never leave your machine and Bench keeps no copy.</p>
+  <h2>Licences and source</h2>
+  <p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>
+  <p>Full attributions, exact version numbers and a written offer to supply the corresponding source code are published in <a href="/vendor/ffmpeg/NOTICE.txt">/vendor/ffmpeg/NOTICE.txt</a>. That notice names the upstream FFmpeg project and the ffmpeg.wasm packaging project, including their source repositories.</p>
   <h2>Not available yet</h2>
   <p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p>
   <div class="itk-status-list">

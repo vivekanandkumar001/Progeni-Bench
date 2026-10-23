@@ -99,7 +99,7 @@ stored.
   Utilities.
 - Engines: **24 FFmpeg.wasm** (codec conversion + complex filters),
   **22 Web Audio API** (decode/analysis/DSP/WAV export), **2 MediaRecorder**
-  (microphone capture). No cloud APIs.
+  (microphone capture, including the live mic check). No cloud APIs.
 - Highlights: format converter, compressor with real before/after sizes,
   trimmer, joiner, splitter, fade/reverse/speed/pitch, silence remover,
   loudness normaliser (EBU R128), noise reducer, EQ, voice recorder with mic

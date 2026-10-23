@@ -1261,6 +1261,8 @@
     // processor simply reports that a recorded take must be supplied first.
     throw new Error("Use the recorder controls on this page: press Record, then Stop, then download.");
   }
+  // Live-only tool. The page mounts the meter (mountMicCheck); this handler
+  // exists so a batch invocation fails loudly instead of pretending to work.
   async function micCheck() {
     throw new Error("Use the live microphone meter on this page: press Start test, then allow microphone access.");
   }
@@ -1339,6 +1341,8 @@
     return { outputs: [audioOut(colour + "-noise.wav", blob, colour + " noise, " + dur + "s, " + formatBytes(blob.size))], errors: [] };
   }
 
+  // Live-only tool. The page mounts a real Web Audio scheduler
+  // (mountMetronome); this handler exists only to fail loudly out of context.
   async function metronome() {
     throw new Error("Use the live metronome on this page: press Start.");
   }
@@ -2001,8 +2005,6 @@
 
   /* ============================================ interactive page mounting */
 
-  const RECORDER_TOOLS = { record: true, micCheck: true };
-
   function mountTool(id) {
     if (typeof document === "undefined") return;
     const config = cfg();
@@ -2034,16 +2036,40 @@
     const limitation = tool.status === "experimental"
       ? '<div class="itk-status warn"><strong>Experimental</strong><span>' + esc(tool.limitations || tool.reason || "This workflow is still under evaluation.") + "</span></div>" : "";
 
-    const isRecorder = !!RECORDER_TOOLS[tool.handler];
+    const isRecorder = tool.handler === "record";
+    const isMicCheck = tool.handler === "micCheck";
+    const isMetronome = tool.handler === "metronome";
+    const isLiveAudio = isRecorder || isMicCheck || isMetronome;
+
     const recorderPanel = isRecorder
       ? '<div class="atk-recorder" id="atk-recorder">' +
-          '<p class="itk-muted">Your browser will ask for microphone permission when you press Start. Recording stays on this device.</p>' +
+          '<p class="itk-muted">Your browser will ask for microphone permission when you press Start. The take is processed in this tab and is never uploaded or stored.</p>' +
           '<div class="itk-actions"><button class="btn btn-lg" type="button" id="atk-rec">Start recording</button><button class="btn secondary" type="button" id="atk-rec-stop" hidden>Stop</button></div>' +
           '<div class="atk-meter" aria-hidden="true"><span id="atk-meter-fill"></span></div>' +
           '<div class="atk-timer" id="atk-timer">0:00.0</div>' +
-          (tool.handler === "record" ? '<div class="itk-actions"><button class="btn" type="button" id="atk-rec-use" hidden>Use this recording</button></div>' : "") +
         "</div>"
       : "";
+    const micPanel = isMicCheck
+      ? '<div class="atk-recorder" id="atk-mic">' +
+          '<p class="itk-muted">Press Start test and allow microphone access. This page only reads your live input level - no recording is made, saved or uploaded.</p>' +
+          '<div class="itk-actions"><button class="btn btn-lg" type="button" id="atk-mic-start">Start test</button><button class="btn secondary" type="button" id="atk-mic-stop" hidden>Stop test</button></div>' +
+          '<div class="atk-meter" aria-hidden="true"><span id="atk-meter-fill"></span></div>' +
+          '<div class="atk-timer" id="atk-timer">Not started</div>' +
+        "</div>"
+      : "";
+    const metroPanel = isMetronome
+      ? '<div class="atk-recorder" id="atk-metro-panel">' +
+          '<p class="itk-muted">The click track is synthesised in your browser. Start it, then change the tempo or beats per bar - the next beat picks up the new settings.</p>' +
+          '<div class="atk-actions-row"><div class="itk-actions"><button class="btn btn-lg" type="button" id="atk-metro">Start metronome</button><button class="btn secondary" type="button" id="atk-metro-stop" hidden>Stop</button></div>' +
+          '<div class="atk-beat" id="atk-beat" aria-live="polite">Ready</div></div>' +
+        "</div>"
+      : "";
+
+    const emptyResults = isMicCheck
+      ? '<div class="itk-empty"><strong>No recording is made</strong><span>The meter reads live input only. Stopping releases the microphone immediately.</span></div>'
+      : isMetronome
+        ? '<div class="itk-empty"><strong>Live click track</strong><span>Audio is synthesised in real time. Nothing is downloaded or stored.</span></div>'
+        : '<div class="itk-empty"><strong>No results yet</strong><span>Bench creates real output only.</span></div>';
 
     const addSection = tool.requiresFile === false
       ? (isRecorder ? "" : "")
@@ -2064,16 +2090,17 @@
           '<div class="itk-panel itk-controls">' +
             addSection +
             recorderPanel +
+            micPanel +
+            metroPanel +
             (optionList.length || tool.requiresFile !== false ? "<h2>" + (tool.requiresFile === false ? "1" : "2") + ". Settings</h2>" : "") +
             '<form id="atk-form" class="itk-options" novalidate>' + options + "</form>" +
-            (tool.requiresFile === false && !isRecorder ? "" : "") +
-            '<div class="itk-actions"><button class="btn btn-lg" id="atk-run" type="button">' + esc(tool.action || "Process") + '</button><button class="btn secondary" id="atk-reset" type="button">Reset</button></div>' +
+            (isLiveAudio ? "" : '<div class="itk-actions"><button class="btn btn-lg" id="atk-run" type="button">' + esc(tool.action || "Process") + '</button><button class="btn secondary" id="atk-reset" type="button">Reset</button></div>') +
             '<div class="itk-progress" id="atk-progress" aria-live="polite"><div class="itk-bar"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready. Processing happens locally in this tab.</p></div>' +
           "</div>" +
           '<div class="itk-panel itk-output">' +
-            "<h2>" + (tool.requiresFile === false ? "2" : "3") + ". Results</h2>" +
+            "<h2>" + (isLiveAudio && !isRecorder ? "2. Notes" : (tool.requiresFile === false ? "2" : "3") + ". Results") + "</h2>" +
             previewHtml() +
-            '<div id="atk-results" class="itk-results" aria-live="polite"><div class="itk-empty"><strong>No results yet</strong><span>Bench creates real output only.</span></div></div>' +
+            '<div id="atk-results" class="itk-results" aria-live="polite">' + emptyResults + "</div>" +
           "</div>" +
         "</div>" +
       "</section>" + seoHtml(tool);
@@ -2202,16 +2229,17 @@
       resultsEl.innerHTML = '<div class="itk-empty"><strong>No results yet</strong><span>Bench creates real output only.</span></div>';
       progress(0, "Ready. Processing happens locally in this tab.");
     });
-    if (formEl) formEl.addEventListener("submit", function (e) { e.preventDefault(); run(); });
+    if (formEl && runEl) formEl.addEventListener("submit", function (e) { e.preventDefault(); run(); });
 
     if (isRecorder) mountRecorder(state, tool, progress, resultsEl);
+    if (isMicCheck) mountMicCheck(state, progress);
+    if (isMetronome) mountMetronome(state, progress);
   }
 
   /* --- Microphone recorder + live meter wiring. */
   function mountRecorder(state, tool, progress, resultsEl) {
     const recBtn = document.getElementById("atk-rec");
     const stopBtn = document.getElementById("atk-rec-stop");
-    const useBtn = document.getElementById("atk-rec-use");
     const meter = document.getElementById("atk-meter-fill");
     const timer = document.getElementById("atk-timer");
     if (!recBtn) return;
@@ -2268,7 +2296,15 @@
             const v = readValues(document.getElementById("atk-form"));
             const out = [];
             if (v.format === "wav" || !v.format) {
-              out.push({ name: takeName.replace(/\.[a-z0-9]+$/i, ".wav"), blob: blob, size: blob.size, kind: "audio", note: "Recorded take, " + formatBytes(blob.size) });
+              // MediaRecorder produces WebM/Opus in most browsers. Never rename
+              // those bytes ".wav" - decode the take and write a real PCM WAV.
+              try {
+                const buffer = await decodeAudio(file);
+                const wavBlob = encodeWav(bufferToChannels(buffer), buffer.sampleRate, { bits: 16 });
+                out.push({ name: takeName.replace(/\.[a-z0-9]+$/i, ".wav"), blob: wavBlob, size: wavBlob.size, kind: "audio", note: "Recorded take, " + formatBytes(wavBlob.size) });
+              } catch (e) {
+                out.push({ name: takeName, blob: blob, size: blob.size, kind: "audio", note: "Recorded (" + (blob.type || "audio") + "); WAV conversion failed: " + e.message });
+              }
             } else {
               try {
                 const wav = await fileToWavBytes(file);
@@ -2302,6 +2338,138 @@
     });
   }
 
+  /* --- Live microphone check: meter only, no recording is ever created. */
+  function mountMicCheck(state, progress) {
+    const startBtn = document.getElementById("atk-mic-start");
+    const stopBtn = document.getElementById("atk-mic-stop");
+    const meter = document.getElementById("atk-meter-fill");
+    const timer = document.getElementById("atk-timer");
+    if (!startBtn) return;
+
+    let stream = null, tick = null, sourceNode = null, startedAt = 0, peak = 0;
+
+    function release() {
+      if (stream) stream.getTracks().forEach(function (t) { try { t.stop(); } catch (_) {} });
+      stream = null;
+      if (tick) { clearInterval(tick); tick = null; }
+      if (sourceNode) { try { sourceNode.disconnect(); } catch (_) {} sourceNode = null; }
+      if (meter) meter.style.width = "0%";
+    }
+    state.cleanup = release;
+
+    startBtn.addEventListener("click", async function () {
+      try {
+        progress(5, "Requesting microphone permission…");
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const ac = audioContext();
+        sourceNode = ac.createMediaStreamSource(stream);
+        const analyser = ac.createAnalyser();
+        analyser.fftSize = 1024;
+        sourceNode.connect(analyser);
+        const data = new Uint8Array(analyser.fftSize);
+        peak = 0;
+        startedAt = Date.now();
+        tick = setInterval(function () {
+          analyser.getByteTimeDomainData(data);
+          let level = 0;
+          for (let i = 0; i < data.length; i++) {
+            const v = Math.abs(data[i] - 128) / 128;
+            if (v > level) level = v;
+          }
+          if (level > peak) peak = level;
+          if (meter) meter.style.width = Math.round(level * 100) + "%";
+          if (timer) timer.textContent = ((Date.now() - startedAt) / 1000).toFixed(1) + "s";
+        }, 80);
+        startBtn.hidden = true;
+        if (stopBtn) stopBtn.hidden = false;
+        progress(20, "Listening. Speak or tap the microphone and watch the meter.");
+      } catch (err) {
+        release();
+        progress(0, "Microphone error: " + (err && err.message ? err.message : String(err)) + ". Check your browser's permission settings.");
+      }
+    });
+
+    if (stopBtn) stopBtn.addEventListener("click", function () {
+      const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+      release();
+      startBtn.hidden = false;
+      stopBtn.hidden = true;
+      if (timer) timer.textContent = "Stopped after " + elapsed + "s";
+      if (peak > 0.02) progress(100, "Microphone works. Peak input was " + Math.round(peak * 100) + "% of full scale.");
+      else progress(0, "No input detected. Check that the right microphone is selected and not muted.");
+    });
+  }
+
+  /* --- Live metronome: Web Audio lookahead scheduler (no file output). */
+  function mountMetronome(state, progress) {
+    const startBtn = document.getElementById("atk-metro");
+    const stopBtn = document.getElementById("atk-metro-stop");
+    const beatEl = document.getElementById("atk-beat");
+    if (!startBtn) return;
+
+    let timer = null, running = false, nextNote = 0, beatIndex = 0;
+
+    function clickAt(time, accent) {
+      const ac = audioContext();
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(accent ? 1760 : 1100, time);
+      gain.gain.setValueAtTime(0.0001, time);
+      gain.gain.exponentialRampToValueAtTime(accent ? 0.34 : 0.2, time + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(time);
+      osc.stop(time + 0.07);
+    }
+
+    function schedule() {
+      const ac = audioContext();
+      const v = readValues(document.getElementById("atk-form"));
+      const bpm = clamp(num(v.bpm, 120), 30, 300);
+      const beats = Math.round(clamp(num(v.beats, 4), 1, 12));
+      const interval = 60 / bpm;
+      while (nextNote < ac.currentTime + 0.15) {
+        const accent = beatIndex % beats === 0;
+        clickAt(nextNote, accent);
+        const shown = (beatIndex % beats) + 1;
+        const delay = Math.max(0, (nextNote - ac.currentTime) * 1000);
+        setTimeout(function () {
+          if (running && beatEl) beatEl.textContent = "Beat " + shown + " of " + beats;
+        }, delay);
+        nextNote += interval;
+        beatIndex++;
+      }
+    }
+
+    function stop() {
+      running = false;
+      if (timer) { clearInterval(timer); timer = null; }
+      startBtn.hidden = false;
+      if (stopBtn) stopBtn.hidden = true;
+      if (beatEl) beatEl.textContent = "Stopped";
+      progress(0, "Metronome stopped.");
+    }
+    state.cleanup = stop;
+
+    startBtn.addEventListener("click", function () {
+      if (running) return;
+      const ac = audioContext();
+      if (ac.state === "suspended" && ac.resume) ac.resume();
+      running = true;
+      beatIndex = 0;
+      nextNote = ac.currentTime + 0.1;
+      schedule();
+      timer = setInterval(schedule, 25);
+      startBtn.hidden = true;
+      if (stopBtn) stopBtn.hidden = false;
+      progress(20, "Metronome running. Tempo changes apply on the next beat.");
+    });
+
+    if (stopBtn) stopBtn.addEventListener("click", stop);
+  }
+
   function pickRecorderMime() {
     const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"];
     if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) return "";
@@ -2311,12 +2479,32 @@
 
   /* ==================================================== hub + studio mount */
 
+  function hubInfoHtml(config) {
+    const limits = config.LIMITS || {};
+    const notReady = (config.TOOLS || []).filter(function (t) { return t.status === "deferred" || t.status === "unavailable"; });
+    return '<section class="toolbox itk-notice-box">' +
+      '<h2>Status and limits</h2><p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: ' + esc(limits.maxFileBytes / (1024 * 1024)) + ' MB per file, ' + esc(limits.maxDurationSec / 60) + ' minutes per file, ' + esc(limits.maxFiles) + ' files per batch.</p>' +
+      '<h2>How processing works</h2><p>Simple editing, analysis, recording and WAV export use the Web Audio API directly in the tab. Format conversion and complex filters (loudness normalisation, denoise, speed, EQ) use a WebAssembly build of FFmpeg that runs on your device. Either way, the audio bytes never leave your machine and Bench keeps no copy.</p>' +
+      '<h2>Licences and source</h2><p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>' +
+      '<p>Full attributions, exact version numbers and a written offer to supply the corresponding source code are published in <a href="/vendor/ffmpeg/NOTICE.txt">/vendor/ffmpeg/NOTICE.txt</a>. That notice names the upstream FFmpeg project and the ffmpeg.wasm packaging project, including their source repositories.</p>' +
+      (notReady.length ? '<h2>Not available yet</h2><p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p><div class="itk-status-list">' +
+        notReady.map(function (t) {
+          return '<div class="itk-status-row"><strong>' + esc(t.name) + '</strong><em class="itk-badge itk-badge-' + esc(t.status) + '">' + esc(statusLabel(t.status)) + '</em><p>' + esc(t.reason || '') + '</p></div>';
+        }).join("") + '</div>' : "") +
+      '<p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>' +
+      '</section>';
+  }
+
   function mountHub() {
     if (typeof document === "undefined") return;
     const app = document.getElementById("app");
     if (!app) return;
     unmount();
     const config = cfg();
+    // Landing directly on /audio/ keeps the richer server-rendered hub (status
+    // and limits, processing notes, GPL source offer, "not available" list).
+    // Only rebuild the hub after client-side navigation, where #app is empty.
+    if (app.querySelector(".itk-status-list")) { setActiveNav(); return; }
     const PUBLIC = (config.TOOLS || []).filter(function (t) { return t.status === "implemented" || t.status === "experimental"; });
     const cats = (config.CATEGORIES || []).map(function (cat) {
       const tools = PUBLIC.filter(function (t) { return t.category === cat.id; });
@@ -2328,10 +2516,10 @@
     }).join("");
     const impl = PUBLIC.filter(function (t) { return t.status === "implemented"; }).length;
     const exp = PUBLIC.filter(function (t) { return t.status === "experimental"; }).length;
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Private audio tools that run in your browser</h1>' +
+    app.innerHTML = '<section class="tool-head itk-head atk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Private audio tools that run in your browser</h1>' +
       "<p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool has a real client-side handler and a tested download path.</p>" +
       '<div class="itk-meta"><span class="itk-chip">' + impl + ' implemented</span><span class="itk-chip">' + exp + ' experimental</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div></section>' +
-      '<section class="itk-categories">' + cats + "</section>";
+      '<section class="itk-categories">' + cats + "</section>" + hubInfoHtml(config);
     setActiveNav();
   }
 

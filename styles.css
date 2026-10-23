@@ -2407,3 +2407,78 @@ footer a:hover{color:var(--brand)}
 @media (max-width: 640px){
   .atk-wave{height:72px}
 }
+
+/* ------------------------------------------------ Interaction polish */
+/* One visible keyboard focus ring for every control, on every page. */
+:where(a, button, input, select, textarea, summary, [role="button"]):focus-visible{
+  outline:3px solid rgba(29, 78, 216, .38);
+  outline-offset:2px;
+}
+.itk-tool-card:focus-visible{outline-offset:3px;border-color:var(--brand)}
+::selection{background:var(--brand-tint);color:var(--text)}
+
+/* Tool cards: a small arrow affordance makes the whole card read as a link. */
+.itk-tool-card{position:relative;overflow:hidden}
+.itk-tool-card strong{padding-right:16px}
+.itk-tool-card::after{
+  content:"";position:absolute;top:18px;right:16px;width:7px;height:7px;
+  border-top:2px solid var(--brand);border-right:2px solid var(--brand);
+  transform:rotate(45deg) translate(-3px,3px);opacity:0;
+  transition:opacity .16s ease, transform .16s ease;pointer-events:none;
+}
+.itk-tool-card:hover::after,
+.itk-tool-card:focus-visible::after{opacity:.9;transform:rotate(45deg) translate(0,0)}
+.itk-tool-card:hover{box-shadow:var(--shadow-sm)}
+
+/* ------------------------------------------------ Audio hub hero */
+/* A waveform motif gives the audio workspace its own identity without images
+   or extra requests. The bars are layered gradients, so they scale cleanly and
+   disappear behind the text mask. */
+.atk-head{
+  position:relative;overflow:hidden;
+  padding:clamp(20px, 3vw, 34px);
+  border:1px solid var(--line);border-radius:var(--radius-lg);
+  background:var(--hero-grad);box-shadow:var(--shadow-sm);
+}
+.atk-head > *{position:relative;z-index:1}
+.atk-head::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(680px 240px at 100% 0%, rgba(29,78,216,.10), transparent 68%);
+}
+.atk-head::after{
+  content:"";position:absolute;right:0;bottom:0;z-index:0;pointer-events:none;
+  width:min(52%, 520px);height:104px;opacity:.55;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(29,78,216,.62) 0 3px, transparent 3px 11px),
+    repeating-linear-gradient(90deg, rgba(29,78,216,.42) 0 3px, transparent 3px 17px),
+    repeating-linear-gradient(90deg, rgba(29,78,216,.28) 0 3px, transparent 3px 25px);
+  background-size:100% 34%, 100% 60%, 100% 92%;
+  background-position:left bottom, left bottom, left bottom;
+  background-repeat:repeat-x;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 26%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 26%);
+}
+@media (max-width: 640px){
+  .atk-head::after{height:72px;width:70%;opacity:.4}
+  .atk-wave{height:72px}
+}
+
+/* ------------------------------------------------ Audio tool surfaces */
+.atk-preview{
+  border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), var(--shadow-xs);
+}
+.atk-wave{height:118px;background:linear-gradient(180deg, var(--card) 0%, var(--surface) 100%)}
+.atk-transport .btn-sm{min-height:34px}
+.itk-result audio{width:100%;margin:8px 0 2px;height:40px;border-radius:999px;background:var(--surface-2)}
+.atk-recorder{border-left:3px solid var(--brand);border-radius:12px}
+.atk-recorder .itk-muted{margin:0 0 4px}
+.atk-actions-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.atk-actions-row .itk-actions{margin-top:0}
+.atk-beat{
+  font-variant-numeric:tabular-nums;font-weight:700;font-size:var(--font-sm);
+  color:var(--brand);background:var(--brand-tint);border:1px solid var(--eyebrow-bd);
+  border-radius:var(--radius-pill);padding:7px 15px;min-width:120px;text-align:center;
+}
+.atk-meter{height:10px;background:var(--surface-3)}
+

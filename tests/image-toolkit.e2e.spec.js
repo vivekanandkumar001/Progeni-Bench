@@ -129,17 +129,17 @@ test('QR reader decodes a locally generated QR code', async ({ page }) => {
   const img = page.locator('#itk-results img').first();
   await expect(img).toBeVisible({ timeout: 20000 });
 
-  const dataUrl = await img.getAttribute('src');
-  const src = dataUrl.startsWith('blob:')
-    ? await page.evaluate(async url => {
-        const res = await fetch(url);
-        const buf = await res.arrayBuffer();
-        let s = '';
-        const bytes = new Uint8Array(buf);
-        for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-        return 'data:image/png;base64,' + btoa(s);
-      }, dataUrl)
-    : dataUrl;
+  // Re-encode the generated image through a canvas rather than fetch()ing its
+  // blob URL: the production CSP keeps connect-src 'self', which correctly
+  // blocks fetch('blob:').
+  const src = await page.evaluate(() => {
+    const img = document.querySelector('#itk-results img');
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    return canvas.toDataURL('image/png');
+  });
   const qrPng = Buffer.from(src.split(',')[1], 'base64');
 
   await page.goto('/image/qr-decode/');
