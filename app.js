@@ -139,6 +139,63 @@ async function mountImageRoute(kind, slug) {
   }
 }
 
+/*
+ * Bench Audio Toolkit is lazy-loaded on /audio/* only, exactly like the image
+ * toolkit. The registry must evaluate before the runtime so audio-toolkit.js
+ * can read window.AudioToolConfig at module-evaluation time.
+ */
+const AUDIO_SCRIPTS = {
+  config: "/audio-tools.config.js",
+  toolkit: "/audio-toolkit.js"
+};
+let audioLoadPromise = null;
+let audioRouteToken = 0;
+
+function ensureAudioToolkit() {
+  if (typeof window !== "undefined" && window.AudioToolkit) return Promise.resolve(window.AudioToolkit);
+  if (!audioLoadPromise) {
+    audioLoadPromise = loadScript(AUDIO_SCRIPTS.config)
+      .then(() => loadScript(AUDIO_SCRIPTS.toolkit))
+      .then(() => {
+        if (!window.AudioToolkit) throw new Error("The audio toolkit did not initialise.");
+        return window.AudioToolkit;
+      })
+      .catch(err => {
+        audioLoadPromise = null;
+        throw err;
+      });
+  }
+  return audioLoadPromise;
+}
+
+function leaveAudioToolkit() {
+  audioRouteToken++;
+  if (typeof window !== "undefined" && window.AudioToolkit && typeof window.AudioToolkit.unmount === "function") {
+    window.AudioToolkit.unmount();
+  }
+}
+
+async function mountAudioRoute(kind, slug) {
+  const token = ++audioRouteToken;
+  const pathAtStart = location.pathname;
+  const target = $("#app");
+  try {
+    const toolkit = await ensureAudioToolkit();
+    if (token !== audioRouteToken || location.pathname !== pathAtStart) return;
+    if (kind === "studio") toolkit.mountStudio();
+    else if (kind === "hub") toolkit.mountHub();
+    else toolkit.mountTool(slug);
+    setActiveNav();
+  } catch (err) {
+    if (token !== audioRouteToken) return;
+    if (target) {
+      target.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Audio toolkit could not load</h1><p>' +
+        esc(err && err.message ? err.message : String(err)) +
+        '</p><p><a class="btn" href="/audio/">Try the audio toolkit again</a> <a class="btn secondary" href="/">Return to all tools</a></p></section>';
+    }
+  }
+}
+
 const $ = s => document.querySelector(s);
 const app = $("#app");
 
@@ -1356,6 +1413,7 @@ function route() {
   p = p.replace(/\/+$/, "") || "/";
 
   leaveImageToolkit();
+  leaveAudioToolkit();
 
   if (p === "/" || p === "") { home(); setActiveNav(); return; }
 
@@ -1368,6 +1426,17 @@ function route() {
     } else {
       const slug = p.split("/")[2];
       mountImageRoute("tool", slug);
+    }
+    return;
+  }
+
+  // Bench Audio Toolkit routes, lazy-loaded exactly like the image toolkit.
+  if (p === "/audio" || p.startsWith("/audio/")) {
+    if (p === "/audio") {
+      mountAudioRoute("hub");
+    } else {
+      const slug = p.split("/")[2];
+      mountAudioRoute("tool", slug);
     }
     return;
   }

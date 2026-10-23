@@ -4,6 +4,8 @@ const zlib = require('zlib');
 const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
 const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
+const audioConfig = require('./audio-tools.config.js');
+const audioPages = require('./audio-pages.js');
 
 const baseDir = __dirname;
 const distDir = path.join(baseDir, 'dist');
@@ -386,6 +388,7 @@ function generateToolPageHtml(tool) {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -518,6 +521,23 @@ function generateHomePageHtml() {
     </div>
   </section>`;
 
+  const audioWorking = audioConfig.TOOLS.filter(t => t.status === "implemented" || t.status === "experimental");
+  const audioFeatured = ["convert", "trimmer", "compress", "joiner", "loudness-normalizer", "noise-reducer", "recorder", "waveform-image"]
+    .map(id => audioConfig.getTool(id))
+    .filter(Boolean);
+  const audioBandHtml = `
+  <section class="image-band audio-band" aria-labelledby="audio-toolkit-heading">
+    <div class="image-band-copy">
+      <span class="eyebrow">New · Bench Audio Toolkit</span>
+      <h2 id="audio-toolkit-heading">Audio tools that never upload your files</h2>
+      <p>Convert, compress, trim, join, clean, record, analyse and tag audio — all in your browser. ${audioWorking.length} tools have a real client-side handler; conversion and heavy filters use a local WebAssembly engine, and anything unavailable is labelled instead of faked.</p>
+      <p class="image-band-actions"><a class="btn btn-lg" href="/audio/">Open the audio toolkit</a> <a class="btn secondary" href="/audio/recorder/">Try the voice recorder</a></p>
+    </div>
+    <div class="image-band-grid">
+      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+    </div>
+  </section>`;
+
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   const categoryBlocksHtml = categories.map(cat => `
       <div class="category-block" id="category-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
@@ -596,6 +616,7 @@ function generateHomePageHtml() {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -633,6 +654,8 @@ function generateHomePageHtml() {
   </section>
 
   ${imageBandHtml}
+
+  ${audioBandHtml}
 
   <section class="privacy-band">
     <h2>100% private, client-side architecture</h2>
@@ -745,6 +768,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -833,6 +857,8 @@ function generateSitemapXml() {
     `${SITE_URL}/image/`,
     `${SITE_URL}/image/studio/`,
     ...imagePages.IMPLEMENTED.map(t => `${SITE_URL}/image/${t.slug}/`),
+    `${SITE_URL}/audio/`,
+    ...audioPages.IMPLEMENTED.map(t => `${SITE_URL}/audio/${t.slug}/`),
     ...TOOLS.map(t => `${SITE_URL}/tools/${t.id}/`)
   ];
 
@@ -901,6 +927,10 @@ TOOLS.forEach(tool => {
 // 1b. Build Bench Image Toolkit pages (hub, studio, one page per public tool)
 const imagePageBuild = imagePages.buildImagePages(baseDir);
 console.log(`Generated ${imagePageBuild.count} image toolkit pages (${imagePageBuild.publicTools.length} public tools).`);
+
+// 1c. Build Bench Audio Toolkit pages (hub, one page per public tool)
+const audioPageBuild = audioPages.buildAudioPages(baseDir);
+console.log(`Generated ${audioPageBuild.count} audio toolkit pages (${audioPageBuild.publicTools.length} public tools).`);
 
 // 2. Build home page
 const homeHtml = generateHomePageHtml();
@@ -1000,7 +1030,7 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
+  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -1021,15 +1051,22 @@ if (fs.existsSync(assetsDir)) {
   });
 }
 
-// Copy same-origin vendor bundles used lazily by image-toolkit.js
+// Copy same-origin vendor bundles used lazily by image-toolkit.js and the
+// FFmpeg engine (/vendor/ffmpeg/) used lazily by audio-toolkit.js. Recurse so
+// subdirectories such as vendor/ffmpeg/ are copied too.
 const vendorDir = path.join(baseDir, 'vendor');
 if (fs.existsSync(vendorDir)) {
   const distVendorDir = path.join(distDir, 'vendor');
-  fs.mkdirSync(distVendorDir, { recursive: true });
-  fs.readdirSync(vendorDir).forEach(f => {
-    const src = path.join(vendorDir, f);
-    if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(distVendorDir, f));
-  });
+  const copyTree = (from, to) => {
+    fs.mkdirSync(to, { recursive: true });
+    fs.readdirSync(from).forEach(f => {
+      const src = path.join(from, f);
+      const dest = path.join(to, f);
+      if (fs.statSync(src).isDirectory()) copyTree(src, dest);
+      else fs.copyFileSync(src, dest);
+    });
+  };
+  copyTree(vendorDir, distVendorDir);
 }
 
 // Copy shared data modules (DMC palette used by pattern-studio.js)
