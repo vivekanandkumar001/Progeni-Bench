@@ -325,7 +325,7 @@
     { key: "size", label: "Image size (px)", type: "number", min: 64, max: 2048, step: 1, value: 512 },
     { key: "margin", label: "Quiet-zone margin (modules)", type: "number", min: 0, max: 10, step: 1, value: 4 },
     { key: "ecLevel", label: "Error correction", type: "select", value: "M",
-      options: [{ value: "L", label: "L - 7%" }, { value: "M", label: "M - 15%" }, { value: "Q", label: "Q - 25%" }, { value: "H", label: "H - 30%" }] },
+      options: [{ value: "L", label: "L — 7%" }, { value: "M", label: "M — 15%" }, { value: "Q", label: "Q — 25%" }, { value: "H", label: "H — 30%" }] },
     { key: "dark", label: "Foreground colour", type: "color", value: "#111827" },
     { key: "light", label: "Background colour", type: "color", value: "#ffffff" },
     { key: "svg", label: "Also download SVG", type: "checkbox", value: true }
@@ -753,11 +753,11 @@
     options: [
       { key: "format", label: "Convert to", type: "select", value: "png",
         options: [
-          { value: "png", label: "PNG - lossless, transparency" },
+          { value: "png", label: "PNG — lossless, transparency" },
           { value: "jpeg", label: "JPEG - small photos, no transparency" },
           { value: "webp", label: "WebP - small files, transparency" },
           { value: "avif", label: "AVIF - modern, browser dependent" },
-          { value: "bmp", label: "BMP - uncompressed legacy" },
+          { value: "bmp", label: "BMP — uncompressed legacy" },
           { value: "tiff", label: "TIFF - uncompressed raster" },
           { value: "gif", label: "GIF - 256 colours, single frame" },
           { value: "ico", label: "ICO - PNG-compressed icon (256 px)" }
@@ -1308,7 +1308,7 @@
 
   TOOLS.push(T({
     id: "svg-optimizer",
-    name: "SVG Optimizer & Validator",
+    name: "SVG Optimiser & Validator",
     category: "create",
     handler: "svgOptimize",
     summary: "Remove scripts, event handlers and dangerous URLs, validate basic SVG structure, and minify markup for safer embedding.",

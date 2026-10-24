@@ -75,7 +75,7 @@ function headExtras(title, desc, canonicalUrl, opts) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${esc(canonicalUrl)}">
   <meta property="og:image" content="${esc(image)}">
-  <meta property="og:image:alt" content="${esc(SITE_NAME)} - private browser audio tools">
+  <meta property="og:image:alt" content="${esc(SITE_NAME)} — private browser audio tools">
   <meta property="og:locale" content="${esc(LOCALE)}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(title)}">

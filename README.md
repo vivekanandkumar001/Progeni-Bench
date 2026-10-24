@@ -1,6 +1,6 @@
 # Progeni Bench - Production README
 
-Progeni Bench is a Progeni project delivering fast, zero-bloat browser utilities with 100% private client-side processing.
+Progeni Bench is a Progeni project delivering 120 browser utilities: 30 core tools, 42 image tools and 48 audio tools, with client-side processing.
 
 ## 🚀 Quick Start
 
@@ -117,7 +117,7 @@ stored.
 Regenerate vendor bundles with `npm run build:vendor`.
 
 
-## 🛠️ Available Tools (30 Total)
+## 🛠️ Core Utilities (30 Tools)
 
 ### Files & Data
 - Chrome Bookmark Cleaner

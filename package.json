@@ -2,7 +2,7 @@
   "name": "progeni",
   "version": "1.0.0",
   "private": true,
-  "description": "Progeni Bench — 30 Fast, Privacy-First Browser Tools & Utilities",
+  "description": "Progeni Bench — 120 Privacy-First Browser Tools for Files, Images & Audio",
   "scripts": {
     "build": "node build_seo_pages.js",
     "build:vendor": "node scripts/build-vendor.js",

@@ -98,12 +98,12 @@
     return {
       key: "bitrate", label: "Bitrate (kbps)", type: "select", value: "192",
       options: [
-        { value: "96", label: "96 - small files" },
-        { value: "128", label: "128 - standard" },
+        { value: "96", label: "96 — small files" },
+        { value: "128", label: "128 — standard" },
         { value: "160", label: "160" },
-        { value: "192", label: "192 - good" },
-        { value: "256", label: "256 - high" },
-        { value: "320", label: "320 - maximum MP3" }
+        { value: "192", label: "192 — good" },
+        { value: "256", label: "256 — high" },
+        { value: "320", label: "320 — maximum MP3" }
       ],
       help: "Applies to lossy formats only. Ignored for WAV, FLAC and AIFF.",
       showIf: { key: "format", value: ["mp3", "m4a", "ogg", "opus"] }
@@ -674,7 +674,7 @@
 
   TOOLS.push(T({
     id: "volume-adjust",
-    name: "Volume & Normalize",
+    name: "Volume & Normalise",
     category: "clean",
     handler: "volumeNormalize",
     engine: "ffmpeg",
@@ -688,7 +688,7 @@
     options: [
       { key: "mode", label: "Mode", type: "select", value: "gain", options: [
         { value: "gain", label: "Fixed gain (dB)" },
-        { value: "peak", label: "Normalize to peak (dBFS)" }
+        { value: "peak", label: "Normalise to peak (dBFS)" }
       ] },
       { key: "gain", label: "Gain (dB)", type: "range", value: 6, min: -24, max: 24, step: 0.5, showIf: { key: "mode", value: ["gain"] } },
       { key: "peak", label: "Target peak (dBFS)", type: "range", value: -1, min: -12, max: 0, step: 0.5, showIf: { key: "mode", value: ["peak"] } },
@@ -855,7 +855,7 @@
 
   TOOLS.push(T({
     id: "loudness-normalizer",
-    name: "Loudness Normalizer (LUFS)",
+    name: "Loudness Normaliser (LUFS)",
     category: "clean",
     handler: "loudnorm",
     engine: "ffmpeg",
@@ -865,7 +865,7 @@
       "with a true-peak ceiling so it never clips.",
         seoDescription:
       "Measures integrated loudness with the ITU-R BS.1770/EBU R128 loudnorm filter and normalises to your target, with a true-peak ceiling so it never clips.",
-    keywords: ["loudness normalizer", "lufs normalize", "ebu r128", "podcast loudness", "-14 lufs", "-16 lufs"],
+    keywords: ["loudness normaliser", "lufs normalise", "ebu r128", "podcast loudness", "-14 lufs", "-16 lufs"],
     options: [
       { key: "target", label: "Target loudness (LUFS)", type: "select", value: "-16", options: [
         { value: "-14", label: "-14 LUFS (streaming)" },
@@ -1097,7 +1097,7 @@
 
   TOOLS.push(T({
     id: "spectrogram",
-    name: "Spectrogram / Spectrum Analyzer",
+    name: "Spectrogram / Spectrum Analyser",
     category: "music",
     handler: "spectrogram",
     engine: "web-audio",
@@ -1105,7 +1105,7 @@
     description: "Computes a magnitude spectrogram with the Web Audio AnalyserNode and renders it to a downloadable image.",
         seoDescription:
       "Render a spectrogram of any audio file so you can see its frequencies over time, using a Web Audio FFT and a downloadable PNG image as the result.",
-    keywords: ["spectrogram", "spectrum analyzer", "frequency analysis", "audio visualizer"],
+    keywords: ["spectrogram", "spectrum analyser", "frequency analysis", "audio visualizer"],
     options: [
       { key: "fft", label: "FFT size", type: "select", value: "2048", options: [ { value: "1024", label: "1024" }, { value: "2048", label: "2048" }, { value: "4096", label: "4096" }, { value: "8192", label: "8192" } ] },
       { key: "scale", label: "Frequency scale", type: "select", value: "log", options: [ { value: "log", label: "Logarithmic" }, { value: "linear", label: "Linear" } ] }
@@ -1193,7 +1193,7 @@
 
   TOOLS.push(T({
     id: "loudness-analyzer",
-    name: "Loudness & Peak Analyzer",
+    name: "Loudness & Peak Analyser",
     category: "metadata",
     handler: "loudnessAnalyze",
     engine: "ffmpeg",

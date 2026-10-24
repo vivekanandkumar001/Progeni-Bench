@@ -2095,7 +2095,7 @@
             (optionList.length || tool.requiresFile !== false ? "<h2>" + (tool.requiresFile === false ? "1" : "2") + ". Settings</h2>" : "") +
             '<form id="atk-form" class="itk-options" novalidate>' + options + "</form>" +
             (isLiveAudio ? "" : '<div class="itk-actions"><button class="btn btn-lg" id="atk-run" type="button">' + esc(tool.action || "Process") + '</button><button class="btn secondary" id="atk-reset" type="button">Reset</button></div>') +
-            '<div class="itk-progress" id="atk-progress" aria-live="polite"><div class="itk-bar"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready. Processing happens locally in this tab.</p></div>' +
+            '<div class="itk-progress" id="atk-progress" aria-live="polite"><div class="itk-bar" role="progressbar" aria-label="Processing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready. Processing happens locally in this tab.</p></div>' +
           "</div>" +
           '<div class="itk-panel itk-output">' +
             "<h2>" + (isLiveAudio && !isRecorder ? "2. Notes" : (tool.requiresFile === false ? "2" : "3") + ". Results") + "</h2>" +
@@ -2123,7 +2123,11 @@
     const timeEl = document.getElementById("atk-time");
 
     function progress(pct, msg) {
-      if (barEl) barEl.style.width = clamp(pct, 0, 100) + "%";
+      const value = clamp(pct, 0, 100);
+      if (barEl) {
+        barEl.style.width = value + "%";
+        if (barEl.parentElement) barEl.parentElement.setAttribute("aria-valuenow", String(Math.round(value)));
+      }
       if (statusEl && msg) statusEl.textContent = msg;
     }
     applyVisibility(formEl);
@@ -2136,7 +2140,7 @@
     function renderFiles() {
       if (!filesEl) return;
       filesEl.innerHTML = state.files.map(function (f, i) {
-        return '<div class="itk-file"><span class="itk-file-name">' + esc(f.name) + "</span><span>" + formatBytes(f.size) + '</span><button type="button" class="itk-remove" data-remove="' + i + '" aria-label="Remove ' + esc(f.name) + '">&times;</button></div>';
+        return '<div class="itk-file"><span class="itk-file-name" title="' + esc(f.name) + '">' + esc(f.name) + "</span><span>" + formatBytes(f.size) + '</span><button type="button" class="itk-remove" data-remove="' + i + '" aria-label="Remove ' + esc(f.name) + '">&times;</button></div>';
       }).join("");
       filesEl.querySelectorAll("[data-remove]").forEach(function (b) {
         b.addEventListener("click", function () { state.files.splice(Number(b.dataset.remove), 1); renderFiles(); });

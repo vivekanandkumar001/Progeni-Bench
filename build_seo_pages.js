@@ -261,7 +261,7 @@ function getFooterDirectoryHtml() {
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   return `
   <div class="footer-directory">
-    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="footer-directory-title">Explore all 120 private browser tools across core, image and audio toolkits</div>
     <div class="category-blocks">
       ${categories.map(cat => `
         <div class="category-block">
@@ -366,7 +366,7 @@ function generateToolPageHtml(tool) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -496,7 +496,7 @@ function generateHomePageHtml() {
     { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
     { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
     { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: "30 focused utilities", body: "Crafters, creators and desk workers — labels, subtitles, CSVs, images and more." }
+    { ico: "🧰", title: "120 tools across three toolkits", body: "30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers." }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -544,7 +544,7 @@ function generateHomePageHtml() {
         <h3>${cat}</h3>
         <ul>
           ${TOOLS.filter(t => t.cat === cat).map(t => `
-            <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${t.desc.slice(0, 70)}…</span></li>
+                        <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${(function(d){var x=String(d||"").replace(/\s+/g," ").trim().replace(/[.!?]+$/,""); if(!x)return ""; if(x.length>72){var i=x.lastIndexOf(" ",72); if(i>40)x=x.slice(0,i); else x=x.slice(0,72); x=x.replace(/[.,;:—–-]+$/,"");} x+="…"; return x;})(t.desc)}</span></li>
           `).join('')}
         </ul>
       </div>
@@ -594,7 +594,7 @@ function generateHomePageHtml() {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -628,12 +628,17 @@ function generateHomePageHtml() {
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · 30 core · 42 image · 48 audio · runs in your browser</span>
       <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
       <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
       <div class="hero-search">
         <label class="sr-only" for="search">Search tools</label>
-        <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+        <input id="search" class="search" type="search" aria-label="Search 30 core tools" placeholder="Search 30 core tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+      </div>
+      <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
+        <span>Looking for a different kind of tool?</span>
+        <a href="/image/">Explore 42 image tools <span aria-hidden="true">→</span></a>
+        <a href="/audio/">Explore 48 audio tools <span aria-hidden="true">→</span></a>
       </div>
       <div id="cats" class="categories" role="group" aria-label="Filter tools by category">${catsHtml}</div>
     </div>
@@ -645,8 +650,8 @@ function generateHomePageHtml() {
 
   <section class="tools-section" aria-label="Browser utility grid">
     <div class="section-head">
-      <h2>All tools</h2>
-      <p class="grid-count">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} tools</p>
+      <h2>Core tools</h2>
+      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} core tools</p>
     </div>
     <div id="grid" class="grid">
       ${gridHtml}
@@ -746,7 +751,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">

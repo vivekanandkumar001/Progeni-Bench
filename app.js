@@ -249,6 +249,9 @@ function layout({ tool, body }) {
   const useCasesList = (tool.useCases && tool.useCases.length) ? tool.useCases : [];
 
   app.innerHTML = `
+    <nav class="tool-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">All tools</a><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
+    </nav>
     <section class="tool-head">
       <span class="eyebrow">${esc(tool.cat)} · 100% Private Client-Side</span>
       <h1>${esc(tool.keyword || tool.name)}</h1>
@@ -326,7 +329,7 @@ function bindPicker(cb) {
 }
 
 function closeMobileNav() {
-  const nav = document.querySelector("nav");
+  const nav = document.getElementById("primary-nav");
   if (nav && nav.classList.contains("open")) {
     nav.classList.remove("open");
     const hamburger = document.getElementById("hamburger");
@@ -336,7 +339,7 @@ function closeMobileNav() {
 
 // Mobile navigation toggle
 document.getElementById("hamburger")?.addEventListener("click", () => {
-  const nav = document.querySelector("nav");
+  const nav = document.getElementById("primary-nav");
   if (nav) {
     nav.classList.toggle("open");
     const hamburger = document.getElementById("hamburger");
@@ -347,7 +350,7 @@ document.getElementById("hamburger")?.addEventListener("click", () => {
 // Close the mobile nav on Escape or when clicking outside it.
 addEventListener("keydown", e => { if (e.key === "Escape") closeMobileNav(); });
 document.addEventListener("click", e => {
-  const nav = document.querySelector("nav");
+  const nav = document.getElementById("primary-nav");
   if (!nav || !nav.classList.contains("open")) return;
   if (nav.contains(e.target) || (e.target.closest && e.target.closest("#hamburger"))) return;
   closeMobileNav();
@@ -1044,13 +1047,53 @@ function home() {
     let cat = "All";
     const render = (c = "All", q = "") => {
       const qLower = q.trim().toLowerCase();
-      document.querySelectorAll("#grid .tool-card").forEach(card => {
+      const cards = [...document.querySelectorAll("#grid .tool-card")];
+      let visible = 0;
+      cards.forEach(card => {
         const text = card.textContent.toLowerCase();
         const cardCat = card.dataset.cat || "";
         const matchesCat = (c === "All" || cardCat === c);
         const matchesQuery = (!qLower || text.includes(qLower));
-        card.style.display = (matchesCat && matchesQuery) ? "" : "none";
+        const matches = matchesCat && matchesQuery;
+        card.style.display = matches ? "" : "none";
+        if (matches) visible++;
       });
+
+      const count = document.querySelector(".grid-count");
+      if (count) {
+        count.setAttribute("aria-live", "polite");
+        count.setAttribute("aria-atomic", "true");
+        count.innerHTML = `Showing <strong>${visible}</strong> of ${TOOLS.length} core tools`;
+      }
+
+      const grid = $("#grid");
+      let empty = grid && grid.querySelector(".search-empty");
+      if (grid && visible === 0 && !empty) {
+        empty = document.createElement("div");
+        empty.className = "empty search-empty";
+        empty.setAttribute("role", "status");
+        empty.innerHTML = `
+          <p>No core tools match these filters. Try a shorter search or browse a specialist toolkit.</p>
+          <div class="search-empty-actions">
+            <button class="btn secondary btn-sm" type="button" data-clear-filters>Clear search and filters</button>
+            <a class="btn secondary btn-sm" href="/image/">Browse image tools</a>
+            <a class="btn secondary btn-sm" href="/audio/">Browse audio tools</a>
+          </div>`;
+        grid.appendChild(empty);
+        empty.querySelector("[data-clear-filters]").onclick = () => {
+          searchEl.value = "";
+          cat = "All";
+          catContainer.querySelectorAll(".pill").forEach(button => {
+            const active = button.dataset.cat === "All";
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+          });
+          render(cat, "");
+          searchEl.focus();
+        };
+      } else if (visible > 0 && empty) {
+        empty.remove();
+      }
     };
 
     catContainer.querySelectorAll(".pill").forEach(b => {
@@ -1078,7 +1121,7 @@ function home() {
     { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
     { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
     { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: "30 focused utilities", body: "Crafters, creators and desk workers — labels, subtitles, CSVs, images and more." }
+    { ico: "🧰", title: "120 tools across three toolkits", body: "30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers." }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -1089,12 +1132,17 @@ function home() {
   app.innerHTML = `
     <section class="hero">
       <div class="hero-inner">
-        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · 30 core · 42 image · 48 audio · runs in your browser</span>
         <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
         <p class="hero-lede">${esc(TAGLINE)} Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
         <div class="hero-search">
           <label class="sr-only" for="search">Search tools</label>
-          <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+          <input id="search" class="search" type="search" aria-label="Search 30 core tools" placeholder="Search 30 core tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+        </div>
+        <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
+          <span>Looking for a different kind of tool?</span>
+          <a href="/image/">Explore 42 image tools <span aria-hidden="true">→</span></a>
+          <a href="/audio/">Explore 48 audio tools <span aria-hidden="true">→</span></a>
         </div>
         <div id="cats" class="categories" role="group" aria-label="Filter tools by category"></div>
       </div>
@@ -1106,8 +1154,8 @@ function home() {
 
     <section class="tools-section" aria-label="Browser utility grid">
       <div class="section-head">
-        <h2>All tools</h2>
-        <p class="grid-count">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} tools</p>
+        <h2>Core tools</h2>
+        <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} core tools</p>
       </div>
       <div id="grid" class="grid"></div>
     </section>
@@ -1396,7 +1444,7 @@ function toolPage(id) {
 
 function setActiveNav() {
   const path = location.pathname;
-  document.querySelectorAll("nav a").forEach(a => {
+  document.querySelectorAll("#primary-nav a").forEach(a => {
     const href = a.getAttribute("href");
     if (href && (path === href || (href !== "/" && path.startsWith(href)))) {
       a.classList.add("active");
