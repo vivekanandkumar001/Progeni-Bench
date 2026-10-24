@@ -459,7 +459,7 @@ ${t.icon} ${t.name}</a>`).join('\n      ')}
 </main>
 
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
+  <div class="footer-brand"><img src="/assets/favicon.svg" alt="" width="32" height="32"><span><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</span></div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>

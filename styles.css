@@ -2108,6 +2108,8 @@ footer{
   color:var(--muted);
 }
 footer strong{color:var(--text)}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-brand img{flex:0 0 auto;border-radius:7px}
 footer a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 footer a:hover{color:var(--brand)}
 .footer-links{display:flex;gap:18px;flex-wrap:wrap}
