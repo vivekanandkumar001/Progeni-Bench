@@ -693,16 +693,19 @@ const canonicalDistUrls = [];
 for (const file of allDistHtml) {
   if (path.basename(file) === '404.html') continue;
   const content = fs.readFileSync(file, 'utf8');
+  // Pages marked "noindex" (experimental tools) must NOT be in the sitemap, so
+  // they are excluded from the indexable canonical set this check compares to.
+  if (/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(content)) continue;
   const canMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
   if (canMatch) canonicalDistUrls.push(canMatch[1]);
 }
 const sitemapSet = new Set(sitemapUrls);
 const canonicalSet = new Set(canonicalDistUrls);
 const sitemapDiff = [...canonicalSet].filter(u => !sitemapSet.has(u)).concat([...sitemapSet].filter(u => !canonicalSet.has(u)));
-if (sitemapDiff.length === 0 && lastmodValid && sitemapSet.size === 35) {
+if (sitemapDiff.length === 0 && lastmodValid && sitemapSet.size === canonicalSet.size) {
   addResult('C38', 'PASS', `sitemap count=${sitemapSet.size}, diff=none, lastmod deterministic`);
 } else {
-  addResult('C38', 'FAIL', `sitemap count=${sitemapSet.size}, canonical count=${canonicalSet.size}, diff=${sitemapDiff.join(', ') || 'none'}, lastmodValid=${lastmodValid}`);
+  addResult('C38', 'FAIL', `sitemap count=${sitemapSet.size}, indexable canonical count=${canonicalSet.size}, diff=${sitemapDiff.join(', ') || 'none'}, lastmodValid=${lastmodValid}`);
 }
 
 // C39: Every tool page body text >= 120 unique words (strip tags, nav, footer); print the 3 lowest word counts
@@ -888,6 +891,9 @@ const allCanonicalHrefs = new Set();
 for (const file of allDistHtml) {
   if (path.basename(file).startsWith('google')) continue;
   const content = fs.readFileSync(file, 'utf8');
+  // noindex pages (experimental tools) are intentionally absent from the
+  // sitemap, so they are not part of the indexable canonical set.
+  if (/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(content)) continue;
   const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
   if (canonicalMatch) {
     allCanonicalHrefs.add(canonicalMatch[1]);

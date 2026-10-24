@@ -2,10 +2,12 @@
   "name": "progeni",
   "version": "1.0.0",
   "private": true,
-  "description": "Progeni Bench — 30 Fast, Privacy-First Browser Tools & Utilities",
+  "description": "Progeni Bench — 120 Privacy-First Browser Tools for Files, Images & Audio",
   "scripts": {
     "build": "node build_seo_pages.js",
     "build:vendor": "node scripts/build-vendor.js",
+    "test": "node --test",
+    "test:e2e": "playwright test",
     "verify": "node scripts/verify.js",
     "start": "node scripts/serve.js 3000 dist",
     "serve": "node scripts/serve.js 3000 dist"
@@ -14,9 +16,13 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "esbuild": "^0.25.0"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "gifenc": "^1.0.3",
     "gifuct-js": "^2.1.2",
     "jsbarcode": "^3.12.1",

@@ -1,0 +1,26 @@
+FFmpeg.wasm engine shipped with the Bench Audio Toolkit
+=====================================================
+
+Files in this directory:
+  ffmpeg.js, 814.ffmpeg.js   - @ffmpeg/ffmpeg 0.12.15, MIT licence
+  ffmpeg-core.js             - @ffmpeg/core 0.12.10, GPL-2.0-or-later
+  ffmpeg-core.wasm           - compiled FFmpeg (GPL build, includes libmp3lame)
+
+@ffmpeg/core is licensed under the GNU General Public License, version 2 or
+later. It is distributed here unmodified. Because this site ships a GPL
+binary, the corresponding source is available:
+
+  FFmpeg source:        https://ffmpeg.org/download.html
+  libmp3lame (LAME):    https://lame.sourceforge.io/
+  @ffmpeg/core source:  https://github.com/ffmpegwasm/ffmpeg.wasm
+  Exact build:          @ffmpeg/core 0.12.10
+  Build instructions:   https://github.com/ffmpegwasm/ffmpeg.wasm/blob/main/docs/build.md
+
+No modifications were made to the FFmpeg or @ffmpeg/core sources. The wrapper
+(@ffmpeg/ffmpeg, MIT) is loaded by the page, which requests the core files from
+this same directory at runtime. If you need the source for a specific binary
+build, write to legal@progeni.live and it will be provided.
+
+Full licence texts:
+  - GPL-2.0-or-later: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+  - MIT:              https://opensource.org/license/mit

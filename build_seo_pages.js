@@ -4,6 +4,8 @@ const zlib = require('zlib');
 const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
 const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
+const audioConfig = require('./audio-tools.config.js');
+const audioPages = require('./audio-pages.js');
 
 const baseDir = __dirname;
 const distDir = path.join(baseDir, 'dist');
@@ -259,7 +261,7 @@ function getFooterDirectoryHtml() {
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   return `
   <div class="footer-directory">
-    <div class="footer-directory-title">Explore all 30 private browser utilities by category</div>
+    <div class="footer-directory-title">Explore all 120 private browser tools across core, image and audio toolkits</div>
     <div class="category-blocks">
       ${categories.map(cat => `
         <div class="category-block">
@@ -364,7 +366,7 @@ function generateToolPageHtml(tool) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -386,6 +388,7 @@ function generateToolPageHtml(tool) {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -456,7 +459,7 @@ ${t.icon} ${t.name}</a>`).join('\n      ')}
 </main>
 
 <footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
+  <div class="footer-brand"><img src="/assets/favicon.svg" alt="" width="32" height="32"><span><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</span></div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -493,7 +496,7 @@ function generateHomePageHtml() {
     { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
     { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
     { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: "30 focused utilities", body: "Crafters, creators and desk workers — labels, subtitles, CSVs, images and more." }
+    { ico: "🧰", title: "120 tools across three toolkits", body: "30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers." }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -518,13 +521,30 @@ function generateHomePageHtml() {
     </div>
   </section>`;
 
+  const audioWorking = audioConfig.TOOLS.filter(t => t.status === "implemented" || t.status === "experimental");
+  const audioFeatured = ["convert", "trimmer", "compress", "joiner", "loudness-normalizer", "noise-reducer", "recorder", "waveform-image"]
+    .map(id => audioConfig.getTool(id))
+    .filter(Boolean);
+  const audioBandHtml = `
+  <section class="image-band audio-band" aria-labelledby="audio-toolkit-heading">
+    <div class="image-band-copy">
+      <span class="eyebrow">New · Bench Audio Toolkit</span>
+      <h2 id="audio-toolkit-heading">Audio tools that never upload your files</h2>
+      <p>Convert, compress, trim, join, clean, record, analyse and tag audio — all in your browser. ${audioWorking.length} tools have a real client-side handler; conversion and heavy filters use a local WebAssembly engine, and anything unavailable is labelled instead of faked.</p>
+      <p class="image-band-actions"><a class="btn btn-lg" href="/audio/">Open the audio toolkit</a> <a class="btn secondary" href="/audio/recorder/">Try the voice recorder</a></p>
+    </div>
+    <div class="image-band-grid">
+      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+    </div>
+  </section>`;
+
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   const categoryBlocksHtml = categories.map(cat => `
       <div class="category-block" id="category-${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
         <h3>${cat}</h3>
         <ul>
           ${TOOLS.filter(t => t.cat === cat).map(t => `
-            <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${t.desc.slice(0, 70)}…</span></li>
+                        <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${(function(d){var x=String(d||"").replace(/\s+/g," ").trim().replace(/[.!?]+$/,""); if(!x)return ""; if(x.length>72){var i=x.lastIndexOf(" ",72); if(i>40)x=x.slice(0,i); else x=x.slice(0,72); x=x.replace(/[.,;:—–-]+$/,"");} x+="…"; return x;})(t.desc)}</span></li>
           `).join('')}
         </ul>
       </div>
@@ -574,7 +594,7 @@ function generateHomePageHtml() {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -596,6 +616,7 @@ function generateHomePageHtml() {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -607,12 +628,17 @@ function generateHomePageHtml() {
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>30 utilities · 100% private · runs in your browser</span>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · 30 core · 42 image · 48 audio · runs in your browser</span>
       <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
       <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
       <div class="hero-search">
         <label class="sr-only" for="search">Search tools</label>
-        <input id="search" class="search" type="search" aria-label="Search 30 tools" placeholder="Search 30 tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+        <input id="search" class="search" type="search" aria-label="Search 30 core tools" placeholder="Search 30 core tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+      </div>
+      <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
+        <span>Looking for a different kind of tool?</span>
+        <a href="/image/">Explore 42 image tools <span aria-hidden="true">→</span></a>
+        <a href="/audio/">Explore 48 audio tools <span aria-hidden="true">→</span></a>
       </div>
       <div id="cats" class="categories" role="group" aria-label="Filter tools by category">${catsHtml}</div>
     </div>
@@ -624,8 +650,8 @@ function generateHomePageHtml() {
 
   <section class="tools-section" aria-label="Browser utility grid">
     <div class="section-head">
-      <h2>All tools</h2>
-      <p class="grid-count">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} tools</p>
+      <h2>Core tools</h2>
+      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} core tools</p>
     </div>
     <div id="grid" class="grid">
       ${gridHtml}
@@ -633,6 +659,8 @@ function generateHomePageHtml() {
   </section>
 
   ${imageBandHtml}
+
+  ${audioBandHtml}
 
   <section class="privacy-band">
     <h2>100% private, client-side architecture</h2>
@@ -723,7 +751,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} - free, private browser tools">
+  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
   <meta property="og:locale" content="${LOCALE}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -745,6 +773,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -833,6 +862,8 @@ function generateSitemapXml() {
     `${SITE_URL}/image/`,
     `${SITE_URL}/image/studio/`,
     ...imagePages.IMPLEMENTED.map(t => `${SITE_URL}/image/${t.slug}/`),
+    `${SITE_URL}/audio/`,
+    ...audioPages.IMPLEMENTED.map(t => `${SITE_URL}/audio/${t.slug}/`),
     ...TOOLS.map(t => `${SITE_URL}/tools/${t.id}/`)
   ];
 
@@ -901,6 +932,10 @@ TOOLS.forEach(tool => {
 // 1b. Build Bench Image Toolkit pages (hub, studio, one page per public tool)
 const imagePageBuild = imagePages.buildImagePages(baseDir);
 console.log(`Generated ${imagePageBuild.count} image toolkit pages (${imagePageBuild.publicTools.length} public tools).`);
+
+// 1c. Build Bench Audio Toolkit pages (hub, one page per public tool)
+const audioPageBuild = audioPages.buildAudioPages(baseDir);
+console.log(`Generated ${audioPageBuild.count} audio toolkit pages (${audioPageBuild.publicTools.length} public tools).`);
 
 // 2. Build home page
 const homeHtml = generateHomePageHtml();
@@ -1000,7 +1035,7 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
+  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -1021,15 +1056,22 @@ if (fs.existsSync(assetsDir)) {
   });
 }
 
-// Copy same-origin vendor bundles used lazily by image-toolkit.js
+// Copy same-origin vendor bundles used lazily by image-toolkit.js and the
+// FFmpeg engine (/vendor/ffmpeg/) used lazily by audio-toolkit.js. Recurse so
+// subdirectories such as vendor/ffmpeg/ are copied too.
 const vendorDir = path.join(baseDir, 'vendor');
 if (fs.existsSync(vendorDir)) {
   const distVendorDir = path.join(distDir, 'vendor');
-  fs.mkdirSync(distVendorDir, { recursive: true });
-  fs.readdirSync(vendorDir).forEach(f => {
-    const src = path.join(vendorDir, f);
-    if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(distVendorDir, f));
-  });
+  const copyTree = (from, to) => {
+    fs.mkdirSync(to, { recursive: true });
+    fs.readdirSync(from).forEach(f => {
+      const src = path.join(from, f);
+      const dest = path.join(to, f);
+      if (fs.statSync(src).isDirectory()) copyTree(src, dest);
+      else fs.copyFileSync(src, dest);
+    });
+  };
+  copyTree(vendorDir, distVendorDir);
 }
 
 // Copy shared data modules (DMC palette used by pattern-studio.js)

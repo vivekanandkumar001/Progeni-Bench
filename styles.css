@@ -256,6 +256,33 @@ nav a.active{color:var(--brand);font-weight:700}
   box-shadow:0 0 0 4px rgba(29,78,216,.14);
 }
 
+.toolkit-shortcuts{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 14px;
+  margin:0 0 var(--space-4);
+  color:var(--muted);
+  font-size:var(--font-sm);
+}
+.toolkit-shortcuts > span{font-weight:600;color:var(--body-fg)}
+.toolkit-shortcuts a{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:36px;
+  padding:5px 11px;
+  border:1px solid var(--eyebrow-bd);
+  border-radius:var(--radius-pill);
+  background:var(--card);
+  color:var(--brand);
+  font-weight:700;
+  text-decoration:none;
+}
+.toolkit-shortcuts a:hover{background:var(--brand-tint);border-color:var(--brand)}
+.toolkit-shortcuts a span{transition:transform .15s ease}
+.toolkit-shortcuts a:hover span{transform:translateX(2px)}
+
 .categories{
   display:flex;
   gap:var(--space-2);
@@ -427,6 +454,8 @@ nav a.active{color:var(--brand);font-weight:700}
   color:var(--muted);
   font-weight:500;
 }
+.search-empty p{margin:0 0 14px}
+.search-empty-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
 
 /* ---------- Landing: privacy band ---------- */
 .privacy-band{
@@ -535,6 +564,23 @@ nav a.active{color:var(--brand);font-weight:700}
 .footer-directory .category-block li a:hover{color:var(--brand)}
 
 /* ---------- Tool page ---------- */
+.tool-breadcrumb{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:0 0 var(--space-4);
+  color:var(--muted);
+  font-size:var(--font-sm);
+}
+.tool-breadcrumb a{
+  color:var(--brand);
+  font-weight:600;
+  text-decoration:none;
+}
+.tool-breadcrumb a:hover{text-decoration:underline;text-underline-offset:3px}
+.tool-breadcrumb [aria-current="page"]{color:var(--muted)}
+
 .tool-head{
   margin-bottom:var(--space-6);
 }
@@ -1080,7 +1126,7 @@ pre{
   position:absolute;
   left:3px;
   bottom:3px;
-  font-size:10px;
+  font-size:12px;
   font-weight:700;
   background:rgba(15,23,42,.72);
   color:#fff;
@@ -1123,7 +1169,7 @@ pre{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:11.5px;
+  font-size:12px;
   font-weight:700;
   color:#fff;
   text-shadow:0 1px 2px rgba(15,23,42,.45);
@@ -1243,7 +1289,7 @@ pre{
   background: var(--card);
   border-radius: 999px;
   padding: 3px 10px;
-  font-size: 11.5px;
+  font-size:12px;
   font-weight: 700;
   color: var(--muted);
   cursor: pointer;
@@ -1261,7 +1307,7 @@ pre{
   background: var(--card);
   color: var(--text);
 }
-.lbl-mini { display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.lbl-mini { display: flex; align-items: center; gap: 4px; font-size:12px; font-weight: 700; color: var(--muted); }
 .lbl-mini input {
   width: 56px;
   padding: 6px;
@@ -1295,7 +1341,7 @@ pre{
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 11.5px;
+  font-size:12px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -1357,7 +1403,7 @@ pre{
   background: var(--warn-bg);
   border: 1px solid var(--warn-bd);
   color: var(--warn-fg);
-  font-size: 11.5px;
+  font-size:12px;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 999px;
@@ -1462,7 +1508,7 @@ pre{
 }
 .pat-compare figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .pat-compare figcaption {
-  font-size: 11.5px;
+  font-size:12px;
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
@@ -1692,7 +1738,7 @@ pre{
   position:absolute;
   top:6px;
   right:6px;
-  font-size:10px;
+  font-size:12px;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.04em;
@@ -1720,9 +1766,9 @@ pre{
 .pbs-bars{display:flex;gap:4px;flex-wrap:wrap}
 .pbs-bar{position:relative;flex:1;min-width:74px;height:16px;background:var(--surface-3);border-radius:99px;overflow:hidden}
 .pbs-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--brand),var(--brand-light));border-radius:99px}
-.pbs-bar em{position:relative;z-index:1;display:block;text-align:center;line-height:16px;font-style:normal;font-size:10px;font-weight:700;color:var(--text)}
+.pbs-bar em{position:relative;z-index:1;display:block;text-align:center;line-height:16px;font-style:normal;font-size:12px;font-weight:700;color:var(--text)}
 .pbs-score{font-size:20px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;text-align:right}
-.pbs-score small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.pbs-score small{display:block;font-size:12px;font-weight:600;color:var(--muted)}
 .pbs-compare-head{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--muted)}
 .pbs-compare-head select{padding:6px 8px;border:1px solid var(--line-strong);border-radius:8px;background:var(--card);color:var(--text);font-size:13px}
 .pbs-compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
@@ -1753,7 +1799,7 @@ pre{
   margin:0;
 }
 .alb-tokens{grid-column:1 / -1;margin:0;font-size:12px;color:var(--muted)}
-.alb-tokens code,#alb-pattern code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--surface-3);border-radius:5px;padding:1px 5px;font-size:11.5px}
+.alb-tokens code,#alb-pattern code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--surface-3);border-radius:5px;padding:1px 5px;font-size:12px}
 .alb-controls input[type=text]{
   padding:9px 10px;
   border:1px solid var(--line-strong);
@@ -1785,10 +1831,10 @@ pre{
   display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;
   color:var(--brand);background:var(--brand-tint);border-radius:99px;padding:2px 9px;
 }
-.alb-bulk{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.alb-bulk{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
 .alb-bulk input[type=date],.alb-file-date{
   padding:4px 6px;border:1px solid var(--line-strong);border-radius:7px;background:var(--card);
-  font-size:11.5px;color:var(--text);outline:none;
+  font-size:12px;color:var(--text);outline:none;
 }
 .alb-bulk input[type=date]:focus,.alb-file-date:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(29,78,216,.12)}
 .alb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -1809,7 +1855,7 @@ pre{
 .alb-name{font-size:12px;font-weight:600;color:var(--text);word-break:break-word;line-height:1.35}
 .alb-sub{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px}
 .alb-badge{
-  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+  font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
   padding:2px 7px;border-radius:99px;background:var(--brand-tint);color:var(--brand);
 }
 .alb-badge.exif{background:rgba(21,128,61,.12);color:var(--ok)}
@@ -1837,14 +1883,14 @@ pre{
 .alb-strip-item img{display:block;width:64px;height:52px;object-fit:cover}
 .alb-strip-noimg{
   display:flex;align-items:center;justify-content:center;width:64px;height:52px;
-  color:var(--noimg-fg);font-weight:700;font-size:10px;
+  color:var(--noimg-fg);font-weight:700;font-size:12px;
 }
 .alb-preview h2{font-size:16px;margin:6px 0}
 .alb-tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .alb-table{border-collapse:collapse;width:100%;font-size:12px}
 .alb-table th,.alb-table td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 .alb-table th{position:sticky;top:0;background:var(--surface);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.alb-table td code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;color:var(--brand)}
+.alb-table td code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--brand)}
 .alb-table tr:last-child td{border-bottom:0}
 .alb-errors{font-size:12.5px;color:var(--muted)}
 .alb-errors summary{cursor:pointer;font-weight:700;color:var(--accent)}
@@ -1933,7 +1979,7 @@ pre{
   background:var(--card);
   border-radius:7px;
   padding:3px 9px;
-  font-size:11.5px;
+  font-size:12px;
   font-weight:700;
   color:var(--brand);
   cursor:pointer;
@@ -2066,7 +2112,7 @@ pre{
 .sub-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
 .sub-tag{
   display:inline-block;
-  font-size:10px;
+  font-size:12px;
   font-weight:700;
   letter-spacing:.04em;
   border-radius:6px;
@@ -2108,6 +2154,8 @@ footer{
   color:var(--muted);
 }
 footer strong{color:var(--text)}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-brand img{flex:0 0 auto;border-radius:7px}
 footer a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 footer a:hover{color:var(--brand)}
 .footer-links{display:flex;gap:18px;flex-wrap:wrap}
@@ -2224,7 +2272,7 @@ footer a:hover{color:var(--brand)}
 .itk-field select:focus,.itk-field input:focus,.itk-field textarea:focus{
   outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(29,78,216,.12)
 }
-.itk-field small{color:var(--muted);font-size:11.5px;line-height:1.45}
+.itk-field small{color:var(--muted);font-size:12px;line-height:1.45}
 .itk-field-check{justify-content:flex-end}
 .itk-check{display:flex;align-items:center;gap:8px;font-size:var(--font-sm);font-weight:600;color:var(--text);cursor:pointer;min-height:42px}
 .itk-check input{width:18px;height:18px;accent-color:var(--brand)}
@@ -2355,4 +2403,268 @@ footer a:hover{color:var(--brand)}
   .itk-thumb{width:100%;height:150px}
   .image-band-grid{grid-template-columns:1fr}
   .itk-actions .btn{flex:1}
+}
+
+/* ------------------------------------------------ Bench Audio Toolkit (atk) */
+
+.atk-preview{
+  display:flex;flex-direction:column;gap:8px;margin-bottom:14px;
+  padding:12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);
+}
+.atk-wave{
+  display:block;width:100%;height:96px;border-radius:6px;background:var(--card);
+  border:1px solid var(--line);
+}
+.atk-transport{display:flex;align-items:center;gap:8px}
+.atk-time{
+  font-variant-numeric:tabular-nums;font-size:var(--font-sm);color:var(--muted);margin-left:auto;
+}
+
+.atk-text{
+  display:block;width:100%;margin:8px 0;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:var(--font-xs);line-height:1.5;color:var(--text);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:8px;resize:vertical;white-space:pre;overflow:auto;
+}
+
+.itk-result audio{width:100%;margin:6px 0}
+
+.atk-recorder{
+  margin:6px 0 18px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);
+}
+.atk-recorder .itk-actions{margin-top:10px}
+.atk-meter{
+  position:relative;height:12px;margin-top:12px;border-radius:999px;overflow:hidden;
+  background:var(--line);border:1px solid var(--line);
+}
+.atk-meter span{
+  display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--ok-fg,#15803d) 0%,#eab308 70%,var(--err-fg,#b91c1c) 100%);
+  transition:width .08s linear;
+}
+.atk-timer{
+  margin-top:8px;font-variant-numeric:tabular-nums;font-size:var(--font-sm);color:var(--muted);
+}
+
+.itk-badge.ok{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-bd)}
+.itk-badge.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:var(--warn-bd)}
+.itk-badge.muted{background:var(--surface-2);color:var(--muted);border-color:var(--line)}
+
+.audio-band{--band-accent:var(--brand)}
+.audio-band .image-band-card:hover{border-color:var(--brand)}
+
+@media (max-width: 640px){
+  .atk-wave{height:72px}
+}
+
+/* ------------------------------------------------ Interaction polish */
+/* One visible keyboard focus ring for every control, on every page. */
+:where(a, button, input, select, textarea, summary, [role="button"]):focus-visible{
+  outline:3px solid rgba(29, 78, 216, .38);
+  outline-offset:2px;
+}
+.itk-tool-card:focus-visible{outline-offset:3px;border-color:var(--brand)}
+::selection{background:var(--brand-tint);color:var(--text)}
+
+/* Tool cards: a small arrow affordance makes the whole card read as a link. */
+.itk-tool-card{position:relative;overflow:hidden}
+.itk-tool-card strong{padding-right:16px}
+.itk-tool-card::after{
+  content:"";position:absolute;top:18px;right:16px;width:7px;height:7px;
+  border-top:2px solid var(--brand);border-right:2px solid var(--brand);
+  transform:rotate(45deg) translate(-3px,3px);opacity:0;
+  transition:opacity .16s ease, transform .16s ease;pointer-events:none;
+}
+.itk-tool-card:hover::after,
+.itk-tool-card:focus-visible::after{opacity:.9;transform:rotate(45deg) translate(0,0)}
+.itk-tool-card:hover{box-shadow:var(--shadow-sm)}
+
+/* ------------------------------------------------ Audio hub hero */
+/* A waveform motif gives the audio workspace its own identity without images
+   or extra requests. The bars are layered gradients, so they scale cleanly and
+   disappear behind the text mask. */
+.atk-head{
+  position:relative;overflow:hidden;
+  padding:clamp(20px, 3vw, 34px);
+  border:1px solid var(--line);border-radius:var(--radius-lg);
+  background:var(--hero-grad);box-shadow:var(--shadow-sm);
+}
+.atk-head > *{position:relative;z-index:1}
+.atk-head::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(680px 240px at 100% 0%, rgba(29,78,216,.10), transparent 68%);
+}
+.atk-head::after{
+  content:"";position:absolute;right:0;bottom:0;z-index:0;pointer-events:none;
+  width:min(52%, 520px);height:104px;opacity:.55;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(29,78,216,.62) 0 3px, transparent 3px 11px),
+    repeating-linear-gradient(90deg, rgba(29,78,216,.42) 0 3px, transparent 3px 17px),
+    repeating-linear-gradient(90deg, rgba(29,78,216,.28) 0 3px, transparent 3px 25px);
+  background-size:100% 34%, 100% 60%, 100% 92%;
+  background-position:left bottom, left bottom, left bottom;
+  background-repeat:repeat-x;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 26%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 26%);
+}
+@media (max-width: 640px){
+  .atk-head::after{height:72px;width:70%;opacity:.4}
+  .atk-wave{height:72px}
+}
+
+/* ------------------------------------------------ Audio tool surfaces */
+.atk-preview{
+  border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), var(--shadow-xs);
+}
+.atk-wave{height:118px;background:linear-gradient(180deg, var(--card) 0%, var(--surface) 100%)}
+.atk-transport .btn-sm{min-height:34px}
+.itk-result audio{width:100%;margin:8px 0 2px;height:40px;border-radius:999px;background:var(--surface-2)}
+.atk-recorder{border-left:3px solid var(--brand);border-radius:12px}
+.atk-recorder .itk-muted{margin:0 0 4px}
+.atk-actions-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.atk-actions-row .itk-actions{margin-top:0}
+.atk-beat{
+  font-variant-numeric:tabular-nums;font-weight:700;font-size:var(--font-sm);
+  color:var(--brand);background:var(--brand-tint);border:1px solid var(--eyebrow-bd);
+  border-radius:var(--radius-pill);padding:7px 15px;min-width:120px;text-align:center;
+}
+.atk-meter{height:10px;background:var(--surface-3)}
+
+/* =========================================================
+   Readability and touch polish
+   Applies to every page: classic tools, image toolkit, audio
+   toolkit, hubs, legal pages and the 404 page.
+   ========================================================= */
+
+/* Nothing a user has to read is smaller than 12px. Dense data
+   surfaces keep their rhythm; only the type floor changes. */
+small,
+.itk-field small,
+.itk-badge,
+.tag,
+.lbl-mini,
+.lbl-chip,
+.lbl-cf,
+.lbl-warnchip,
+.pat-compare figcaption,
+.pbs-cmp-fig figcaption,
+.pbs-badge,
+.pbs-keep-badge,
+.pbs-card-sub,
+.pbs-dist,
+.pbs-bar em,
+.pbs-score small,
+.alb-count,
+.alb-badge,
+.alb-err,
+.alb-bulk,
+.alb-bulk input[type="date"],
+.alb-file-date,
+.alb-table th,
+.alb-table td code,
+.med-table th,
+.med-play,
+.sub-table th,
+.sub-stat span,
+.sub-tag,
+.st-progress-label,
+.st-idx,
+.st-x,
+.st-edit,
+.shs-mirror{font-size:12px}
+.pbs-bar em{line-height:16px}
+
+/* Long-form copy keeps a comfortable measure on wide screens. */
+.seo-section p,
+.seo-section > ul,
+.seo-section > ol,
+.faq-item p,
+.tool-head p{max-width:78ch}
+h1,h2,h3{text-wrap:balance}
+p{text-wrap:pretty}
+
+/* Keyboard and in-page links clear the sticky header. */
+html{scroll-padding-top:76px}
+
+/* Controls that were physically smaller than a fingertip. */
+.skip-link{min-height:44px;display:inline-flex;align-items:center}
+.brand{min-height:44px}
+.hamburger{width:44px;height:44px;padding:0;align-items:center;justify-content:center}
+.pill{min-height:40px}
+.atk-transport .btn-sm{min-height:38px}
+.itk-range input[type="range"]{min-height:28px}
+.itk-check{min-height:44px}
+.itk-check input{min-width:20px;min-height:20px}
+.itk-color input[type="color"]{min-height:44px}
+.itk-remove{min-width:32px;min-height:32px}
+.st-icon-btn{min-width:36px;min-height:36px;height:auto}
+.st-view-btn{min-height:36px;height:auto}
+.itk-inline-file{
+  display:inline-flex;align-items:center;gap:10px;min-height:44px;
+  font-size:var(--font-xs);font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.itk-inline-file input[type="file"]{
+  flex:1;min-width:0;min-height:40px;font-size:var(--font-sm);
+  text-transform:none;letter-spacing:normal;color:var(--text);
+}
+
+/* Phones and touch screens: fingertip targets and 16px form
+   text, so iOS never zooms when a field receives focus. */
+@media (max-width: 768px), (pointer: coarse){
+  nav a{min-height:44px;display:flex;align-items:center}
+  .pill{min-height:42px}
+  .atk-transport .btn-sm{min-height:40px}
+  input[type="range"]{min-height:40px;height:40px}
+  input[type="checkbox"],
+  input[type="radio"]{min-width:24px;min-height:24px;width:24px;height:24px}
+  input[type="color"],
+  input[type="file"]{min-height:44px}
+  select{min-height:40px}
+  .itk-remove{min-width:40px;min-height:40px}
+  .st-icon-btn,
+  .st-view-btn{min-width:44px;min-height:44px;padding:8px 10px}
+  #pat-zoom-out,#pat-zoom-in,#pat-zoom-fit,
+  #shs-zoom-out,#shs-zoom-in,#shs-zoom-fit,
+  #st-zoom-out,#st-zoom-in,#st-zoom-fit,#st-resetview,
+  button.st-view-btn{min-width:44px;min-height:44px}
+  .st-x,
+  .st-edit{min-width:40px;min-height:40px;font-size:14px}
+  .st-x{right:4px;top:4px}
+  .st-edit{right:48px;top:4px}
+  .lbl-b,.lbl-i{min-width:40px;min-height:40px}
+  .lbl-mini input,
+  .lbl-cf input,
+  .lbl-cf select,
+  .lbl-line-main select,
+  .lbl-line-main .lbl-tpl,
+  .lbl-rowx button,
+  .alb-bulk input[type="date"],
+  .alb-file-date,
+  .alb-controls input[type="text"],
+  .pat-inline input[type="number"],
+  .pat-inline select,
+  .sub-controls input[type="number"],
+  .sub-controls select,
+  .shs-gridopts input,
+  .shs-gridopts select,
+  .med-controls input,
+  .med-controls select,
+  .controls input:not([type="range"]):not([type="color"]):not([type="file"]),
+  .controls select,
+  .controls textarea{min-height:40px}
+  input:not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea{font-size:16px}
+  .med-play{min-height:40px;padding:6px 12px}
+  .lbl-mini{min-height:44px}
+  .lbl-cf{min-height:44px}
+  .st-check{min-height:44px;padding-bottom:0}
+  .st-check input{width:24px;height:24px}
+  .pbs-card label{min-height:44px;display:flex;align-items:center;gap:10px}
+  .pat-studio label{min-height:44px;display:flex;align-items:center;gap:10px}
+  .shs-controls label{min-height:44px;display:flex;align-items:center;gap:10px}
+  .sub-controls label{min-height:44px;display:flex;align-items:center;gap:10px}
+  .med-controls label{min-height:44px;display:flex;align-items:center;gap:10px}
+  .alb-bulk label{min-height:44px;display:flex;align-items:center;gap:10px}
 }

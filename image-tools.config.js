@@ -325,7 +325,7 @@
     { key: "size", label: "Image size (px)", type: "number", min: 64, max: 2048, step: 1, value: 512 },
     { key: "margin", label: "Quiet-zone margin (modules)", type: "number", min: 0, max: 10, step: 1, value: 4 },
     { key: "ecLevel", label: "Error correction", type: "select", value: "M",
-      options: [{ value: "L", label: "L - 7%" }, { value: "M", label: "M - 15%" }, { value: "Q", label: "Q - 25%" }, { value: "H", label: "H - 30%" }] },
+      options: [{ value: "L", label: "L — 7%" }, { value: "M", label: "M — 15%" }, { value: "Q", label: "Q — 25%" }, { value: "H", label: "H — 30%" }] },
     { key: "dark", label: "Foreground colour", type: "color", value: "#111827" },
     { key: "light", label: "Background colour", type: "color", value: "#ffffff" },
     { key: "svg", label: "Also download SVG", type: "checkbox", value: true }
@@ -512,6 +512,65 @@
     "The file is never uploaded, logged or stored by Bench, and the result exists only in a temporary object URL " +
     "until you download it or close the page.";
 
+  /* Hand-authored SEO overrides.
+     verify.js (C35) requires every generated page to have a <title> of at most
+     60 characters and a meta description of 120-155 characters. The generic
+     defaults produced by makeTool ("<name>: private browser tool | Bench" and a
+     copy of the shorter summary) fall outside that range for some tools, so
+     these exact, unique strings are used instead. Keep in sync with
+     audit/build-image-seo.js, which validates them. */
+  const SEO = {
+    titles: {
+      "application-photo": "Application Photo & Signature | Bench",
+      "social-resize": "Social & YouTube Image Sizes | Bench",
+      "border-padding": "Border, Padding & Corners | Bench",
+      "product-shadow": "Product Shadow & Background | Bench",
+      "duplicate-finder": "Duplicate Photo Finder | Bench",
+      "srcset": "Responsive srcset Generator | Bench",
+      "recovery": "Corruption Recovery | Bench",
+      "base64": "Base64 & Data URI Converter | Bench",
+      "annotate": "Text, Captions & Annotations | Bench",
+      "splitter": "Image Splitter & Grid Cutter | Bench",
+      "favicon": "Favicon & App Icon Generator | Bench",
+      "gif-studio": "GIF Studio: Create & Extract | Bench",
+      "inspection": "Image Inspector & Diagnostics | Bench",
+      "photo-signature": "Photo & Signature Composition | Bench"
+    },
+    descs: {
+      compress: "Shrink JPEG, PNG, WebP and AVIF images with real before and after sizes. Drop several files at once and compress the whole batch in one pass.",
+      resize: "Resize images by pixels or percentage with aspect-ratio lock, fit, fill or stretch modes, plus optional batch output for many files at once.",
+      crop: "Crop any image with a percentage box, fixed aspect ratios, rounded corners or a true circular crop with transparent corners, then export as PNG or JPEG.",
+      "social-resize": "Crop and export images for YouTube thumbnails and banners, Instagram, Facebook, LinkedIn, X and other presets with exact pixel dimensions.",
+      dpi: "Read the embedded DPI or PPI of PNG and JPEG files, inspect real pixel dimensions, and write a corrected DPI copy without resampling the image.",
+      "image-to-pdf": "Combine JPEG, PNG, WebP or rasterised SVG images into a single PDF, with one page per image or each image fitted neatly to A4 or Letter.",
+      base64: "Encode an image to Base64 or a full data URI for embedding in code, or decode Base64 back into a real, decodable image file you can download.",
+      "blur-redact": "Blur, pixelate or paint over a rectangular region to hide faces, numbers or private details. The image is never uploaded and nothing is stored.",
+      annotate: "Add a caption, label, callout text or a solid caption bar to an image with real canvas rendering, configurable colour, size and placement.",
+      "border-padding": "Add a border, outer padding, rounded corners, a solid or gradient canvas and an optional drop shadow to frame any image cleanly.",
+      watermark: "Add visible text watermarks with configurable placement, opacity, rotation, tiling across the image and colour, exported as a flattened image.",
+      meme: "Turn any image into a classic top and bottom caption meme with outlined Impact-style text, local processing and an instant download with no upload.",
+      collage: "Arrange several images into a clean grid collage with configurable columns, gap, background colour and output width, then download the result.",
+      splitter: "Split an image or a scanned page into a rows by columns grid of equal tiles and download every tile together in a single ZIP archive.",
+      merge: "Merge two or more images horizontally or vertically into one strip with an optional gap and background colour, useful for comparisons and receipts.",
+      compare: "Compare two images visually and numerically with dimensions, exact SHA-256 hashes and a perceptual similarity score, all computed locally.",
+      "product-shadow": "Place a product cut-out on a clean background with padding, rounded corners and a soft realistic drop shadow for marketplace listings.",
+      "scan-cleanup": "Turn phone photos of documents into cleaner grayscale or binarised pages and correct a manually measured tilt before you export.",
+      "image-hash": "Generate an exact SHA-256 hash plus perceptual average and difference hashes for image identity, deduplication and similarity checks.",
+      palette: "Extract a dominant colour palette with hex values, inspect RGB and luminance histograms, and sample exact colours from anywhere in an image.",
+      "og-image": "Compose a 1200 by 630 social preview card from an image with a headline, subtitle, dark overlay and an accent bar for Open Graph sharing.",
+      "qr-code": "Generate a real QR code for text or a URL with size, quiet zone, foreground and background colours and error-correction level, as PNG or SVG.",
+      "qr-decode": "Decode a QR code from a screenshot or photo entirely in your browser, with no upload, and read the exact text or URL it contains.",
+      barcode: "Generate CODE128, EAN-13, EAN-8, CODE39 or UPC-A barcodes as real PNG or SVG images with built-in checksum validation for each symbology.",
+      "svg-optimizer": "Remove scripts, event handlers and dangerous URLs, validate basic SVG structure, and minify the markup for safer, smaller embedding.",
+      placeholder: "Generate clean SVG or PNG placeholder images with exact dimensions, custom background and text colours, and an optional centred label.",
+      srcset: "Generate several resized WebP, JPEG or PNG widths plus a ready-to-paste srcset and sizes snippet for responsive, faster-loading pages.",
+      "sprite-sheet": "Pack several images into an evenly spaced sprite sheet and get a generated CSS background-position snippet for each frame automatically.",
+      "batch-rename": "Rename a batch of images with a numbered pattern and optionally convert the format, then download every file together as a single ZIP.",
+      recovery: "Attempt a best-effort decode and re-encode of a damaged image, with an honest report and clear reasons when recovery is not possible.",
+      "photo-signature": "Combine an application photo and a signature into one canvas with a configurable layout, spacing and export dimensions for forms."
+    }
+  };
+
   function makeTool(def) {
     const tool = Object.assign({
       slug: def.id,
@@ -524,8 +583,8 @@
       privacy: CLIENT_PRIVACY,
       keywords: []
     }, def);
-    if (!tool.seoTitle) tool.seoTitle = tool.name + ": private browser tool | Bench";
-    if (!tool.seoDescription) tool.seoDescription = tool.summary;
+    if (!tool.seoTitle) tool.seoTitle = SEO.titles[tool.id] || tool.name + ": private browser tool | Bench";
+    if (!tool.seoDescription) tool.seoDescription = SEO.descs[tool.id] || tool.summary;
     if (!tool.faq || !tool.faq.length) {
       tool.faq = [
         { q: "Does " + tool.name + " upload my images?", a: tool.privacy },
@@ -694,11 +753,11 @@
     options: [
       { key: "format", label: "Convert to", type: "select", value: "png",
         options: [
-          { value: "png", label: "PNG - lossless, transparency" },
+          { value: "png", label: "PNG — lossless, transparency" },
           { value: "jpeg", label: "JPEG - small photos, no transparency" },
           { value: "webp", label: "WebP - small files, transparency" },
           { value: "avif", label: "AVIF - modern, browser dependent" },
-          { value: "bmp", label: "BMP - uncompressed legacy" },
+          { value: "bmp", label: "BMP — uncompressed legacy" },
           { value: "tiff", label: "TIFF - uncompressed raster" },
           { value: "gif", label: "GIF - 256 colours, single frame" },
           { value: "ico", label: "ICO - PNG-compressed icon (256 px)" }
@@ -1120,7 +1179,7 @@
       "Review the groups. The first file in a group is the suggested original; later files are duplicates or variants.",
       "Download the report, and optionally a ZIP containing the files Bench marked as unique."
     ],
-    limitations: "Similarity detection compares downscaled grayscale fingerprints, so rotations, crops and severe colour edits can reduce the score. It does not read EXIF dates or delete files automatically. Review groups before discarding anything, especially when similar-looking graphics are intentionally repeated.",
+    limitations: "Similarity detection compares downscaled grayscale fingerprints, so rotations, crops and severe colour edits can reduce the score. It does not read EXIF dates or delete files automatically. Check each group before discarding anything, especially when similar-looking graphics are intentionally repeated.",
     useCases: ["Clean up repeated downloads.", "Find resized copies of the same photo.", "Review a client folder for accidental duplicates."]
   }));
 
@@ -1249,7 +1308,7 @@
 
   TOOLS.push(T({
     id: "svg-optimizer",
-    name: "SVG Optimizer & Validator",
+    name: "SVG Optimiser & Validator",
     category: "create",
     handler: "svgOptimize",
     summary: "Remove scripts, event handlers and dangerous URLs, validate basic SVG structure, and minify markup for safer embedding.",

@@ -1,6 +1,6 @@
 ﻿# Progeni Bench — Free Private Browser File Utilities
 
-> Progeni Bench (https://bench.progeni.live) is a fast, 100% client-side web utility suite featuring 30 free file tools. All processing executes locally inside the user's web browser using HTML5 Canvas, Web Cryptography, and WebAssembly. Zero files, images, or documents are uploaded to external servers.
+> Progeni Bench (https://bench.progeni.live) is a fast, 100% client-side web utility suite featuring 30 free file tools plus the Bench Image Toolkit and Bench Audio Toolkit. All processing executes locally inside the user's web browser using HTML5 Canvas, Web Audio, Web Cryptography, and WebAssembly. Zero files, images, audio, or documents are uploaded to external servers.
 
 ## Core Values & Privacy Guarantee
 - 100% Client-Side Processing: All file transformations occur in local browser memory (RAM).
@@ -93,6 +93,69 @@
 - Sprite Sheet Generator (https://bench.progeni.live/image/sprite-sheet/): Pack frames into a sprite sheet plus metadata.
 - Batch Rename & Export (https://bench.progeni.live/image/batch-rename/): Rename and export many images as a ZIP.
 - Image Inspector & Diagnostics (https://bench.progeni.live/image/inspection/): Byte-level inspection without full decoding.
+
+## Bench Audio Toolkit
+> A registry-driven, 100% client-side audio workspace at https://bench.progeni.live/audio/ with 48 public tools. Decoding, DSP and encoding run locally using the Web Audio API and a same-origin FFmpeg.wasm engine; no audio is ever uploaded, logged or stored. Microphone access is scoped to /audio/* and only opens after an explicit action. Six AI features are listed as deferred and two as unavailable rather than faked, and experimental tools are marked noindex with their limits stated on the page.
+
+- Audio Toolkit Hub (https://bench.progeni.live/audio/): Browse every working audio tool by category.
+- Audio Converter (https://bench.progeni.live/audio/convert/): Convert between MP3, WAV, FLAC, AAC/M4A, OGG, Opus and AIFF with a real encoder and an exact output size.
+- Audio Compressor (https://bench.progeni.live/audio/compress/): Reduce an audio file's size by lowering bitrate, downmixing to mono and trimming the sample rate.
+- Audio to WAV (https://bench.progeni.live/audio/to-wav/): Decode any supported audio file and export a universally compatible, uncompressed WAV file.
+- Audio to MP3 (https://bench.progeni.live/audio/to-mp3/): Encode any audio file to MP3 with libmp3lame at a bitrate you choose.
+- Audio to FLAC (https://bench.progeni.live/audio/to-flac/): Encode audio to lossless, compressed FLAC - smaller than WAV with no quality loss.
+- Audio to M4A / AAC (https://bench.progeni.live/audio/to-m4a/): Encode audio to AAC in an M4A container for small, widely compatible files.
+- Audio to OGG / Opus (https://bench.progeni.live/audio/to-ogg/): Encode audio to open OGG Vorbis or Opus, ideal for the web and games.
+- Audio to AIFF (https://bench.progeni.live/audio/to-aiff/): Convert audio to uncompressed AIFF, the classic Apple lossless audio format.
+- Ringtone Maker (https://bench.progeni.live/audio/ringtone-maker/): Crop a song to a 30-second ringtone, add a fade and export as MP3 or M4A.
+- Audio Trimmer (https://bench.progeni.live/audio/trimmer/): Cut a section out of an audio file with an interactive waveform and export the exact range.
+- Audio Joiner (https://bench.progeni.live/audio/joiner/): Merge two or more audio files into one track, in the order you choose.
+- Audio Splitter (https://bench.progeni.live/audio/splitter/): Split one file into several parts by time or into equal-length chunks.
+- Fade In / Out (https://bench.progeni.live/audio/fade/): Add a fade-in, a fade-out or both to smooth the start and end of a track.
+- Reverse Audio (https://bench.progeni.live/audio/reverse/): Play an audio file backwards for effects and creative edits.
+- Change Speed (https://bench.progeni.live/audio/speed/): Speed up or slow down audio while keeping the pitch the same (time-stretch).
+- Pitch Shifter (https://bench.progeni.live/audio/pitch/): Shift pitch up or down. Experimental: large shifts also change timbre (no formant preservation).
+- Loop Maker (https://bench.progeni.live/audio/loop-maker/): Repeat a section of audio a chosen number of times to build a smooth loop.
+- Crossfade Editor (https://bench.progeni.live/audio/crossfade/): Blend two tracks together with a real crossfade at a duration you choose.
+- Stereo & Channel Tools (https://bench.progeni.live/audio/channel-tools/): Swap or merge channels, isolate left or right, downmix to mono or make a dual-mono track.
+- Silence Remover (https://bench.progeni.live/audio/silence-remover/): Detect silent gaps and remove them, or trim only the leading and trailing silence.
+- Volume & Normalize (https://bench.progeni.live/audio/volume-adjust/): Change loudness by a fixed amount or normalise to a target peak, with clipping protection.
+- Noise Reducer (https://bench.progeni.live/audio/noise-reducer/): Reduce steady background noise with a real FFT denoiser. Experimental: spectral subtraction, not AI.
+- Voice Enhancer (https://bench.progeni.live/audio/voice-enhancer/): Brighten and control speech with a high-pass, EQ and gentle compression chain. Experimental: deterministic DSP.
+- Bass, Treble & EQ (https://bench.progeni.live/audio/equalizer/): Boost or cut bass, treble and a selectable mid band with real peaking filters.
+- Loudness Normalizer (LUFS) (https://bench.progeni.live/audio/loudness-normalizer/): Normalise to a broadcast loudness target in LUFS with true-peak limiting.
+- Voice Recorder (https://bench.progeni.live/audio/recorder/): Record from your microphone in the browser, preview it and download a WAV or WebM/Opus file.
+- Microphone Check (https://bench.progeni.live/audio/mic-check/): Test whether your microphone works, with a live input-level meter and permission status.
+- Stereo Channel Test (https://bench.progeni.live/audio/stereo-test/): Play a signal through each channel to confirm left/right speakers and headphones.
+- Tone Generator (https://bench.progeni.live/audio/tone-generator/): Generate a pure sine tone or musical note at a chosen frequency and length, then download it.
+- Noise Generator (https://bench.progeni.live/audio/noise-generator/): Generate white, pink or brown noise for masking, sleep or testing.
+- Metronome (https://bench.progeni.live/audio/metronome/): A click track with adjustable tempo, time signature and accent for practice.
+- BPM & Key Detector (https://bench.progeni.live/audio/bpm-detector/): Estimate tempo (BPM) and suggest a likely key. Experimental: needs a steady beat; key is a coarse hint.
+- Spectrogram / Spectrum Analyzer (https://bench.progeni.live/audio/spectrogram/): Render a spectrogram or real-time spectrum to see frequencies over time.
+- Clipping Detector (https://bench.progeni.live/audio/clipping-detector/): Scan a file for clipped samples and report where and how often it distorts.
+- Silence Detector (https://bench.progeni.live/audio/silence-detector/): Map every silent gap with start time, end time and duration.
+- Audio Metadata Viewer (https://bench.progeni.live/audio/metadata-viewer/): Inspect tags, duration, bitrate, sample rate, channels and codec of an audio file.
+- ID3 Tag Editor (https://bench.progeni.live/audio/id3-editor/): View and rewrite common tag fields and export a new copy. Experimental: partial frame support.
+- Loudness & Peak Analyzer (https://bench.progeni.live/audio/loudness-analyzer/): Measure integrated LUFS, true peak, RMS and dynamic range for broadcast checks.
+- Audio Integrity Check (https://bench.progeni.live/audio/integrity-check/): Verify a file decodes cleanly and report header, signature and structure problems.
+- Duplicate Audio Finder (https://bench.progeni.live/audio/duplicate-finder/): Compare several audio files and find exact duplicates using a content hash.
+- Audio to Base64 (https://bench.progeni.live/audio/audio-to-base64/): Encode an audio file as a Base64 string or data URI for embedding in code.
+- Base64 to Audio (https://bench.progeni.live/audio/base64-to-audio/): Decode a Base64 string or data URI back into a playable, downloadable audio file.
+- Audio Batch Rename (https://bench.progeni.live/audio/batch-rename/): Rename and export several audio files with a prefix, sequence numbers and a chosen format.
+- Audio to ZIP (https://bench.progeni.live/audio/audio-zip/): Bundle several audio files into a single ZIP archive for one-click download.
+- Waveform Image (https://bench.progeni.live/audio/waveform-image/): Generate a clean waveform PNG from any audio file for video, print or the web.
+- Audio MIME & Signature Checker (https://bench.progeni.live/audio/mime-checker/): See the real file type from its magic bytes and compare it with the extension and MIME type.
+- HTML Audio Player Generator (https://bench.progeni.live/audio/player-generator/): Generate a safe, accessible HTML audio player snippet for your file.
+- Podcast RSS Enclosure Validator (https://bench.progeni.live/audio/rss-validator/): Check a podcast feed's enclosure tags for missing or invalid audio URLs and types.
+
+### Audio features that are honestly not shipped
+- Audio Transcription (deferred): needs a speech-recognition model and a CSP-compatible local adapter.
+- Vocal Remover / Stem Separation (deferred): needs a real separation model; centre-channel cancellation is not separation.
+- AI Noise Reduction (deferred): needs a licensed neural model; real spectral denoising is offered instead.
+- Audio Restoration (deferred): needs a restoration model; deterministic filters are not full restoration.
+- Speech Translation (deferred): depends on transcription plus an external translation service.
+- System / Tab Audio Capture (deferred): getDisplayMedia audio capture is not consistent across browsers.
+- Text to Speech (unavailable): the browser SpeechSynthesis API cannot reliably capture output to a file.
+- Speaker Diarization (unavailable): needs a speaker-recognition model and a transcript.
 
 ## Primary Contact & Publisher Information
 - Publisher: Progeni (https://progeni.live)

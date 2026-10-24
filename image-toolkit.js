@@ -2011,7 +2011,7 @@
         catch (err) { decodeOk = false; decodeError = err.message; }
         const doc = { file: p.name, detected: meta, headerDimensions: { width: p.width, height: p.height }, decodedDimensions: actual, decodeOk, decodeError };
         outputs.push(reportResult(outputName(p.name, "metadata", "json"), JSON.stringify(doc, null, 2),
-          (FORMAT_LABEL[meta.format] || meta.format) + ", " + actual.width + " x " + actual.height + ", " + formatBytes(meta.bytes) + (meta.hasGps ? " - GPS present" : "") + (meta.hasExif ? " - EXIF present" : "")));
+          (FORMAT_LABEL[meta.format] || meta.format) + ", " + actual.width + " x " + actual.height + ", " + formatBytes(meta.bytes) + (meta.hasGps ? " · GPS present" : "") + (meta.hasExif ? " · EXIF present" : "")));
       } catch (err) { errors.push({ name: item.name || "file", message: err.message || String(err) }); }
       if (ctx.onProgress) ctx.onProgress(i + 1, ctx.inputs.length);
     }

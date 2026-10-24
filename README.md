@@ -1,6 +1,6 @@
 # Progeni Bench - Production README
 
-Progeni Bench is a Progeni project delivering fast, zero-bloat browser utilities with 100% private client-side processing.
+Progeni Bench is a Progeni project delivering 120 browser utilities: 30 core tools, 42 image tools and 48 audio tools, with client-side processing.
 
 ## 🚀 Quick Start
 
@@ -47,7 +47,7 @@ The `dist/` folder contains everything needed for static production hosting:
 - **_headers** - Strict Content-Security-Policy & security headers
 - **_redirects** - Netlify 404 handler
 - **manifest.webmanifest** - PWA configuration
-- **sitemap.xml** - 76 crawlable URLs for `bench.progeni.live` (35 legacy + 41 image)
+- **sitemap.xml** - 120 crawlable URLs for `bench.progeni.live` (5 core + 30 legacy tools + 41 image + 44 audio; experimental pages are `noindex` and excluded)
 - **robots.txt** - Crawler directives
 - **about/index.html** - About page
 - **privacy/index.html** - Privacy policy
@@ -55,9 +55,13 @@ The `dist/` folder contains everything needed for static production hosting:
 - **contact/index.html** - Contact & support page
 - **tools/** - 30 pre-rendered static tool pages with Schema.org JSON-LD
 - **image/** - 44 pre-rendered Bench Image Toolkit pages (hub, studio, and 39 tools + experimental pages)
+- **audio/** - 49 pre-rendered Bench Audio Toolkit pages (hub and 48 public tools)
 - **image-tools.config.js** - Image toolkit registry (source of truth for tools, SEO and status)
 - **image-toolkit.js** - Image toolkit runtime (pure byte core + browser engine + UI mounts)
+- **audio-tools.config.js** - Audio toolkit registry (source of truth for tools, SEO and status)
+- **audio-toolkit.js** - Audio toolkit runtime (Web Audio + FFmpeg.wasm processors + UI mounts)
 - **vendor/** - Same-origin third-party bundles (QR, barcode, GIF, TIFF) — no CDN
+- **vendor/ffmpeg/** - Same-origin FFmpeg.wasm engine (GPL, `NOTICE.txt` included) — no CDN
 - **assets/** - favicon.svg
 - **vercel.json** - Vercel clean URL routing configuration
 
@@ -81,15 +85,39 @@ account, no watermark.
 - Full architecture, inventory, per-tool status, security decisions and
   rollback notes: see **[IMAGE-TOOLKIT.md](./IMAGE-TOOLKIT.md)**.
 
-> **Note:** `main` ships without a test harness so the deployed tree stays lean.
-> The full suite (226 Node unit tests + 26 Chromium e2e tests) lives on the
-> **`tests` branch** (`origin/tests`). See §13 of
-> `IMAGE-TOOLKIT.md` for how to use it.
+## 🔊 Bench Audio Toolkit (56 tools · 48 public)
+
+A registry-driven audio workspace at `/audio/` with one stable page per tool.
+Everything runs locally in your browser — audio is never uploaded and never
+stored.
+
+- **Hub:** `/audio/` · **Tools:** `/audio/<slug>/`
+- **43 implemented**, **5 experimental** (`noindex, follow`), **6 deferred**,
+  **2 unavailable** AI features listed honestly with no page and no fake output.
+- Categories: Convert & Compress, Cut/Join & Edit, Clean & Enhance,
+  Record & Microphone, Music & Sound, Metadata & Diagnostics, Developer
+  Utilities.
+- Engines: **24 FFmpeg.wasm** (codec conversion + complex filters),
+  **22 Web Audio API** (decode/analysis/DSP/WAV export), **2 MediaRecorder**
+  (microphone capture, including the live mic check). No cloud APIs.
+- Highlights: format converter, compressor with real before/after sizes,
+  trimmer, joiner, splitter, fade/reverse/speed/pitch, silence remover,
+  loudness normaliser (EBU R128), noise reducer, EQ, voice recorder with mic
+  meter, tone/noise generators, metronome, BPM/spectrogram, waveform image,
+  ID3/metadata editor and MIME/duplicate checks.
+- Microphone access is scoped to `/audio/*` via `Permissions-Policy`
+  (`microphone=(self)`); every other route keeps `microphone=()`.
+- Full architecture, inventory, per-tool status, security decisions and
+  rollback notes: see **[AUDIO-TOOLKIT.md](./AUDIO-TOOLKIT.md)**.
+
+> **Tests:** this branch ships the full harness. Run `npm test` for the Node
+> unit suite and `npm run test:e2e` for the Chromium end-to-end suite. See §13
+> of `IMAGE-TOOLKIT.md` and §13 of `AUDIO-TOOLKIT.md` for details.
 
 Regenerate vendor bundles with `npm run build:vendor`.
 
 
-## 🛠️ Available Tools (30 Total)
+## 🛠️ Core Utilities (30 Tools)
 
 ### Files & Data
 - Chrome Bookmark Cleaner

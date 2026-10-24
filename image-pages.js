@@ -115,6 +115,7 @@ function shell(title, desc, canonicalUrl, body, opts) {
   <nav id="primary-nav" aria-label="Primary navigation">
     <a href="/">All tools</a>
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/about/">About</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -131,6 +132,7 @@ ${body}
   <div><strong>${esc(SITE_NAME)}</strong> — <a href="${esc(site.PARENT_URL)}" target="_blank" rel="noopener">A Progeni project</a> · ${esc(TAGLINE)}</div>
   <div class="footer-links">
     <a href="/image/">Image toolkit</a>
+    <a href="/audio/">Audio toolkit</a>
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
     <a href="/about/">About</a>
