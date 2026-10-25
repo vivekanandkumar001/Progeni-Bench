@@ -1136,7 +1136,7 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
+  'site.config.js', 'app.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -1163,6 +1163,30 @@ if (fs.existsSync(assetsDir)) {
 const vendorDir = path.join(baseDir, 'vendor');
 if (fs.existsSync(vendorDir)) {
   const distVendorDir = path.join(distDir, 'vendor');
+  const copyVendorFile = (source, destination) => {
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(source, destination);
+  };
+  const copyVendorTree = (from, to) => {
+    fs.mkdirSync(to, { recursive: true });
+    fs.readdirSync(from).forEach(file => {
+      const source = path.join(from, file);
+      const destination = path.join(to, file);
+      if (fs.statSync(source).isDirectory()) copyVendorTree(source, destination);
+      else fs.copyFileSync(source, destination);
+    });
+  };
+  const pdfjsRoot = path.dirname(require.resolve('pdfjs-dist/package.json'));
+  const pdfjsVendorDir = path.join(vendorDir, 'pdfjs');
+  const pdfLibVendorDir = path.join(vendorDir, 'pdf-lib');
+  copyVendorFile(require.resolve('pdfjs-dist/legacy/build/pdf.min.js'), path.join(pdfjsVendorDir, 'pdf.min.js'));
+  copyVendorFile(require.resolve('pdfjs-dist/legacy/build/pdf.worker.min.js'), path.join(pdfjsVendorDir, 'pdf.worker.min.js'));
+  copyVendorFile(path.join(pdfjsRoot, 'LICENSE'), path.join(pdfjsVendorDir, 'LICENSE'));
+  copyVendorTree(path.join(pdfjsRoot, 'cmaps'), path.join(pdfjsVendorDir, 'cmaps'));
+  copyVendorTree(path.join(pdfjsRoot, 'standard_fonts'), path.join(pdfjsVendorDir, 'standard_fonts'));
+  const pdfLibRoot = path.dirname(require.resolve('pdf-lib/package.json'));
+  copyVendorFile(require.resolve('pdf-lib/dist/pdf-lib.min.js'), path.join(pdfLibVendorDir, 'pdf-lib.min.js'));
+  copyVendorFile(path.join(pdfLibRoot, 'LICENSE.md'), path.join(pdfLibVendorDir, 'LICENSE.md'));
   const copyTree = (from, to) => {
     fs.mkdirSync(to, { recursive: true });
     fs.readdirSync(from).forEach(f => {

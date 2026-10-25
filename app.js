@@ -51,6 +51,7 @@ const STUDIO_SCRIPTS = {
   dmc: "/data/dmc.js"
 };
 const loadedScripts = new Map();
+let pdfManagerRouteToken = 0;
 
 function loadScript(src) {
   if (loadedScripts.has(src)) return loadedScripts.get(src);
@@ -1263,6 +1264,104 @@ function home() {
 function toolPage(id) {
   const tool = TOOLS.find(x => x.id === id);
   if (!tool) { home(); return; }
+
+  if (id === "pdf-page-manager") {
+    const body = `
+      <section class="pdfpm" id="pdfpm" aria-busy="false">
+        <div class="pdfpm-drop" id="pdfpm-drop" role="button" tabindex="0" aria-label="Choose a PDF to edit">
+          <strong>Drop a PDF here or choose a file</strong>
+          <span>PDFs are read and edited locally · Maximum 50 MB and 150 pages</span>
+          <input id="pdfpm-file" type="file" accept=".pdf,application/pdf" hidden>
+        </div>
+        <div class="pdfpm-error" id="pdfpm-error" role="alert" hidden></div>
+        <p class="pdfpm-status" id="pdfpm-status" role="status" aria-live="polite">Choose a PDF to begin.</p>
+        <section class="pdfpm-editor" id="pdfpm-editor" aria-label="PDF page editor" hidden>
+          <div class="pdfpm-file-info" id="pdfpm-file-info"></div>
+          <div class="pdfpm-warning" role="note"><strong>PDF compatibility:</strong> Editing invalidates digital signatures. Links, annotations, bookmarks, forms, metadata and other advanced features may not be preserved.</div>
+          <div class="pdfpm-toolbar" role="toolbar" aria-label="Page editing actions">
+            <button class="btn secondary btn-sm" id="pdfpm-select-all" type="button">Select all</button>
+            <button class="btn secondary btn-sm" id="pdfpm-clear-selection" type="button">Clear selection</button>
+            <button class="btn danger btn-sm" id="pdfpm-delete" type="button" disabled>Delete selected</button>
+            <button class="btn secondary btn-sm" id="pdfpm-duplicate" type="button" disabled>Duplicate selected</button>
+            <button class="btn secondary btn-sm" id="pdfpm-move-up" type="button" disabled>Move earlier</button>
+            <button class="btn secondary btn-sm" id="pdfpm-move-down" type="button" disabled>Move later</button>
+            <button class="btn secondary btn-sm" id="pdfpm-undo" type="button" disabled>Undo</button>
+            <button class="btn secondary btn-sm" id="pdfpm-redo" type="button" disabled>Redo</button>
+            <button class="btn secondary btn-sm" id="pdfpm-reset" type="button">Reset to original</button>
+          </div>
+          <div class="pdfpm-insert-bar">
+            <label for="pdfpm-position">Insert position</label>
+            <select id="pdfpm-position">
+              <option value="before">Before selected page</option>
+              <option value="after">After selected page</option>
+              <option value="append">At end</option>
+            </select>
+            <button class="btn secondary btn-sm" id="pdfpm-add-pdf" type="button">Choose another PDF</button>
+            <input id="pdfpm-second-file" type="file" accept=".pdf,application/pdf" hidden>
+            <button class="btn secondary btn-sm" id="pdfpm-add-blank" type="button">Insert blank page</button>
+            <button class="btn secondary btn-sm" id="pdfpm-add-image" type="button">Insert image page</button>
+            <input id="pdfpm-image-file" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
+            <label for="pdfpm-page-size">Page size</label>
+            <select id="pdfpm-page-size">
+              <option value="adjacent">Match adjacent page</option>
+              <option value="a4">A4 portrait</option>
+              <option value="letter">US Letter portrait</option>
+              <option value="custom">Custom dimensions</option>
+            </select>
+            <span class="pdfpm-custom-size" id="pdfpm-custom-size" hidden>
+              <label>Width (mm) <input id="pdfpm-width" type="number" min="50" max="1000" value="210"></label>
+              <label>Height (mm) <input id="pdfpm-height" type="number" min="50" max="1000" value="297"></label>
+            </span>
+          </div>
+          <p class="pdfpm-help">Drag a page to reorder it. Keyboard users can select pages and use Move earlier/later. Thumbnails render only near the visible scroll area.</p>
+          <div class="pdfpm-page-summary" id="pdfpm-page-summary" aria-live="polite"></div>
+          <div class="pdfpm-pages" id="pdfpm-pages" role="list" aria-label="PDF pages"></div>
+          <section class="pdfpm-source" id="pdfpm-source" aria-labelledby="pdfpm-source-title" hidden>
+            <div class="pdfpm-source-head">
+              <div><h2 id="pdfpm-source-title">Pages from another PDF</h2><p id="pdfpm-source-info"></p></div>
+              <div class="pdfpm-source-actions">
+                <button class="btn secondary btn-sm" id="pdfpm-source-select-all" type="button">Select all source pages</button>
+                <button class="btn secondary btn-sm" id="pdfpm-insert-source" type="button" disabled>Insert selected pages</button>
+                <button class="btn secondary btn-sm" id="pdfpm-append-source" type="button">Append entire PDF</button>
+                <button class="btn secondary btn-sm" id="pdfpm-close-source" type="button">Remove source PDF</button>
+              </div>
+            </div>
+            <div class="pdfpm-pages pdfpm-source-pages" id="pdfpm-source-pages" role="list" aria-label="Pages in the second PDF"></div>
+          </section>
+          <div class="pdfpm-export">
+            <div><strong id="pdfpm-final-count"></strong><span id="pdfpm-export-status" role="status" aria-live="polite"></span></div>
+            <progress id="pdfpm-progress" max="100" value="0" aria-label="PDF export progress" hidden></progress>
+            <div class="pdfpm-export-actions">
+              <button class="btn" id="pdfpm-export" type="button" disabled>Export edited PDF</button>
+              <a class="btn secondary" id="pdfpm-download" href="#" download hidden>Download PDF</a>
+            </div>
+          </div>
+        </section>
+      </section>
+    `;
+    layout({ tool, body });
+    const routeToken = ++pdfManagerRouteToken;
+    loadScript("/vendor/pdfjs/pdf.min.js")
+      .then(() => loadScript("/vendor/pdf-lib/pdf-lib.min.js"))
+      .then(() => loadScript("/pdf-page-manager.js"))
+      .then(() => {
+        if (routeToken !== pdfManagerRouteToken || !$("#pdfpm")) return;
+        if (!window.PdfPageManager || !window.pdfjsLib || !window.PDFLib) {
+          throw new Error("A local PDF component did not initialize.");
+        }
+        window.PdfPageManager.mount();
+      })
+      .catch(err => {
+        if (routeToken !== pdfManagerRouteToken) return;
+        const error = $("#pdfpm-error");
+        if (error) {
+          error.hidden = false;
+          error.textContent = `PDF Page Manager could not load: ${err.message || err}`;
+        }
+      });
+    return;
+  }
+
   let accept = "*/*", multi = false;
 
   if (["bookmark-cleaner", "bookmark-reading"].includes(id)) accept = ".html,.htm";
@@ -1510,6 +1609,10 @@ function setActiveNav() {
 }
 
 function route() {
+  pdfManagerRouteToken += 1;
+  if (window.PdfPageManager && typeof window.PdfPageManager.unmount === "function") {
+    window.PdfPageManager.unmount();
+  }
   const hash = location.hash.replace(/^#/, "") || "";
   const path = location.pathname.replace(/^\/+/, "/") || "/";
   let p = path || hash || "/";
