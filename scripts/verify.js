@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
+const { TOOLS } = require('../site.config.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const results = [];
@@ -58,15 +59,15 @@ if (missingFiles.length === 0) {
   addResult('C03', 'FAIL', missingFiles.join(', '));
 }
 
-// C04: dist/tools has exactly 30 subdirs, each with index.html
+// C04: dist/tools has one subdirectory with index.html for each registered tool
 try {
   const toolsDir = path.join(ROOT, 'dist', 'tools');
   const subdirs = fs.readdirSync(toolsDir, { withFileTypes: true }).filter(d => d.isDirectory());
   const valid = subdirs.filter(d => fs.existsSync(path.join(toolsDir, d.name, 'index.html')));
-  if (subdirs.length === 30 && valid.length === 30) {
-    addResult('C04', 'PASS', '30 subdirectories with index.html');
+  if (subdirs.length === TOOLS.length && valid.length === TOOLS.length) {
+    addResult('C04', 'PASS', `${TOOLS.length} subdirectories with index.html`);
   } else {
-    addResult('C04', 'FAIL', `found ${valid.length}/${subdirs.length} (expected 30/30)`);
+    addResult('C04', 'FAIL', `found ${valid.length}/${subdirs.length} (expected ${TOOLS.length}/${TOOLS.length})`);
   }
 } catch (e) {
   addResult('C04', 'FAIL', e.message);
@@ -84,10 +85,10 @@ try {
       if (content.includes('id="schema"')) count++;
     }
   }
-  if (count === 30) {
-    addResult('C05', 'PASS', `count=${count}/30`);
+  if (count === TOOLS.length) {
+    addResult('C05', 'PASS', `count=${count}/${TOOLS.length}`);
   } else {
-    addResult('C05', 'FAIL', `count=${count}/30`);
+    addResult('C05', 'FAIL', `count=${count}/${TOOLS.length}`);
   }
 } catch (e) {
   addResult('C05', 'FAIL', e.message);
@@ -983,4 +984,3 @@ const passCount = results.filter(r => r.status === 'PASS').length;
 const failCount = results.filter(r => r.status === 'FAIL').length;
 const skipCount = results.filter(r => r.status === 'SKIP').length;
 console.log(`SUMMARY | pass=${passCount} fail=${failCount} skip=${skipCount}`);
-
