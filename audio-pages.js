@@ -30,7 +30,6 @@ const TAGLINE = site.TAGLINE || 'Fast, private browser utilities';
 const PUBLIC = C.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental');
 const IMPLEMENTED = PUBLIC.filter(t => t.status === 'implemented');
 const EXPERIMENTAL = PUBLIC.filter(t => t.status === 'experimental');
-const NOT_AVAILABLE = C.TOOLS.filter(t => t.status !== 'implemented' && t.status !== 'experimental');
 
 function esc(value) {
   return String(value == null ? '' : value)
@@ -48,7 +47,7 @@ function json(value) {
 
 function statusLabel(status) {
   return {
-    implemented: 'Implemented and tested',
+    implemented: 'Ready',
     experimental: 'Experimental',
     deferred: 'Deferred',
     unavailable: 'Unavailable',
@@ -58,6 +57,12 @@ function statusLabel(status) {
 
 function statusClass(status) {
   return 'itk-badge itk-badge-' + esc(status);
+}
+
+function statusBadge(status) {
+  return status === 'implemented'
+    ? ''
+    : `<em class="${statusClass(status)}">${esc(statusLabel(status))}</em>`;
 }
 
 function publicUrl(tool) {
@@ -155,7 +160,7 @@ function toolCard(tool) {
   return `<a class="itk-tool-card" href="/audio/${esc(tool.slug)}/">
   <strong>${esc(tool.name)}</strong>
   <span>${esc(tool.summary)}</span>
-  <em class="${statusClass(tool.status)}">${esc(statusLabel(tool.status))}</em>
+  ${statusBadge(tool.status)}
 </a>`;
 }
 
@@ -171,9 +176,6 @@ function hubBody() {
   <div class="itk-tool-grid">${tools.map(toolCard).join('\n')}</div>
 </section>`;
   }).join('\n');
-
-  const emptyCategories = C.CATEGORIES.filter(cat => !PUBLIC.some(t => t.category === cat.id))
-    .map(cat => `<li><strong>${esc(cat.name)}</strong> — no working tools in this category yet.</li>`).join('');
 
   return `<section class="tool-head itk-head atk-head">
   <span class="eyebrow">Bench Audio Toolkit</span>
@@ -195,17 +197,11 @@ ${categories}
 <section class="toolbox itk-notice-box">
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: ${esc(C.LIMITS.maxFileBytes / (1024 * 1024))} MB per file, ${esc(C.LIMITS.maxDurationSec / 60)} minutes per file, ${esc(C.LIMITS.maxFiles)} files per batch. Conversion and complex filters use a ${esc((C.LIMITS.ffmpegCoreBytes / (1024 * 1024)).toFixed(0))} MB FFmpeg engine downloaded once and cached.</p>
-  ${emptyCategories ? `<p class="itk-muted">${emptyCategories}</p>` : ''}
   <h2>How processing works</h2>
   <p>Simple editing, analysis, recording and WAV export use the Web Audio API directly in the tab. Format conversion and complex filters (loudness normalisation, denoise, speed, EQ) use a WebAssembly build of FFmpeg that runs on your device. Either way, the audio bytes never leave your machine and Bench keeps no copy.</p>
   <h2>Licences and source</h2>
   <p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>
   <p>Full attributions, exact version numbers and a written offer to supply the corresponding source code are published in <a href="/vendor/ffmpeg/NOTICE.txt">/vendor/ffmpeg/NOTICE.txt</a>. That notice names the upstream FFmpeg project and the ffmpeg.wasm packaging project, including their source repositories.</p>
-  <h2>Not available yet</h2>
-  <p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p>
-  <div class="itk-status-list">
-    ${NOT_AVAILABLE.map(t => `<div class="itk-status-row"><strong>${esc(t.name)}</strong><em class="${statusClass(t.status)}">${esc(statusLabel(t.status))}</em><p>${esc(t.reason || 'Not available in this build.')}</p></div>`).join('\n')}
-  </div>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>`;
 }
@@ -237,7 +233,7 @@ function toolBody(tool) {
   return `<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/audio/">Audio toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">${esc(tool.name)}</span></nav>
 
 <section class="tool-head itk-head">
-  <span class="eyebrow">Bench Audio Toolkit · <span class="${statusClass(tool.status)}">${esc(statusLabel(tool.status))}</span></span>
+  <span class="eyebrow">Bench Audio Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
   <h1>${esc(tool.name)}</h1>
   <p>${esc(tool.summary)} <strong>Nothing is uploaded.</strong></p>
   <div class="itk-meta">
@@ -388,7 +384,6 @@ module.exports = {
   PUBLIC,
   IMPLEMENTED,
   EXPERIMENTAL,
-  NOT_AVAILABLE,
   generateHubHtml,
   generateToolHtml,
   buildAudioPages,
