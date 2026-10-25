@@ -1,11 +1,18 @@
 ﻿# Progeni Bench — Free Private Browser File Utilities
 
-> Progeni Bench (https://bench.progeni.live) is a fast, 100% client-side web utility suite featuring 30 free file tools plus the Bench Image Toolkit and Bench Audio Toolkit. All processing executes locally inside the user's web browser using HTML5 Canvas, Web Audio, Web Cryptography, and WebAssembly. Zero files, images, audio, or documents are uploaded to external servers.
+> Progeni Bench (https://bench.progeni.live/) is a free suite of 122 browser-based utilities: 32 core tools, 42 public image tools, and 48 public audio tools. Selected file contents are processed locally in the browser and are not uploaded to Bench servers. Some tools download required application assets, including the same-origin FFmpeg.wasm engine used by audio tools. Experimental tools are identified on their pages with limitations.
 
-## Core Values & Privacy Guarantee
-- 100% Client-Side Processing: All file transformations occur in local browser memory (RAM).
-- Zero Uploads: Sensitive CSVs, personal photos, contact databases, and calendar files never touch a remote server.
-- Free & No Registration: Unlimited access to all 30 utility tools without signup or ads.
+## Quick Answers
+- What is Progeni Bench? A free browser-based toolkit for common file, image, audio, data, print and productivity tasks.
+- How many tools are available? 122 public tool pages: 32 core, 42 image and 48 audio.
+- Are selected files uploaded? No. Bench processes selected file contents locally; required site or processing-engine assets may be downloaded separately. PDF Translator sends extracted text, not the PDF, to DeepL.
+- Is an account required? No account or subscription is required to use the tools.
+- Where can I find the tools? Browse the [core tool catalog](https://bench.progeni.live/), [image toolkit](https://bench.progeni.live/image/) or [audio toolkit](https://bench.progeni.live/audio/).
+
+## Core Privacy Principles
+- Client-Side File Processing: Selected file contents are processed in local browser memory.
+- No File Uploads: Bench does not upload users' selected files for processing.
+- Free & No Registration: No account or subscription is required to use the browser tools.
 
 ## Tool Categories & Key Capabilities
 
@@ -50,7 +57,7 @@
 - Family Photo Date Organizer (https://bench.progeni.live/tools/family-organizer/): Group family photos by date and create structured timeline indices.
 
 ## Bench Image Toolkit
-> A registry-driven, 100% client-side image workspace at https://bench.progeni.live/image/ with 39 working tools plus a batch Image Studio. Every tool runs locally in the browser using Canvas and File APIs; no image is ever uploaded. Tools without a real client-side handler are labelled unavailable or deferred instead of faking output.
+> A registry-driven, 100% client-side image workspace at https://bench.progeni.live/image/ with 42 public tools (39 ready, 3 experimental) plus a batch Image Studio. Every tool runs locally in the browser using Canvas and File APIs; no image is ever uploaded. Tools without a real client-side handler are labelled unavailable or deferred instead of faking output.
 
 - Image Toolkit Hub (https://bench.progeni.live/image/): Browse every working image tool by category.
 - Image Studio (https://bench.progeni.live/image/studio/): Multi-file batch resize, convert, rename and ZIP export.
@@ -161,3 +168,17 @@
 - Publisher: Progeni (https://progeni.live)
 - Support Email: support@progeni.live
 - License: Free client-side web utility suite.
+- Last updated: 2026-10-25
+
+## Citation Guidance
+- Cite the exact tool URL when describing one tool, for example: Progeni Bench, "Audio Trimmer", https://bench.progeni.live/audio/trimmer/.
+- Cite https://bench.progeni.live/ for statements about the site as a whole.
+- Do not invent ratings, review scores, user counts, certifications or guarantees; none are published.
+- Describe experimental tools with their documented limitation rather than as fully validated.
+- Pricing is free. There is no paid tier or subscription.
+
+## Machine-Readable Files
+- Full tool reference: https://bench.progeni.live/llms-full.txt
+- Sitemap: https://bench.progeni.live/sitemap.xml
+- Crawler policy: https://bench.progeni.live/robots.txt
+- All indexable pages carry Schema.org JSON-LD, canonical URLs and answer-first summaries.

@@ -19,6 +19,11 @@
   const SUPPORT_EMAIL = "support@progeni.live";
   const TAGLINE = "Small file jobs, done privately in your browser.";
   const LOCALE = "en-IN";
+  // Date the public content was last reviewed. Used for schema dateModified,
+  // sitemap lastmod and llms.txt so builds stay deterministic.
+  const LAST_UPDATED = "2026-10-25";
+  // All tools are free, so the offer currency is only a schema formality.
+  const PRICE_CURRENCY = "USD";
 
   const TOOLS = [
   {
@@ -786,7 +791,7 @@
       "Download the standalone reading-list.html document for distraction-free offline reading."
     ],
     "limits": "Filters out internal browser schemes (javascript:, data:, chrome:, file:). Does not scrape or archive the full offline text content of linked web pages.",
-    "privacy": "Your saved articles and reading links never leave your browser sandbox. Complete privacy and local offline storage guaranteed.",
+    "privacy": "Your saved articles and reading links never leave your browser sandbox. Bench reads the bookmark file locally, keeps the parsed list in memory, and exports a standalone HTML reading list.",
     "useCases": [
       "Reading List Digest Creation: Convert cluttered browser bookmark folders into a clean Markdown checklist for reading later in Obsidian or Notion.",
       "Domain-Grouped Research Lists: Group saved research bookmarks by website domain to organize sources for research papers and articles.",
@@ -1133,7 +1138,7 @@
       },
       {
         "q": "What happens if two photos share the same date and title?",
-        "a": "The engine automatically appends zero-padded collision avoidance numbers (-01, -02) to guarantee unique filenames."
+        "a": "The engine automatically appends zero-padded collision avoidance numbers (-01, -02) so filenames stay unique."
       },
       {
         "q": "Are original files modified on my hard drive without confirmation?",
@@ -1142,6 +1147,44 @@
     ]
   }
 ];
+
+  TOOLS.push({
+    "id": "pdf-translator",
+    "icon": "🌐",
+    "cat": "Files & Data",
+    "name": "PDF Translator",
+    "keyword": "PDF Translator",
+    "desc": "Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF.",
+    "seoDesc": "Translate native-text PDFs with OCR for scanned pages, page selection, language and style controls, plus PDF download. Translation uses DeepL.",
+    "whatItDoes": "Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages.",
+    "howToUse": [
+      "Choose a PDF under 15 MB and review its page count and supported-page notice.",
+      "Select a target language, translation style and output layout; optionally set a source language and page range.",
+      "Enable local OCR for scanned pages. OCR requires downloading language data to your browser, but page images stay on your device.",
+      "Translate and review the text preview and page-quality report before downloading the generated PDF."
+    ],
+    "limits": "Maximum 15 MB, 30 pages and 120,000 extracted characters per job. Complex tables, embedded image text, handwriting, unusual fonts and expanded translations can affect layout. Original-layout reconstruction is best-effort, links are not preserved as interactive links, and output pages are rasterized. Hinglish is DeepL Hindi translated then romanized; the mix of Hindi and English is not guaranteed. The translation provider processes extracted text.",
+    "privacy": "The PDF itself is parsed, rendered, OCR-processed and rebuilt locally in your browser. Extracted text blocks are sent to the configured DeepL API through the Bench server endpoint for translation; API credentials stay server-side. OCR language data is downloaded from the Tesseract data host, but document images are not sent there.",
+    "useCases": [
+      "Translate text-based reports, guides and study materials while retaining their page structure where practical.",
+      "Convert Hindi translations to Roman script for a best-effort Hinglish reading copy.",
+      "OCR scanned English or Hindi pages locally before translating selected pages."
+    ],
+    "faq": [
+      {
+        "q": "Is my PDF uploaded to Bench?",
+        "a": "No. PDF pages stay in your browser. Extracted text is sent to DeepL through a server endpoint, so the translation provider processes that text."
+      },
+      {
+        "q": "Does Hinglish use Roman script?",
+        "a": "Yes. The tool translates to Hindi and romanizes that output. This is best-effort Romanized Hindi, not guaranteed natural Hindi-English mixing."
+      },
+      {
+        "q": "Can scanned documents be translated?",
+        "a": "Yes, when local OCR is enabled and the required language data is available. OCR may be incomplete for low-quality scans, handwriting and image-heavy pages."
+      }
+    ]
+  });
 
   TOOLS.push({
     "id": "pdf-page-manager",
@@ -1190,6 +1233,8 @@
     SUPPORT_EMAIL,
     TAGLINE,
     LOCALE,
+    LAST_UPDATED,
+    PRICE_CURRENCY,
     TOOLS
   };
 });

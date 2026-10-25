@@ -6,17 +6,24 @@
   <title>Photo Timeline Builder: Free Online Tool | Progeni Bench</title>
   <meta name="description" content="Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.">
   <meta name="theme-color" content="#f4f6f9">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Progeni">
   <meta property="og:site_name" content="Progeni Bench">
   <meta property="og:title" content="Photo Timeline Builder: Free Online Tool | Progeni Bench">
   <meta property="og:description" content="Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/tools/photo-timeline/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
-  <meta property="og:image:alt" content="Progeni Bench — free, private browser tools">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Progeni Bench — Photo Timeline Builder">
   <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Photo Timeline Builder: Free Online Tool | Progeni Bench">
+  <meta name="twitter:description" content="Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.">
   <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta name="twitter:image:alt" content="Progeni Bench — Photo Timeline Builder">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
@@ -26,7 +33,9 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/tools/photo-timeline/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Photo Timeline Builder","url":"https://bench.progeni.live/tools/photo-timeline/","description":"Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"isAccessibleForFree":true,"provider":{"@type":"Organization","name":"Progeni","url":"https://progeni.live"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/#category-images"},{"@type":"ListItem","position":3,"name":"Photo Timeline Builder","item":"https://bench.progeni.live/tools/photo-timeline/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does the tool determine when a photograph was taken?","acceptedAnswer":{"@type":"Answer","text":"It extracts the authentic EXIF DateTimeOriginal tag from the JPEG header, falling back to file modification dates if EXIF is absent."}},{"@type":"Question","name":"Can I manually override dates for scanned photographs?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can edit dates for individual photos or batch-assign calendar dates to archival family photo scans."}},{"@type":"Question","name":"Can I download a timeline rename plan for my photo collection?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can export a structured rename plan or download grouped photos organized by calendar day."}}]}]}</script>
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
+  <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full LLM-readable tool reference">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://bench.progeni.live/#organization","name":"Progeni","url":"https://progeni.live","description":"Progeni Bench is a free, privacy-first collection of browser-based file, image and audio tools published by Progeni.","logo":{"@type":"ImageObject","url":"https://bench.progeni.live/assets/favicon-512.png","width":512,"height":512},"brand":{"@type":"Brand","name":"Progeni Bench"},"contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"support@progeni.live","url":"https://bench.progeni.live/contact/","availableLanguage":["en"]}]},{"@type":"WebSite","@id":"https://bench.progeni.live/#website","name":"Progeni Bench","url":"https://bench.progeni.live/","inLanguage":"en-IN","description":"Small file jobs, done privately in your browser.","publisher":{"@id":"https://bench.progeni.live/#organization"}},{"@type":"WebPage","@id":"https://bench.progeni.live/tools/photo-timeline/#webpage","url":"https://bench.progeni.live/tools/photo-timeline/","name":"Photo Timeline Builder: Free Online Tool | Progeni Bench","description":"Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.","inLanguage":"en-IN","dateModified":"2026-10-25","isPartOf":{"@id":"https://bench.progeni.live/#website"},"publisher":{"@id":"https://bench.progeni.live/#organization"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".quick-answer .answer-text",".quick-answer .key-facts"]}},{"@type":"WebApplication","name":"Photo Timeline Builder","url":"https://bench.progeni.live/tools/photo-timeline/","description":"Build photo album from EXIF dates in your browser. Export offline HTML photo diary with lazy-loaded images. Zero uploads, no server dependency.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","browserRequirements":"Requires a modern JavaScript-enabled web browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true,"provider":{"@id":"https://bench.progeni.live/#organization"},"featureList":["Chronological Vacation Photo Sorting: Organize hundreds of trip snapshots into calendar-sorted day and month albums.","Event Photo Sequencing: Order wedding or conference photos taken on multiple cameras into a single chronological timeline.","Photo Archive Verification: Inspect EXIF capture timestamps to confirm whether legacy photo scans contain camera metadata."]},{"@type":"HowTo","name":"How to use Photo Timeline Builder","description":"Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts…","step":[{"@type":"HowToStep","position":1,"text":"Drop a folder or batch of photo files from a family event, wedding, or holiday."},{"@type":"HowToStep","position":2,"text":"Each JPEG's EXIF DateTimeOriginal is read first; files without EXIF fall back to the file date and are flagged for correction."},{"@type":"HowToStep","position":3,"text":"Review the day/month groups, click any thumbnail to open the full-resolution original, and fix any wrong dates inline."},{"@type":"HowToStep","position":4,"text":"Check the embedded album-size report, add an album title, and download the standalone photo-timeline.html photo diary."}],"url":"https://bench.progeni.live/tools/photo-timeline/"},{"@type":"BreadcrumbList","@id":"https://bench.progeni.live/tools/photo-timeline/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Images","item":"https://bench.progeni.live/#category-images"},{"@type":"ListItem","position":3,"name":"Photo Timeline Builder","item":"https://bench.progeni.live/tools/photo-timeline/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does the tool determine when a photograph was taken?","acceptedAnswer":{"@type":"Answer","text":"It extracts the authentic EXIF DateTimeOriginal tag from the JPEG header, falling back to file modification dates if EXIF is absent."}},{"@type":"Question","name":"Can I manually override dates for scanned photographs?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can edit dates for individual photos or batch-assign calendar dates to archival family photo scans."}},{"@type":"Question","name":"Can I download a timeline rename plan for my photo collection?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can export a structured rename plan or download grouped photos organized by calendar day."}}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -49,6 +58,18 @@
     <h1>Photo Timeline Builder</h1>
     <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
   </section>
+
+  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
+  <h2 id="quick-answer-title">Quick answer</h2>
+  <p class="answer-text"><strong>Photo Timeline Builder</strong> is a free images tool that runs in your browser. Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts…</p>
+  <dl class="key-facts">
+    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
+    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
+    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
+    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
+    <div><dt>Best for</dt><dd>Chronological Vacation Photo Sorting: Organize hundreds of trip snapshots into calendar-sorted day and month albums.</dd></div>
+  </dl>
+</aside>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -132,8 +153,8 @@
     <a href="/contact/">Contact</a>
   </div>
   
-  <div class="footer-directory">
-    <div class="footer-directory-title">Explore all 120 private browser tools across core, image and audio toolkits</div>
+  <details class="footer-directory">
+    <summary class="footer-directory-title">Explore all 122 private browser tools across core, image and audio toolkits</summary>
     <div class="category-blocks">
       
         <div class="category-block">
@@ -245,8 +266,19 @@
           </ul>
         </div>
       
+        <div class="category-block">
+          <h3>Files & Data</h3>
+          <ul>
+            
+              <li><a href="/tools/pdf-translator/">🌐 PDF Translator</a></li>
+            
+              <li><a href="/tools/pdf-page-manager/">📑 PDF Page Manager</a></li>
+            
+          </ul>
+        </div>
+      
     </div>
-  </div>
+  </details>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>

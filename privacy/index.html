@@ -3,20 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Privacy Policy: Progeni Bench Zero-Upload Guarantee</title>
-  <meta name="description" content="Read the Progeni Bench zero-upload privacy guarantee. All files and documents process locally inside your browser memory with zero tracking and zero ads.">
+  <title>Privacy Policy: Progeni Bench Local Processing</title>
+  <meta name="description" content="Read how Progeni Bench processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.">
   <meta name="theme-color" content="#f4f6f9">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Progeni">
   <meta property="og:site_name" content="Progeni Bench">
-  <meta property="og:title" content="Privacy Policy: Progeni Bench Zero-Upload Guarantee">
-  <meta property="og:description" content="Read the Progeni Bench zero-upload privacy guarantee. All files and documents process locally inside your browser memory with zero tracking and zero ads.">
+  <meta property="og:title" content="Privacy Policy: Progeni Bench Local Processing">
+  <meta property="og:description" content="Read how Progeni Bench processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/privacy/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
-  <meta property="og:image:alt" content="Progeni Bench — free, private browser tools">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Progeni Bench — Privacy Policy">
   <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Privacy Policy: Progeni Bench Zero-Upload Guarantee">
+  <meta name="twitter:title" content="Privacy Policy: Progeni Bench Local Processing">
+  <meta name="twitter:description" content="Read how Progeni Bench processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.">
   <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta name="twitter:image:alt" content="Progeni Bench — Privacy Policy">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
@@ -26,7 +33,9 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/privacy/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","name":"Privacy Policy: Progeni Bench Zero-Upload Guarantee","url":"https://bench.progeni.live/privacy/","description":"Read the Progeni Bench zero-upload privacy guarantee. All files and documents process locally inside your browser memory with zero tracking and zero ads.","isPartOf":{"@type":"WebSite","name":"Progeni Bench","url":"https://bench.progeni.live/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Privacy Policy","item":"https://bench.progeni.live/privacy/"}]}]}</script>
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
+  <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full LLM-readable tool reference">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://bench.progeni.live/#organization","name":"Progeni","url":"https://progeni.live","description":"Progeni Bench is a free, privacy-first collection of browser-based file, image and audio tools published by Progeni.","logo":{"@type":"ImageObject","url":"https://bench.progeni.live/assets/favicon-512.png","width":512,"height":512},"brand":{"@type":"Brand","name":"Progeni Bench"},"contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"support@progeni.live","url":"https://bench.progeni.live/contact/","availableLanguage":["en"]}]},{"@type":"WebSite","@id":"https://bench.progeni.live/#website","name":"Progeni Bench","url":"https://bench.progeni.live/","inLanguage":"en-IN","description":"Small file jobs, done privately in your browser.","publisher":{"@id":"https://bench.progeni.live/#organization"}},{"@type":"WebPage","@id":"https://bench.progeni.live/privacy/#webpage","url":"https://bench.progeni.live/privacy/","name":"Privacy Policy: Progeni Bench Local Processing","description":"Read how Progeni Bench processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.","inLanguage":"en-IN","dateModified":"2026-10-25","isPartOf":{"@id":"https://bench.progeni.live/#website"},"publisher":{"@id":"https://bench.progeni.live/#organization"}},{"@type":"BreadcrumbList","@id":"https://bench.progeni.live/privacy/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://bench.progeni.live/"},{"@type":"ListItem","position":2,"name":"Privacy Policy","item":"https://bench.progeni.live/privacy/"}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -50,16 +59,18 @@
   </section>
   <section class="toolbox" style="line-height: 1.8;">
     
-  <h2>1. The Zero-Upload Guarantee</h2>
-  <p>Progeni Bench is designed from the ground up as a <strong>client-side execution platform</strong>. When you use our bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
+  <h2>1. Local Processing and the Translation Exception</h2>
+  <p>Most Progeni Bench tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
   <ul>
     <li>Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
     <li>Calculations and conversions run on your device's CPU/GPU.</li>
     <li>Generated outputs are downloaded directly to your disk.</li>
-    <li><strong>None of your files, images, or document contents are ever sent to our servers or stored on remote databases.</strong></li>
+    <li>Those tools do not send selected file contents to Bench servers.</li>
   </ul>
+  <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Vercel Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
+  <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
   <h2>2. Zero Third-Party Tracking</h2>
-  <p>Progeni Bench does not embed third-party advertising tracking scripts or behavioral profilers. All utility tools function entirely offline once loaded into your web browser.</p>
+  <p>Progeni Bench does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
 
   </section>
 </main>

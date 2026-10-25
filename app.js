@@ -51,6 +51,7 @@ const STUDIO_SCRIPTS = {
   dmc: "/data/dmc.js"
 };
 const loadedScripts = new Map();
+let pdfRouteToken = 0;
 let pdfManagerRouteToken = 0;
 
 function loadScript(src) {
@@ -230,7 +231,10 @@ const imageFromFile = async f => {
 };
 
 function layout({ tool, body }) {
+  const headerSearch = document.getElementById("header-search");
+  if (headerSearch) headerSearch.hidden = true;
   const related = TOOLS.filter(t => t.id !== tool.id && (t.cat === tool.cat || (["Images","Print & Craft"].includes(t.cat) && ["Images","Print & Craft"].includes(tool.cat)))).slice(0, 6);
+  const hasTranslationBackend = tool.id === "pdf-translator";
 
   // Release any object URLs from the previous tool view before we replace #app.
   if (app) revokeResultURLs(app);
@@ -248,16 +252,37 @@ function layout({ tool, body }) {
 
   const faqList = (tool.faq && tool.faq.length) ? tool.faq : [];
   const useCasesList = (tool.useCases && tool.useCases.length) ? tool.useCases : [];
+  const answerFirst = String(tool.whatItDoes || tool.desc || "").replace(/<[^>]*>/g, " ");
+  const answerMatch = answerFirst.match(/^.*?[.!?](?=\s|$)/);
+  const answerSentence = (answerMatch ? answerMatch[0] : answerFirst).trim();
+  const quickFacts = [
+    ["Cost", "Free · no account needed"],
+    ["Runs", hasTranslationBackend ? "PDF pages local, extracted text translated by DeepL" : "Entirely in your browser"],
+    ["Uploads", hasTranslationBackend ? "PDF pages stay local; extracted text is sent to DeepL" : "No file uploads"],
+    ["Works on", "Modern desktop, tablet and mobile browsers"]
+  ];
+  if (useCasesList.length) quickFacts.push(["Best for", useCasesList[0]]);
 
   app.innerHTML = `
     <nav class="tool-breadcrumb" aria-label="Breadcrumb">
       <a href="/">All tools</a><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
     </nav>
     <section class="tool-head">
-      <span class="eyebrow">${esc(tool.cat)} · 100% Private Client-Side</span>
+      <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
       <h1>${esc(tool.keyword || tool.name)}</h1>
-      <p>${esc(tool.desc)} <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+      <p>${esc(tool.desc)} ${hasTranslationBackend
+        ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+        : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
     </section>
+
+    <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">Quick answer</h2>
+      <p class="answer-text"><strong>${esc(tool.name)}</strong> is a free ${esc(String(tool.cat).toLowerCase())} tool that runs in your browser. ${esc(answerSentence)}</p>
+      <dl class="key-facts">
+        ${quickFacts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
+      </dl>
+    </aside>
+
 
     <section class="toolbox">${body}</section>
 
@@ -1031,6 +1056,20 @@ async function panorama(f, rs) {
    (2.4) run inside the shared PhotoBatch engine (photo-batch-studio.js). */
 
 function home() {
+  const topbar = document.querySelector(".topbar");
+  let headerSearch = document.getElementById("header-search");
+  if (!headerSearch && topbar) {
+    headerSearch = document.createElement("div");
+    headerSearch.className = "header-search";
+    headerSearch.id = "header-search";
+    headerSearch.innerHTML = `
+      <label class="sr-only" for="search">Search Bench tools</label>
+      <input id="search" class="search" type="search" aria-label="Search Bench tools" placeholder="Search tools by name, task or format…">
+    `;
+    topbar.insertBefore(headerSearch, topbar.querySelector("#primary-nav") || topbar.querySelector("#hamburger"));
+  }
+  if (headerSearch) headerSearch.hidden = false;
+
   let homeTitle = `${SITE_NAME}: Free Private File Tools in Your Browser`;
   if (homeTitle.length > 60) homeTitle = `${SITE_NAME}: Private File Tools`;
   document.title = homeTitle;
@@ -1167,10 +1206,10 @@ function home() {
   }
 
   const trustHtml = [
-    { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
+    { ico: "🔒", title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
     { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
     { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: "120 tools across three toolkits", body: "30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers." }
+    { ico: "🧰", title: `${TOOLS.length + 42 + 48} tools across three toolkits`, body: `${TOOLS.length} core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers.` }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -1181,13 +1220,9 @@ function home() {
   app.innerHTML = `
     <section class="hero">
       <div class="hero-inner">
-        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · private in your browser</span>
-        <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
-        <p class="hero-lede">${esc(TAGLINE)} Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
-        <div class="hero-search">
-          <label class="sr-only" for="search">Search tools</label>
-          <input id="search" class="search" type="search" aria-label="Search all tools" placeholder="Search all tools by name, task, format or feature…">
-        </div>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>${TOOLS.length + 42 + 48} tools · local processing by default</span>
+        <h1>Fix everyday file jobs <span class="accent">with local processing by default</span>.</h1>
+        <p class="hero-lede">${esc(TAGLINE)} Free tools for crafters, creators and desk workers. Most tools process files locally; PDF Translator keeps pages on your device and sends extracted text to DeepL.</p>
         <div class="catalog-controls" aria-label="Filter tools">
           <label for="toolkit-filter">Toolkit
             <select id="toolkit-filter"><option value="all">All toolkits</option><option value="core">Core tools</option><option value="image">Image tools</option><option value="audio">Audio tools</option></select>
@@ -1216,10 +1251,10 @@ function home() {
     </section>
 
     <section class="privacy-band">
-      <h2>100% private, client-side architecture</h2>
-      <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, ${esc(SITE_NAME)} runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+      <h2>Local file processing, with an explicit translation exception</h2>
+      <p>Most ${esc(SITE_NAME)} tools process selected files locally in your browser. PDF Translator keeps PDF pages on your device but sends extracted text blocks to DeepL through a server-side function. Review that tool's privacy notice before using it.</p>
       <div class="privacy-points">
-        <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+        <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Local by default.</b> Files stay on your device in most tools; PDF Translator sends extracted text to DeepL.</span></div>
         <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
         <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
       </div>
@@ -1357,6 +1392,120 @@ function toolPage(id) {
         if (error) {
           error.hidden = false;
           error.textContent = `PDF Page Manager could not load: ${err.message || err}`;
+        }
+      });
+    return;
+  }
+
+  if (id === "pdf-translator") {
+    const body = `
+      <div class="pdf-translator" id="pdf-controls" aria-busy="false">
+        <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0" aria-label="Choose a PDF to translate">
+          <strong>Drop a PDF here</strong>
+          <span>or choose a file from your device · maximum 15 MB and 30 pages</span>
+          <input id="pdf-file" type="file" accept=".pdf,application/pdf" hidden>
+        </div>
+        <div id="pdf-file-info" class="pdf-file-info" hidden>
+          <strong id="pdf-file-name"></strong>
+          <span><span id="pdf-file-size"></span> · <span id="pdf-page-count">Checking pages…</span></span>
+        </div>
+        <div class="pdf-settings">
+          <label>Source language
+            <select id="pdf-source-language" aria-describedby="pdf-source-help"></select>
+            <span id="pdf-source-help" class="pdf-help">Auto-detect is recommended unless you know the document language.</span>
+          </label>
+          <label>Target language
+            <input id="pdf-target-language" list="pdf-target-options" value="Hinglish" autocomplete="off" aria-describedby="pdf-hinglish-note">
+            <datalist id="pdf-target-options"></datalist>
+            <span id="pdf-hinglish-note" class="pdf-help">Hinglish is Hindi translated by DeepL and then romanized; natural English-Hindi mixing is not guaranteed.</span>
+          </label>
+          <label>Translation style
+            <select id="pdf-translation-style">
+              <option value="faithful">Faithful</option>
+              <option value="formal">Formal (where supported)</option>
+              <option value="conversational">Conversational (where supported)</option>
+            </select>
+          </label>
+          <label>Output layout
+            <select id="pdf-output-mode">
+              <option value="preserve">Preserve original layout (best effort)</option>
+              <option value="readable">Clean readable layout</option>
+              <option value="bilingual">Bilingual source + translation</option>
+            </select>
+          </label>
+          <label>Pages to include
+            <input id="pdf-page-range" type="text" inputmode="text" placeholder="All pages (or e.g. 1-3, 6)">
+            <span class="pdf-help">Only selected pages are included in the output PDF.</span>
+          </label>
+        </div>
+        <label class="pdf-check">
+          <input id="pdf-use-ocr" type="checkbox">
+          <span><strong>Use local OCR on scanned pages</strong><small>English or Hindi OCR data downloads as needed. Page images stay on your device.</small></span>
+        </label>
+        <label class="pdf-ocr-language">OCR language
+          <select id="pdf-ocr-language">
+            <option value="eng">English</option>
+            <option value="hin">Hindi</option>
+          </select>
+        </label>
+        <div class="pdf-actions">
+          <button class="btn" id="pdf-run" type="button" disabled>Translate PDF</button>
+          <button class="btn secondary" id="pdf-cancel" type="button" hidden>Cancel</button>
+        </div>
+        <div class="pdf-progress-wrap">
+          <progress id="pdf-progress" max="100" value="0" aria-label="Translation progress"></progress>
+          <p id="pdf-status" role="status" aria-live="polite">Select a PDF to validate it in your browser.</p>
+        </div>
+        <div class="error pdf-error" id="pdf-error" role="alert" hidden></div>
+        <div class="error pdf-error" id="pdf-runtime-error" role="alert" hidden></div>
+        <section class="pdf-preview" id="pdf-preview" aria-labelledby="pdf-preview-heading" hidden>
+          <h2 id="pdf-preview-heading">Translation preview</h2>
+          <p id="pdf-preview-count"></p>
+          <div id="pdf-preview-list"></div>
+        </section>
+        <section class="pdf-result" id="pdf-result" aria-labelledby="pdf-result-heading" hidden>
+          <h2 id="pdf-result-heading">PDF quality report</h2>
+          <p id="pdf-result-summary"></p>
+          <p id="pdf-detected-source" hidden></p>
+          <ul id="pdf-quality"></ul>
+          <a class="btn" id="pdf-download" href="#" download>Download translated PDF</a>
+        </section>
+        <p class="pdf-privacy-note">Privacy: the PDF itself is never uploaded. Extracted text blocks are processed by DeepL; do not use this tool for confidential documents. Successful translation responses may remain in volatile function memory for up to five minutes to avoid duplicate charges. OCR language data is fetched from the Tesseract data host without sending your pages.</p>
+      </div>
+    `;
+    layout({ tool, body });
+    const target = $("#pdf-runtime-error");
+    const routeToken = ++pdfRouteToken;
+    loadScript("/vendor/pdfjs/pdf.min.js")
+      .then(() => loadScript("/vendor/pdf-lib/pdf-lib.min.js"))
+      .then(() => loadScript("/vendor/tesseract/tesseract.min.js"))
+      .then(() => loadScript("/pdf-translator.js"))
+      .then(() => {
+        if (routeToken !== pdfRouteToken || !$("#pdf-controls")) return;
+        if (!window.PdfTranslator || !window.pdfjsLib || !window.PDFLib) {
+          throw new Error("A PDF processing component did not initialize.");
+        }
+        const languages = window.PdfTranslator.getLanguages();
+        $("#pdf-source-language").innerHTML = languages.sources.map(([code, name]) =>
+          `<option value="${esc(code)}">${esc(name)}</option>`
+        ).join("");
+        $("#pdf-target-options").innerHTML = languages.targets.map(([code, name]) =>
+          `<option value="${esc(name)}" label="${esc(code)}"></option>`
+        ).join("") + '<option value="Hinglish"></option>';
+        const fontPath = "/vendor/fonts/noto-sans-devanagari/400.css";
+        if (!document.querySelector(`link[href="${fontPath}"]`)) {
+          const fontCss = document.createElement("link");
+          fontCss.rel = "stylesheet";
+          fontCss.href = fontPath;
+          document.head.appendChild(fontCss);
+        }
+        window.PdfTranslator.mount();
+      })
+      .catch(err => {
+        if (routeToken !== pdfRouteToken) return;
+        if (target) {
+          target.hidden = false;
+          target.textContent = `PDF Translator could not load: ${err.message || err}`;
         }
       });
     return;
@@ -1609,14 +1758,20 @@ function setActiveNav() {
 }
 
 function route() {
+  pdfRouteToken += 1;
   pdfManagerRouteToken += 1;
   if (window.PdfPageManager && typeof window.PdfPageManager.unmount === "function") {
     window.PdfPageManager.unmount();
+  }
+  if (window.PdfTranslator && typeof window.PdfTranslator.unmount === "function") {
+    window.PdfTranslator.unmount().catch(err => console.error("PDF Translator cleanup failed", err));
   }
   const hash = location.hash.replace(/^#/, "") || "";
   const path = location.pathname.replace(/^\/+/, "/") || "/";
   let p = path || hash || "/";
   p = p.replace(/\/+$/, "") || "/";
+  const headerSearch = document.getElementById("header-search");
+  if (headerSearch) headerSearch.hidden = p !== "/";
 
   leaveImageToolkit();
   leaveAudioToolkit();

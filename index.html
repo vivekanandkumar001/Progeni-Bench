@@ -4,19 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Progeni Bench: Free Private File Tools in Your Browser</title>
-  <meta name="description" content="Fix everyday digital file tasks in your browser with Progeni Bench. Convert CSVs, repair subtitles, format Avery labels, and crop photos with zero uploads.">
+  <meta name="description" content="Fix everyday digital file tasks in your browser with Progeni Bench. Most tools process files locally; PDF Translator sends extracted text to DeepL.">
   <meta name="theme-color" content="#f4f6f9">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="Progeni">
   <meta property="og:site_name" content="Progeni Bench">
   <meta property="og:title" content="Progeni Bench: Free Private File Tools in Your Browser">
-  <meta property="og:description" content="Fix everyday digital file tasks in your browser with Progeni Bench. Convert CSVs, repair subtitles, format Avery labels, and crop photos with zero uploads.">
+  <meta property="og:description" content="Fix everyday digital file tasks in your browser with Progeni Bench. Most tools process files locally; PDF Translator sends extracted text to DeepL.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bench.progeni.live/">
   <meta property="og:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Progeni Bench — free, private browser tools">
   <meta property="og:locale" content="en-IN">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Progeni Bench: Free Private File Tools in Your Browser">
+  <meta name="twitter:description" content="Fix everyday digital file tasks in your browser with Progeni Bench. Most tools process files locally; PDF Translator sends extracted text to DeepL.">
   <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
+  <meta name="twitter:image:alt" content="Progeni Bench — free, private browser tools">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
@@ -26,7 +33,9 @@
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/">
-  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Progeni Bench","url":"https://bench.progeni.live/","inLanguage":"en-IN","description":"Small file jobs, done privately in your browser.","publisher":{"@type":"Organization","name":"Progeni","url":"https://progeni.live","logo":"https://bench.progeni.live/assets/favicon.svg"}},{"@type":"Organization","name":"Progeni","url":"https://progeni.live","logo":"https://bench.progeni.live/assets/favicon.svg","brand":{"@type":"Brand","name":"Progeni Bench"}}]}</script>
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
+  <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full LLM-readable tool reference">
+  <script type="application/ld+json" id="schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://bench.progeni.live/#organization","name":"Progeni","url":"https://progeni.live","description":"Progeni Bench is a free, privacy-first collection of browser-based file, image and audio tools published by Progeni.","logo":{"@type":"ImageObject","url":"https://bench.progeni.live/assets/favicon-512.png","width":512,"height":512},"brand":{"@type":"Brand","name":"Progeni Bench"},"contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"support@progeni.live","url":"https://bench.progeni.live/contact/","availableLanguage":["en"]}]},{"@type":"WebSite","@id":"https://bench.progeni.live/#website","name":"Progeni Bench","url":"https://bench.progeni.live/","inLanguage":"en-IN","description":"Small file jobs, done privately in your browser.","publisher":{"@id":"https://bench.progeni.live/#organization"}},{"@type":"WebPage","@id":"https://bench.progeni.live/#webpage","url":"https://bench.progeni.live/","name":"Progeni Bench: Free Private File Tools in Your Browser","description":"Fix everyday digital file tasks in your browser with Progeni Bench. Most tools process files locally; PDF Translator sends extracted text to DeepL.","inLanguage":"en-IN","dateModified":"2026-10-25","isPartOf":{"@id":"https://bench.progeni.live/#website"},"publisher":{"@id":"https://bench.progeni.live/#organization"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".quick-answer .answer-text",".quick-answer .key-facts"]}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Progeni Bench?","acceptedAnswer":{"@type":"Answer","text":"Progeni Bench is a free collection of 122 browser-based file utilities: 32 core tools, 42 image tools, and 48 audio tools. Tool pages identify experimental features and explain their limits."}},{"@type":"Question","name":"Are my files uploaded when I use a tool?","acceptedAnswer":{"@type":"Answer","text":"Most tools process files locally without uploading them. PDF Translator keeps PDF pages in your browser but sends extracted text to DeepL for translation."}},{"@type":"Question","name":"Do I need an account or subscription?","acceptedAnswer":{"@type":"Answer","text":"No account or subscription is required to use the browser tools. Open a tool, select a local file when needed, and download its result."}},{"@type":"Question","name":"What can I do with Progeni Bench?","acceptedAnswer":{"@type":"Answer","text":"You can prepare print and craft projects, work with image and audio files, clean CSV or contact data, and inspect or repair subtitles. Browse the core, image, and audio toolkits to find a tool for a specific task."}}]}]}</script>
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -41,18 +50,18 @@
     <a href="/contact/">Contact</a>
   </nav>
   <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
+  <div class="header-search" id="header-search">
+    <label class="sr-only" for="search">Search Bench tools</label>
+    <input id="search" class="search" type="search" aria-label="Search Bench tools" placeholder="Search tools by name, task or format…">
+  </div>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · private in your browser</span>
-      <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
-      <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
-      <div class="hero-search">
-        <label class="sr-only" for="search">Search all 120 tools</label>
-        <input id="search" class="search" type="search" aria-label="Search all 120 tools" placeholder="Search all 120 tools by name, task, format or feature…">
-      </div>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>122 tools · private in your browser</span>
+      <h1>Fix everyday file jobs <span class="accent">with local processing by default</span>.</h1>
+      <p class="hero-lede">Free tools for crafters, creators and desk workers. Most tools process files locally; PDF Translator keeps pages on your device and sends extracted text to DeepL.</p>
       <div class="catalog-controls" aria-label="Filter tools">
         <label for="toolkit-filter">Toolkit
           <select id="toolkit-filter">
@@ -64,7 +73,7 @@
         </label>
         <select id="category-filter" class="sr-only" aria-hidden="true" tabindex="-1">
           <option value="all">All categories</option>
-          <option value="core:Print &amp; Craft">Core · Print &amp; Craft</option><option value="core:Audio &amp; Video">Core · Audio &amp; Video</option><option value="core:Text &amp; Subtitles">Core · Text &amp; Subtitles</option><option value="core:Data">Core · Data</option><option value="core:Files">Core · Files</option><option value="core:Productivity">Core · Productivity</option><option value="core:Images">Core · Images</option><option value="image:compress">Image · Compress &amp; Optimize</option><option value="image:resize">Image · Resize &amp; Prepare</option><option value="image:convert">Image · Convert</option><option value="image:edit">Image · Edit &amp; Design</option><option value="image:documents">Image · Documents &amp; Scan</option><option value="image:metadata">Image · Metadata &amp; Privacy</option><option value="image:create">Image · Create &amp; Developer</option><option value="image:animation">Image · Animation &amp; Batch</option><option value="image:diagnostics">Image · Diagnostics</option><option value="audio:convert">Audio · Convert &amp; Compress</option><option value="audio:edit">Audio · Cut, Join &amp; Edit</option><option value="audio:clean">Audio · Clean &amp; Enhance</option><option value="audio:record">Audio · Record &amp; Microphone</option><option value="audio:music">Audio · Music &amp; Sound</option><option value="audio:metadata">Audio · Metadata &amp; Diagnostics</option><option value="audio:developer">Audio · Developer Utilities</option>
+          <option value="core:Print &amp; Craft">Core · Print &amp; Craft</option><option value="core:Audio &amp; Video">Core · Audio &amp; Video</option><option value="core:Text &amp; Subtitles">Core · Text &amp; Subtitles</option><option value="core:Data">Core · Data</option><option value="core:Files">Core · Files</option><option value="core:Productivity">Core · Productivity</option><option value="core:Images">Core · Images</option><option value="core:Files &amp; Data">Core · Files &amp; Data</option><option value="image:compress">Image · Compress &amp; Optimize</option><option value="image:resize">Image · Resize &amp; Prepare</option><option value="image:convert">Image · Convert</option><option value="image:edit">Image · Edit &amp; Design</option><option value="image:documents">Image · Documents &amp; Scan</option><option value="image:metadata">Image · Metadata &amp; Privacy</option><option value="image:create">Image · Create &amp; Developer</option><option value="image:animation">Image · Animation &amp; Batch</option><option value="image:diagnostics">Image · Diagnostics</option><option value="audio:convert">Audio · Convert &amp; Compress</option><option value="audio:edit">Audio · Cut, Join &amp; Edit</option><option value="audio:clean">Audio · Clean &amp; Enhance</option><option value="audio:record">Audio · Record &amp; Microphone</option><option value="audio:music">Audio · Music &amp; Sound</option><option value="audio:metadata">Audio · Metadata &amp; Diagnostics</option><option value="audio:developer">Audio · Developer Utilities</option>
         </select>
         <button class="catalog-clear" type="button" data-clear-filters>Clear filters</button>
       </div>
@@ -76,16 +85,29 @@
     </div>
   </section>
 
+  <aside class="quick-answer home-answer" id="quick-answer" aria-labelledby="quick-answer-title">
+  <h2 id="quick-answer-title">Quick answer</h2>
+  <p class="answer-text"><strong>Progeni Bench</strong> is a free suite of 122 browser-based file, image and audio tools. Most tools process selected files locally in your browser; PDF Translator keeps the PDF on your device and sends only extracted text to DeepL.</p>
+  <dl class="key-facts">
+    <div><dt>Core tools</dt><dd>32</dd></div>
+    <div><dt>Image tools</dt><dd>42</dd></div>
+    <div><dt>Audio tools</dt><dd>48</dd></div>
+    <div><dt>Account</dt><dd>Not required</dd></div>
+    <div><dt>Uploads</dt><dd>None for most tools</dd></div>
+    <div><dt>Price</dt><dd>Free</dd></div>
+  </dl>
+</aside>
+
   <section class="tools-section" aria-label="Browser utility grid">
     <div class="section-head">
       <h2>All tools</h2>
-      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>120</strong> of 120 tools</p>
+      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>122</strong> of 122 tools</p>
     </div>
     <div id="grid" class="catalog-groups">
       <section class="catalog-toolkit" data-toolkit-group="core">
       <div class="catalog-toolkit-head">
         <div><h2>Core tools</h2><p>File, data, productivity, print and creator utilities.</p></div>
-        <span class="catalog-group-count">30 tools</span>
+        <span class="catalog-group-count">32 tools</span>
       </div>
       <section class="catalog-category" data-category-group="core:Print &amp; Craft">
         <div class="catalog-category-head">
@@ -308,6 +330,24 @@
           <h3>Family Photo Date Organizer</h3>
           <p>Organize family photos into a year-to-month-to-day tree and export a rename plan.</p>
           <span class="catalog-card-meta"><span class="tag">Images</span><span class="catalog-status catalog-status-implemented">Ready</span></span>
+        </a></div>
+      </section><section class="catalog-category" data-category-group="core:Files &amp; Data">
+        <div class="catalog-category-head">
+          <div><h3>Files &amp; Data</h3></div>
+          <span class="catalog-category-count">2 tools</span>
+        </div>
+        <div class="catalog-card-grid"><a class="tool-card catalog-tool-card" href="/tools/pdf-translator/" data-toolkit="core" data-category="core:Files &amp; Data" data-search="pdf-translator PDF Translator PDF Translator Files &amp; Data Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF. Translate native-text PDFs with OCR for scanned pages, page selection, language and style controls, plus PDF download. Translation uses DeepL. Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages. Translate text-based reports, guides and study materials while retaining their page structure where practical. Convert Hindi translations to Roman script for a best-effort Hinglish reading copy. OCR scanned English or Hindi pages locally before translating selected pages. Choose a PDF under 15 MB and review its page count and supported-page notice. Select a target language, translation style and output layout; optionally set a source language and page range. Enable local OCR for scanned pages. OCR requires downloading language data to your browser, but page images stay on your device. Translate and review the text preview and page-quality report before downloading the generated PDF.">
+          <span class="go" aria-hidden="true">&rarr;</span>
+          <div class="icon" aria-hidden="true">🌐</div>
+          <h3>PDF Translator</h3>
+          <p>Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF.</p>
+          <span class="catalog-card-meta"><span class="tag">Files &amp; Data</span><span class="catalog-status catalog-status-implemented">Ready</span></span>
+        </a><a class="tool-card catalog-tool-card" href="/tools/pdf-page-manager/" data-toolkit="core" data-category="core:Files &amp; Data" data-search="pdf-page-manager PDF Page Manager PDF Page Manager Files &amp; Data Reorder, remove, duplicate, insert and merge PDF pages privately in your browser. Edit PDF page order locally: delete, duplicate, insert blank or image pages, and merge selected pages from another PDF. No uploads. Builds a new PDF from the pages you choose, in the exact order shown in the editor. PDF.js reads documents and renders on-demand thumbnails; pdf-lib copies source pages, inserts blank pages and images, and writes the finished PDF entirely in browser memory. Original files are never modified or uploaded. Reorder or remove pages from reports, scanned documents and study materials. Combine selected pages from a second PDF or append another document. Add blank sheets or PNG/JPEG pages before printing or sharing a document. Choose or drop a PDF. Review its page count and select the pages you want to change. Drag pages to reorder them, or use the accessible move buttons. Delete or duplicate selected pages, or undo and redo edits. Insert pages from another PDF, append the whole document, add a blank page, or insert PNG/JPEG images. Choose the insertion point and page size. Export the edited document, review the output page count, and download the validated PDF.">
+          <span class="go" aria-hidden="true">&rarr;</span>
+          <div class="icon" aria-hidden="true">📑</div>
+          <h3>PDF Page Manager</h3>
+          <p>Reorder, remove, duplicate, insert and merge PDF pages privately in your browser.</p>
+          <span class="catalog-card-meta"><span class="tag">Files &amp; Data</span><span class="catalog-status catalog-status-implemented">Ready</span></span>
         </a></div>
       </section>
     </section><section class="catalog-toolkit" data-toolkit-group="image">
@@ -966,7 +1006,7 @@
     
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">🔒</span>
-      <div><b>Nothing leaves your device</b><span>Files are processed in-browser with Web APIs — zero uploads, zero network transfer.</span></div>
+      <div><b>Local processing by default</b><span>Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself.</span></div>
     </div>
   
     <div class="trust-item">
@@ -981,7 +1021,7 @@
   
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">🧰</span>
-      <div><b>120 tools across three toolkits</b><span>30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers.</span></div>
+      <div><b>122 tools across three toolkits</b><span>32 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers.</span></div>
     </div>
   
   </section>
@@ -1013,12 +1053,35 @@
   </section>
 
   <section class="privacy-band">
-    <h2>100% private, client-side architecture</h2>
-    <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, Progeni Bench runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+    <h2>Local file processing, with an explicit translation exception</h2>
+    <p>Most Progeni Bench tools process selected files locally in your browser. PDF Translator keeps PDF pages on your device but sends extracted text blocks to DeepL through a server-side function. Review the tool's privacy notice before using it. Some tools download processing-engine assets before processing.</p>
     <div class="privacy-points">
-      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Local by default.</b> Files stay on your device in most tools; PDF Translator sends extracted text to DeepL.</span></div>
       <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
       <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
+    </div>
+  </section>
+
+  <section class="home-faq" aria-labelledby="home-faq-title">
+    <h2 id="home-faq-title">Quick answers about Progeni Bench</h2>
+    <div class="home-faq-grid">
+      
+      <article class="home-faq-item">
+        <h3>What is Progeni Bench?</h3>
+        <p>Progeni Bench is a free collection of 122 browser-based file utilities: 32 core tools, 42 image tools, and 48 audio tools. Tool pages identify experimental features and explain their limits.</p>
+      </article>
+      <article class="home-faq-item">
+        <h3>Are my files uploaded when I use a tool?</h3>
+        <p>Most tools process files locally without uploading them. PDF Translator keeps PDF pages in your browser but sends extracted text to DeepL for translation.</p>
+      </article>
+      <article class="home-faq-item">
+        <h3>Do I need an account or subscription?</h3>
+        <p>No account or subscription is required to use the browser tools. Open a tool, select a local file when needed, and download its result.</p>
+      </article>
+      <article class="home-faq-item">
+        <h3>What can I do with Progeni Bench?</h3>
+        <p>You can prepare print and craft projects, work with image and audio files, clean CSV or contact data, and inspect or repair subtitles. Browse the core, image, and audio toolkits to find a tool for a specific task.</p>
+      </article>
     </div>
   </section>
 
@@ -1136,6 +1199,17 @@
         </ul>
       </div>
     
+      <div class="category-block" id="category-files-data">
+        <h3>Files & Data</h3>
+        <ul>
+          
+                        <li><a href="/tools/pdf-translator/">🌐 PDF Translator</a> — <span class="cat-desc">Translate text PDFs into other languages, including best-effort…</span></li>
+          
+                        <li><a href="/tools/pdf-page-manager/">📑 PDF Page Manager</a> — <span class="cat-desc">Reorder, remove, duplicate, insert and merge PDF pages privately in your…</span></li>
+          
+        </ul>
+      </div>
+    
     </div>
   </section>
 </main>
@@ -1149,8 +1223,8 @@
     <a href="/contact/">Contact</a>
   </div>
   
-  <div class="footer-directory">
-    <div class="footer-directory-title">Explore all 120 private browser tools across core, image and audio toolkits</div>
+  <details class="footer-directory">
+    <summary class="footer-directory-title">Explore all 122 private browser tools across core, image and audio toolkits</summary>
     <div class="category-blocks">
       
         <div class="category-block">
@@ -1262,8 +1336,19 @@
           </ul>
         </div>
       
+        <div class="category-block">
+          <h3>Files & Data</h3>
+          <ul>
+            
+              <li><a href="/tools/pdf-translator/">🌐 PDF Translator</a></li>
+            
+              <li><a href="/tools/pdf-page-manager/">📑 PDF Page Manager</a></li>
+            
+          </ul>
+        </div>
+      
     </div>
-  </div>
+  </details>
 </footer>
 
 <script src="/site.config.js"></script>

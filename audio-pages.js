@@ -20,6 +20,7 @@ const fs = require('fs');
 const path = require('path');
 
 const site = require('./site.config.js');
+const seo = require('./scripts/seo.js');
 const C = require('./audio-tools.config.js');
 
 const SITE_URL = C.SITE_URL || site.SITE_URL;
@@ -30,6 +31,36 @@ const TAGLINE = site.TAGLINE || 'Fast, private browser utilities';
 const PUBLIC = C.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental');
 const IMPLEMENTED = PUBLIC.filter(t => t.status === 'implemented');
 const EXPERIMENTAL = PUBLIC.filter(t => t.status === 'experimental');
+
+const HUB_FAQ = [
+  {
+    q: 'Are my audio files uploaded when I use the Bench Audio Toolkit?',
+    a: 'No. Decoding, editing and encoding run inside your browser. Conversion and heavy filters use a same-origin FFmpeg.wasm engine that runs on your device; audio bytes are never sent to Bench or a third party.'
+  },
+  {
+    q: 'How many audio tools are available?',
+    a: `${PUBLIC.length} public audio tools are available: ${IMPLEMENTED.length} implemented tools and ${EXPERIMENTAL.length} experimental tools. Tools that need a model or an unreliable browser API are listed as deferred or unavailable instead of being faked.`
+  },
+  {
+    q: 'Do the audio tools cost anything or need an account?',
+    a: 'No. The tools are free and no account, password or subscription is required.'
+  },
+  {
+    q: 'What are the audio tool limits?',
+    a: `Each file can be up to ${C.LIMITS.maxFileBytes / (1024 * 1024)} MB and ${C.LIMITS.maxDurationSec / 60} minutes, with ${C.LIMITS.maxFiles} files per batch. The FFmpeg engine is about ${(C.LIMITS.ffmpegCoreBytes / (1024 * 1024)).toFixed(0)} MB and is cached after the first download.`
+  }
+];
+
+const hubQuickAnswer = seo.quickAnswerHtml({
+  answerHtml: `<strong>The Bench Audio Toolkit</strong> is a free set of ${PUBLIC.length} browser-based audio tools: ${IMPLEMENTED.length} ready tools and ${EXPERIMENTAL.length} experimental tools. Decoding, editing and encoding run locally with the Web Audio API and a same-origin FFmpeg.wasm engine, so audio is not uploaded.`,
+  facts: seo.keyFacts([
+    ['Tools', `${PUBLIC.length} public audio tools`],
+    ['Engine', 'Web Audio API + same-origin FFmpeg.wasm'],
+    ['Uploads', 'No audio is uploaded'],
+    ['Account', 'Not required'],
+    ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB · ${C.LIMITS.maxDurationSec / 60} minutes per file`]
+  ])
+});
 
 function esc(value) {
   return String(value == null ? '' : value)
@@ -71,31 +102,14 @@ function publicUrl(tool) {
 
 function headExtras(title, desc, canonicalUrl, opts) {
   opts = opts || {};
-  const image = `${SITE_URL}/assets/og-image.png`;
-  return `
-  <meta name="theme-color" content="#f4f6f9">
-  <meta property="og:site_name" content="${esc(SITE_NAME)}">
-  <meta property="og:title" content="${esc(title)}">
-  <meta property="og:description" content="${esc(desc)}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${esc(canonicalUrl)}">
-  <meta property="og:image" content="${esc(image)}">
-  <meta property="og:image:alt" content="${esc(SITE_NAME)} — private browser audio tools">
-  <meta property="og:locale" content="${esc(LOCALE)}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${esc(title)}">
-  <meta name="twitter:description" content="${esc(desc)}">
-  <meta name="twitter:image" content="${esc(image)}">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="${esc(canonicalUrl)}">${opts.noindex ? '\n  <meta name="robots" content="noindex, follow">' : ''}
-  <script type="application/ld+json" id="schema">${json(opts.schema || {})}</script>`;
+  return seo.headMeta({
+    title,
+    description: desc,
+    canonicalUrl,
+    imageAlt: `${SITE_NAME} — private browser audio tools`,
+    noindex: opts.noindex,
+    schema: opts.schema
+  });
 }
 
 function shell(title, desc, canonicalUrl, body, opts) {
@@ -137,8 +151,8 @@ ${body}
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
-  <div class="footer-directory">
-    <div class="footer-directory-title">Audio tools by category</div>
+  <details class="footer-directory">
+    <summary class="footer-directory-title">Audio tools by category</summary>
     <div class="category-blocks">
       ${C.CATEGORIES.map(cat => {
         const tools = PUBLIC.filter(t => t.category === cat.id);
@@ -146,7 +160,7 @@ ${body}
         return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/audio/${esc(t.slug)}/">${esc(t.name)}</a></li>`).join('')}</ul></div>`;
       }).join('')}
     </div>
-  </div>
+  </details>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
@@ -190,6 +204,8 @@ function hubBody() {
   <p><a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
 </section>
 
+${hubQuickAnswer}
+
 <section class="itk-categories">
 ${categories}
 </section>
@@ -203,6 +219,13 @@ ${categories}
   <p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>
   <p>Full attributions, exact version numbers and a written offer to supply the corresponding source code are published in <a href="/vendor/ffmpeg/NOTICE.txt">/vendor/ffmpeg/NOTICE.txt</a>. That notice names the upstream FFmpeg project and the ffmpeg.wasm packaging project, including their source repositories.</p>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
+</section>
+
+<section class="home-faq" aria-labelledby="audio-faq-title">
+  <h2 id="audio-faq-title">Quick answers about the audio toolkit</h2>
+  <div class="home-faq-grid">
+    ${HUB_FAQ.map(({ q, a }) => `<article class="home-faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('\n    ')}
+  </div>
 </section>`;
 }
 
@@ -230,6 +253,23 @@ function toolBody(tool) {
     <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
   </section>`;
 
+  const engineShort = tool.engine === 'ffmpeg'
+    ? 'FFmpeg.wasm on your device'
+    : tool.engine === 'media-recorder'
+      ? 'Browser microphone capture'
+      : 'Web Audio API in your browser';
+  const quickAnswer = seo.quickAnswerHtml({
+    answerHtml: `<strong>${esc(tool.name)}</strong> processes audio locally in your browser. ${esc(tool.summary)}`,
+    facts: seo.keyFacts([
+      ['Cost', 'Free · no account needed'],
+      ['Uploads', 'No audio is uploaded'],
+      ['Inputs', (tool.inputs || []).join(', ') || (tool.requiresFile === false ? 'No file needed' : 'Audio file')],
+      ['Output', seo.formatOutputs(tool.outputs)],
+      ['Engine', engineShort],
+      ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB · ${C.LIMITS.maxDurationSec / 60} minutes per file`]
+    ])
+  });
+
   return `<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/audio/">Audio toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">${esc(tool.name)}</span></nav>
 
 <section class="tool-head itk-head">
@@ -242,6 +282,8 @@ function toolBody(tool) {
     <span class="itk-chip">${esc((C.LIMITS.maxFileBytes / (1024 * 1024)).toFixed(0))} MB / file</span>
   </div>
 </section>
+
+${quickAnswer}
 
 ${experimental ? `<div class="itk-status warn"><strong>Experimental</strong><span>${esc(limitations)}</span></div>` : ''}
 
@@ -265,73 +307,60 @@ ${fallback}
 }
 
 function hubSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'CollectionPage',
-        name: 'Bench Audio Toolkit',
-        url: `${SITE_URL}/audio/`,
-        description: 'Private browser audio tools for conversion, compression, editing, cleaning, recording, analysis and metadata.',
-        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` }
-      },
-      {
-        '@type': 'ItemList',
-        name: 'Working audio tools',
-        numberOfItems: PUBLIC.length,
-        itemListElement: PUBLIC.map((t, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: t.name,
-          url: publicUrl(t)
-        }))
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-          { '@type': 'ListItem', position: 2, name: 'Audio toolkit', item: `${SITE_URL}/audio/` }
-        ]
-      }
-    ]
-  };
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: `${SITE_URL}/audio/`,
+      name: 'Bench Audio Toolkit: private browser audio tools',
+      description: 'Private browser audio tools for conversion, compression, editing, cleaning, recording, analysis and metadata.',
+      type: 'CollectionPage'
+    }),
+    {
+      '@type': 'ItemList',
+      name: 'Working audio tools',
+      numberOfItems: PUBLIC.length,
+      itemListElement: PUBLIC.map((t, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: t.name,
+        url: publicUrl(t)
+      }))
+    },
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Audio toolkit', url: `${SITE_URL}/audio/` }
+    ]),
+    seo.faqPageNode(HUB_FAQ)
+  ]);
 }
 
 function toolSchema(tool) {
-  const graph = [
-    {
-      '@type': 'WebApplication',
+  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: publicUrl(tool),
+      name: tool.seoTitle || tool.name,
+      description: tool.seoDescription || tool.summary
+    }),
+    seo.softwareApplicationNode({
       name: tool.name,
       url: publicUrl(tool),
       description: tool.seoDescription || tool.summary,
-      applicationCategory: 'MultimediaApplication',
-      operatingSystem: 'Any',
-      browserRequirements: 'Requires a modern browser with Web Audio and WebAssembly support',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      isAccessibleForFree: true,
-      provider: { '@type': 'Organization', name: site.PARENT_BRAND, url: site.PARENT_URL }
-    },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-        { '@type': 'ListItem', position: 2, name: 'Audio toolkit', item: `${SITE_URL}/audio/` },
-        { '@type': 'ListItem', position: 3, name: tool.name, item: publicUrl(tool) }
-      ]
-    }
-  ];
-  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
-  if (faq.length) {
-    graph.push({
-      '@type': 'FAQPage',
-      mainEntity: faq.map(f => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a }
-      }))
-    });
-  }
-  return { '@context': 'https://schema.org', '@graph': graph };
+      category: 'MultimediaApplication',
+      requirements: 'Requires a modern browser with Web Audio and WebAssembly support',
+      featureList: tool.useCases
+    }),
+    seo.howToNode(tool.name, tool.description || tool.summary, tool.howTo, publicUrl(tool)),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Audio toolkit', url: `${SITE_URL}/audio/` },
+      { name: tool.name, url: publicUrl(tool) }
+    ]),
+    seo.faqPageNode(faq)
+  ]);
 }
 
 function generateHubHtml() {

@@ -2,10 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
+const seo = require('./scripts/seo.js');
+const llmsFull = require('./scripts/llms-full.js');
 const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
 const audioConfig = require('./audio-tools.config.js');
 const audioPages = require('./audio-pages.js');
+const publicTools = tools => tools.filter(tool => tool.status === 'implemented' || tool.status === 'experimental');
+const publicToolCounts = {
+  core: TOOLS.length,
+  image: publicTools(imageConfig.TOOLS).length,
+  audio: publicTools(audioConfig.TOOLS).length
+};
+const totalPublicTools = publicToolCounts.core + publicToolCounts.image + publicToolCounts.audio;
 
 const baseDir = __dirname;
 const distDir = path.join(baseDir, 'dist');
@@ -260,8 +269,8 @@ function getRelatedTools(currentTool) {
 function getFooterDirectoryHtml() {
   const categories = [...new Set(TOOLS.map(t => t.cat))];
   return `
-  <div class="footer-directory">
-    <div class="footer-directory-title">Explore all 120 private browser tools across core, image and audio toolkits</div>
+  <details class="footer-directory">
+    <summary class="footer-directory-title">Explore all ${totalPublicTools} private browser tools across core, image and audio toolkits</summary>
     <div class="category-blocks">
       ${categories.map(cat => `
         <div class="category-block">
@@ -274,81 +283,56 @@ function getFooterDirectoryHtml() {
         </div>
       `).join('')}
     </div>
-  </div>`;
+  </details>`;
 }
 
 function generateToolPageHtml(tool) {
   const title = getToolTitle(tool);
+  const isPdfTranslator = tool.id === "pdf-translator";
   const canonicalUrl = `${SITE_URL}/tools/${tool.id}/`;
   const related = getRelatedTools(tool);
   const faq = tool.faq || [];
   const useCases = tool.useCases || [];
   const catSlug = tool.cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+  const quickFacts = [
+    ['Cost', 'Free · no account needed'],
+    ['Runs', isPdfTranslator ? 'PDF pages local, extracted text translated by DeepL' : 'Entirely in your browser'],
+    ['Uploads', isPdfTranslator ? 'PDF pages stay local; extracted text is sent to DeepL' : 'No file uploads'],
+    ['Works on', 'Modern desktop, tablet and mobile browsers']
+  ];
+  if (useCases.length) quickFacts.push(['Best for', useCases[0]]);
+  const quickAnswer = seo.quickAnswerHtml({
+    answerHtml: `<strong>${seo.esc(tool.name)}</strong> is a free ${seo.esc(tool.cat.toLowerCase())} tool that runs in your browser. ${seo.esc(seo.firstSentence(tool.whatItDoes))}`,
+    facts: seo.keyFacts(quickFacts)
+  });
+
   const graph = [
-    {
-      "@type": "WebApplication",
-      "name": tool.name,
-      "url": canonicalUrl,
-      "description": tool.seoDesc,
-      "applicationCategory": "UtilitiesApplication",
-      "operatingSystem": "Any",
-      "browserRequirements": "Requires modern JavaScript-enabled web browser",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "INR"
-      },
-      "isAccessibleForFree": true,
-      "provider": {
-        "@type": "Organization",
-        "name": PARENT_BRAND,
-        "url": PARENT_URL
-      }
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": `${SITE_URL}/`
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": tool.cat,
-          "item": `${SITE_URL}/#category-${catSlug}`
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": tool.name,
-          "item": canonicalUrl
-        }
-      ]
-    }
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: canonicalUrl,
+      name: title,
+      description: tool.seoDesc
+    }),
+    seo.softwareApplicationNode({
+      name: tool.name,
+      url: canonicalUrl,
+      description: tool.seoDesc,
+      category: 'UtilitiesApplication',
+      requirements: 'Requires a modern JavaScript-enabled web browser',
+      featureList: useCases
+    }),
+    seo.howToNode(tool.name, tool.whatItDoes, tool.howToUse, canonicalUrl),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: tool.cat, url: `${SITE_URL}/#category-${catSlug}` },
+      { name: tool.name, url: canonicalUrl }
+    ]),
+    seo.faqPageNode(faq)
   ];
 
-  if (faq.length > 0) {
-    graph.push({
-      "@type": "FAQPage",
-      "mainEntity": faq.map(f => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": f.a
-        }
-      }))
-    });
-  }
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@graph": graph
-  };
+  const schema = seo.graph(graph);
 
   const footerDir = getFooterDirectoryHtml();
 
@@ -359,28 +343,7 @@ function generateToolPageHtml(tool) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${tool.seoDesc}">
-  <meta name="theme-color" content="#f4f6f9">
-  <meta property="og:site_name" content="${SITE_NAME}">
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${tool.seoDesc}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${canonicalUrl}">
-  <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
-  <meta property="og:locale" content="${LOCALE}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="${canonicalUrl}">
-  <script type="application/ld+json" id="schema">${JSON.stringify(schema)}</script>
+${seo.headMeta({ title, description: tool.seoDesc, canonicalUrl, imageAlt: `${SITE_NAME} — ${tool.name}`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -399,10 +362,14 @@ function generateToolPageHtml(tool) {
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
-    <span class="eyebrow">${tool.cat} · 100% Private Client-Side</span>
+    <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
     <h1>${tool.keyword}</h1>
-    <p>${tool.desc} <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    <p>${tool.desc} ${isPdfTranslator
+      ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+      : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
   </section>
+
+  ${quickAnswer}
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -478,7 +445,7 @@ ${t.icon} ${t.name}</a>`).join('\n      ')}
 
 function generateHomePageHtml() {
   const title = `${SITE_NAME}: Free Private File Tools in Your Browser`;
-  const desc = `Fix everyday digital file tasks in your browser with ${SITE_NAME}. Convert CSVs, repair subtitles, format Avery labels, and crop photos with zero uploads.`;
+  const desc = `Fix everyday digital file tasks in your browser with ${SITE_NAME}. Most tools process files locally; PDF Translator sends extracted text to DeepL.`;
   const canonicalUrl = `${SITE_URL}/`;
   const escapeHtml = value => String(value == null ? "" : value)
     .replace(/&/g, "&amp;")
@@ -486,7 +453,6 @@ function generateHomePageHtml() {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-  const publicTools = tools => tools.filter(t => t.status === "implemented" || t.status === "experimental");
   const imageTools = publicTools(imageConfig.TOOLS);
   const audioTools = publicTools(audioConfig.TOOLS);
   const catalogGroups = [
@@ -524,6 +490,24 @@ function generateHomePageHtml() {
     }
   ];
   const totalTools = TOOLS.length + imageTools.length + audioTools.length;
+  const homeFaq = [
+    {
+      q: `What is ${SITE_NAME}?`,
+      a: `${SITE_NAME} is a free collection of ${totalTools} browser-based file utilities: ${publicToolCounts.core} core tools, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools. Tool pages identify experimental features and explain their limits.`
+    },
+    {
+      q: `Are my files uploaded when I use a tool?`,
+      a: `Most tools process files locally without uploading them. PDF Translator keeps PDF pages in your browser but sends extracted text to DeepL for translation.`
+    },
+    {
+      q: `Do I need an account or subscription?`,
+      a: `No account or subscription is required to use the browser tools. Open a tool, select a local file when needed, and download its result.`
+    },
+    {
+      q: `What can I do with ${SITE_NAME}?`,
+      a: `You can prepare print and craft projects, work with image and audio files, clean CSV or contact data, and inspect or repair subtitles. Browse the core, image, and audio toolkits to find a tool for a specific task.`
+    }
+  ];
   const categoryOptions = catalogGroups.flatMap(group => group.categories.map(category =>
     `<option value="${escapeHtml(`${group.id}:${category.id}`)}">${escapeHtml(`${group.name.replace(/ tools$/, "")} · ${category.name}`)}</option>`
   )).join("");
@@ -572,10 +556,10 @@ function generateHomePageHtml() {
   }).join("");
 
   const trustHtml = [
-    { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
+    { ico: "🔒", title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
     { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
     { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: "120 tools across three toolkits", body: "30 core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers." }
+    { ico: "🧰", title: `${totalPublicTools} tools across three toolkits`, body: `${publicToolCounts.core} core utilities, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools for crafters, creators and desk workers.` }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -630,34 +614,29 @@ function generateHomePageHtml() {
     `).join("");
   const footerDir = getFooterDirectoryHtml();
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "name": SITE_NAME,
-        "url": canonicalUrl,
-        "inLanguage": LOCALE,
-        "description": TAGLINE,
-        "publisher": {
-          "@type": "Organization",
-          "name": PARENT_BRAND,
-          "url": PARENT_URL,
-          "logo": `${SITE_URL}/assets/favicon.svg`
-        }
-      },
-      {
-        "@type": "Organization",
-        "name": PARENT_BRAND,
-        "url": PARENT_URL,
-        "logo": `${SITE_URL}/assets/favicon.svg`,
-        "brand": {
-          "@type": "Brand",
-          "name": SITE_NAME
-        }
-      }
-    ]
-  };
+  const homeAnswer = seo.quickAnswerHtml({
+    className: 'home-answer',
+    answerHtml: `<strong>${seo.esc(SITE_NAME)}</strong> is a free suite of ${totalTools} browser-based file, image and audio tools. Most tools process selected files locally in your browser; PDF Translator keeps the PDF on your device and sends only extracted text to DeepL.`,
+    facts: seo.keyFacts([
+      ['Core tools', String(publicToolCounts.core)],
+      ['Image tools', String(publicToolCounts.image)],
+      ['Audio tools', String(publicToolCounts.audio)],
+      ['Account', 'Not required'],
+      ['Uploads', 'None for most tools'],
+      ['Price', 'Free']
+    ])
+  });
+
+  const schema = seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: canonicalUrl,
+      name: title,
+      description: desc
+    }),
+    seo.faqPageNode(homeFaq)
+  ]);
 
   return `<!doctype html>
 <html lang="${LOCALE}">
@@ -666,28 +645,7 @@ function generateHomePageHtml() {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${desc}">
-  <meta name="theme-color" content="#f4f6f9">
-  <meta property="og:site_name" content="${SITE_NAME}">
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${desc}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${canonicalUrl}">
-  <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
-  <meta property="og:locale" content="${LOCALE}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="${canonicalUrl}">
-  <script type="application/ld+json" id="schema">${JSON.stringify(schema)}</script>
+${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME} — free, private browser tools`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -702,18 +660,18 @@ function generateHomePageHtml() {
     <a href="/contact/">Contact</a>
   </nav>
   <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
+  <div class="header-search" id="header-search">
+    <label class="sr-only" for="search">Search Bench tools</label>
+    <input id="search" class="search" type="search" aria-label="Search Bench tools" placeholder="Search tools by name, task or format…">
+  </div>
 </header>
 
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · private in your browser</span>
-      <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
-      <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
-      <div class="hero-search">
-        <label class="sr-only" for="search">Search all ${totalTools} tools</label>
-        <input id="search" class="search" type="search" aria-label="Search all ${totalTools} tools" placeholder="Search all ${totalTools} tools by name, task, format or feature…">
-      </div>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>${totalPublicTools} tools · private in your browser</span>
+      <h1>Fix everyday file jobs <span class="accent">with local processing by default</span>.</h1>
+      <p class="hero-lede">Free tools for crafters, creators and desk workers. Most tools process files locally; PDF Translator keeps pages on your device and sends extracted text to DeepL.</p>
       <div class="catalog-controls" aria-label="Filter tools">
         <label for="toolkit-filter">Toolkit
           <select id="toolkit-filter">
@@ -737,6 +695,8 @@ function generateHomePageHtml() {
     </div>
   </section>
 
+  ${homeAnswer}
+
   <section class="tools-section" aria-label="Browser utility grid">
     <div class="section-head">
       <h2>All tools</h2>
@@ -756,12 +716,23 @@ function generateHomePageHtml() {
   ${audioBandHtml}
 
   <section class="privacy-band">
-    <h2>100% private, client-side architecture</h2>
-    <p>Unlike conventional web utilities that upload your sensitive documents, spreadsheets, photos and personal data to remote servers, ${SITE_NAME} runs entirely inside your browser using modern Web APIs — Web Workers, HTML5 Canvas, the Web Audio API and the File Reader API. Your files are processed in your device's memory and never cross the network.</p>
+    <h2>Local file processing, with an explicit translation exception</h2>
+    <p>Most ${SITE_NAME} tools process selected files locally in your browser. PDF Translator keeps PDF pages on your device but sends extracted text blocks to DeepL through a server-side function. Review the tool's privacy notice before using it. Some tools download processing-engine assets before processing.</p>
     <div class="privacy-points">
-      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Zero server uploads.</b> Nothing is transmitted; files stay on your machine.</span></div>
+      <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>Local by default.</b> Files stay on your device in most tools; PDF Translator sends extracted text to DeepL.</span></div>
       <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No account required.</b> Immediate access — no signup, passwords or subscriptions.</span></div>
       <div class="pp"><span class="pp-tick" aria-hidden="true">✓</span><span><b>No trackers.</b> No third-party analytics cookies or behavioural monitoring scripts.</span></div>
+    </div>
+  </section>
+
+  <section class="home-faq" aria-labelledby="home-faq-title">
+    <h2 id="home-faq-title">Quick answers about ${SITE_NAME}</h2>
+    <div class="home-faq-grid">
+      ${homeFaq.map(({ q, a }) => `
+      <article class="home-faq-item">
+        <h3>${escapeHtml(q)}</h3>
+        <p>${escapeHtml(a)}</p>
+      </article>`).join("")}
     </div>
   </section>
 
@@ -796,39 +767,20 @@ function generateHomePageHtml() {
 function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   const canonicalUrl = `${SITE_URL}/${pageId}/`;
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebPage",
-        "name": title,
-        "url": canonicalUrl,
-        "description": desc,
-        "isPartOf": {
-          "@type": "WebSite",
-          "name": SITE_NAME,
-          "url": `${SITE_URL}/`
-        }
-      },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": `${SITE_URL}/`
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": h1,
-            "item": canonicalUrl
-          }
-        ]
-      }
-    ]
-  };
+  const schema = seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: canonicalUrl,
+      name: title,
+      description: desc,
+      withSpeakable: false
+    }),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: h1, url: canonicalUrl }
+    ])
+  ]);
 
   return `<!doctype html>
 <html lang="${LOCALE}">
@@ -837,28 +789,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${desc}">
-  <meta name="theme-color" content="#f4f6f9">
-  <meta property="og:site_name" content="${SITE_NAME}">
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${desc}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${canonicalUrl}">
-  <meta property="og:image" content="${SITE_URL}/assets/og-image.png">
-  <meta property="og:image:alt" content="${SITE_NAME} — free, private browser tools">
-  <meta property="og:locale" content="${LOCALE}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:image" content="${SITE_URL}/assets/og-image.png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="${canonicalUrl}">
-  <script type="application/ld+json" id="schema">${JSON.stringify(schema)}</script>
+${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME} — ${h1}`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
 <header class="topbar" role="banner">
@@ -904,7 +835,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
 
 function generate404Html() {
   const title = `Page Not Found: ${SITE_NAME} File Utilities`;
-  const desc = `The requested page could not be found on ${SITE_NAME}. Browse our collection of 30 free, privacy-first client-side file tools.`;
+  const desc = `The requested page could not be found on ${SITE_NAME}. Browse ${totalPublicTools} free browser-based file tools across the core, image and audio toolkits.`;
 
   return `<!doctype html>
 <html lang="${LOCALE}">
@@ -945,7 +876,7 @@ function generate404Html() {
 }
 
 function generateSitemapXml() {
-  const lastmod = new Date().toISOString().split('T')[0];
+  const lastmod = seo.LAST_UPDATED;
   const urls = [
     `${SITE_URL}/`,
     `${SITE_URL}/about/`,
@@ -966,7 +897,7 @@ ${urls.map(u => `  <url>
     <loc>${u}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>${u === `${SITE_URL}/` ? '1.0' : '0.8'}</priority>
+    <priority>${u === `${SITE_URL}/` ? '1.0' : (u === `${SITE_URL}/image/` || u === `${SITE_URL}/audio/`) ? '0.9' : '0.8'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 
@@ -1046,7 +977,7 @@ fs.writeFileSync(path.join(distDir, 'index.html'), homeHtml, 'utf8');
 // 3. Build static pages
 const aboutContent = `
   <h2>Browser-First Global Architecture</h2>
-  <p>${SITE_NAME} is designed on a simple principle: digital utility tasks should be instant, free, and 100% private. All 30 tools process files locally in your web browser. Your sensitive spreadsheets, personal photos, and contact lists never touch an external server.</p>
+  <p>${SITE_NAME} is a collection of ${totalPublicTools} browser-based utilities: ${publicToolCounts.core} core tools, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools. Most tools process files locally in your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL for translation.</p>
   <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> dedicated to building fast, zero-bloat web utilities.</p>
   <h2>Who is ${SITE_NAME} Built For?</h2>
   <ul>
@@ -1055,25 +986,27 @@ const aboutContent = `
     <li><strong>Everyday Power Users:</strong> Convert <a href="/tools/timetable-calendar/">timetables to iCal</a>, check <a href="/tools/subtitle-speed/">subtitle reading speed</a>, find <a href="/tools/duplicate-finder/">duplicate photos</a>, and optimize <a href="/tools/print-layout/">print layouts</a>.</li>
   </ul>
 `;
-const aboutHtml = generateStaticPageHtml('about', `About ${SITE_NAME}: Privacy-First Browser Tools`, `Learn about ${SITE_NAME}, a fast client-side web utility suite with 30 tools. We process digital tasks privately in your browser with zero data uploads.`, `About ${SITE_NAME}`, aboutContent);
+const aboutHtml = generateStaticPageHtml('about', `About ${SITE_NAME}: Privacy-First Browser Tools`, `Explore ${totalPublicTools} free file, image and audio tools from ${SITE_NAME}. Process files locally in your browser without uploading them to Bench.`, `About ${SITE_NAME}`, aboutContent);
 if (!fs.existsSync(path.join(baseDir, 'about'))) fs.mkdirSync(path.join(baseDir, 'about'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'about'))) fs.mkdirSync(path.join(distDir, 'about'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'about', 'index.html'), aboutHtml, 'utf8');
 fs.writeFileSync(path.join(distDir, 'about', 'index.html'), aboutHtml, 'utf8');
 
 const privacyContent = `
-  <h2>1. The Zero-Upload Guarantee</h2>
-  <p>${SITE_NAME} is designed from the ground up as a <strong>client-side execution platform</strong>. When you use our bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
+  <h2>1. Local Processing and the Translation Exception</h2>
+  <p>Most ${SITE_NAME} tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
   <ul>
     <li>Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
     <li>Calculations and conversions run on your device's CPU/GPU.</li>
     <li>Generated outputs are downloaded directly to your disk.</li>
-    <li><strong>None of your files, images, or document contents are ever sent to our servers or stored on remote databases.</strong></li>
+    <li>Those tools do not send selected file contents to Bench servers.</li>
   </ul>
+  <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Vercel Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
+  <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
   <h2>2. Zero Third-Party Tracking</h2>
-  <p>${SITE_NAME} does not embed third-party advertising tracking scripts or behavioral profilers. All utility tools function entirely offline once loaded into your web browser.</p>
+  <p>${SITE_NAME} does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
 `;
-const privacyHtml = generateStaticPageHtml('privacy', `Privacy Policy: ${SITE_NAME} Zero-Upload Guarantee`, `Read the ${SITE_NAME} zero-upload privacy guarantee. All files and documents process locally inside your browser memory with zero tracking and zero ads.`, `Privacy Policy`, privacyContent);
+const privacyHtml = generateStaticPageHtml('privacy', `Privacy Policy: ${SITE_NAME} Local Processing`, `Read how ${SITE_NAME} processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.`, `Privacy Policy`, privacyContent);
 if (!fs.existsSync(path.join(baseDir, 'privacy'))) fs.mkdirSync(path.join(baseDir, 'privacy'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'privacy'))) fs.mkdirSync(path.join(distDir, 'privacy'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'privacy', 'index.html'), privacyHtml, 'utf8');
@@ -1083,7 +1016,7 @@ const termsContent = `
   <h2>1. Acceptance of Terms</h2>
   <p>By accessing and using ${SITE_NAME} (${SITE_URL}) and any of our browser-based utility tools, you agree to comply with and be bound by these Terms of Service.</p>
   <h2>2. Description of Service & Local Processing</h2>
-  <p>${SITE_NAME} provides 30 browser-first digital utilities. All file processing occurs locally inside your web browser using client-side JavaScript. ${SITE_NAME} does not upload, store, or view your source files or generated outputs on external servers.</p>
+  <p>${SITE_NAME} provides browser-first digital utilities. Most file processing happens locally inside your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL through a server-side function; the provider's own terms and privacy policy apply to that text.</p>
   <h2>3. Disclaimer of Warranties</h2>
   <p>All utilities, software routines, and calculations on ${SITE_NAME} are provided "as is" and "as available" without warranty of any kind.</p>
 `;
@@ -1129,14 +1062,40 @@ const manifestJson = generateManifestJson();
 fs.writeFileSync(path.join(baseDir, 'manifest.webmanifest'), manifestJson, 'utf8');
 fs.writeFileSync(path.join(distDir, 'manifest.webmanifest'), manifestJson, 'utf8');
 
-// 7. Robots.txt
-const robotsTxt = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
+// 7. Robots.txt — explicitly welcome search and answer-engine crawlers.
+const AI_CRAWLERS = [
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-Web',
+  'PerplexityBot',
+  'Google-Extended',
+  'Applebot-Extended',
+  'CCBot',
+  'meta-externalagent',
+  'Bingbot'
+];
+const robotsTxt = [
+  'User-agent: *',
+  'Allow: /',
+  '',
+  '# Search and AI answer engines may index this public reference.',
+  ...AI_CRAWLERS.map(agent => `User-agent: ${agent}\nAllow: /`),
+  '',
+  `Sitemap: ${SITE_URL}/sitemap.xml`,
+  ''
+].join('\n');
 fs.writeFileSync(path.join(baseDir, 'robots.txt'), robotsTxt, 'utf8');
 fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 
+// 7b. Full plain-text reference for generative and answer engines.
+const llmsFullText = llmsFull.writeLlmsFull(baseDir);
+console.log(`Generated llms-full.txt (${llmsFullText.length} characters).`);
+
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt'
+  'site.config.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
@@ -1163,30 +1122,6 @@ if (fs.existsSync(assetsDir)) {
 const vendorDir = path.join(baseDir, 'vendor');
 if (fs.existsSync(vendorDir)) {
   const distVendorDir = path.join(distDir, 'vendor');
-  const copyVendorFile = (source, destination) => {
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(source, destination);
-  };
-  const copyVendorTree = (from, to) => {
-    fs.mkdirSync(to, { recursive: true });
-    fs.readdirSync(from).forEach(file => {
-      const source = path.join(from, file);
-      const destination = path.join(to, file);
-      if (fs.statSync(source).isDirectory()) copyVendorTree(source, destination);
-      else fs.copyFileSync(source, destination);
-    });
-  };
-  const pdfjsRoot = path.dirname(require.resolve('pdfjs-dist/package.json'));
-  const pdfjsVendorDir = path.join(vendorDir, 'pdfjs');
-  const pdfLibVendorDir = path.join(vendorDir, 'pdf-lib');
-  copyVendorFile(require.resolve('pdfjs-dist/legacy/build/pdf.min.js'), path.join(pdfjsVendorDir, 'pdf.min.js'));
-  copyVendorFile(require.resolve('pdfjs-dist/legacy/build/pdf.worker.min.js'), path.join(pdfjsVendorDir, 'pdf.worker.min.js'));
-  copyVendorFile(path.join(pdfjsRoot, 'LICENSE'), path.join(pdfjsVendorDir, 'LICENSE'));
-  copyVendorTree(path.join(pdfjsRoot, 'cmaps'), path.join(pdfjsVendorDir, 'cmaps'));
-  copyVendorTree(path.join(pdfjsRoot, 'standard_fonts'), path.join(pdfjsVendorDir, 'standard_fonts'));
-  const pdfLibRoot = path.dirname(require.resolve('pdf-lib/package.json'));
-  copyVendorFile(require.resolve('pdf-lib/dist/pdf-lib.min.js'), path.join(pdfLibVendorDir, 'pdf-lib.min.js'));
-  copyVendorFile(path.join(pdfLibRoot, 'LICENSE.md'), path.join(pdfLibVendorDir, 'LICENSE.md'));
   const copyTree = (from, to) => {
     fs.mkdirSync(to, { recursive: true });
     fs.readdirSync(from).forEach(f => {
@@ -1197,6 +1132,35 @@ if (fs.existsSync(vendorDir)) {
     });
   };
   copyTree(vendorDir, distVendorDir);
+  const copyResolved = (source, destination) => {
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(source, destination);
+  };
+  const vendorPath = (...parts) => path.join(vendorDir, ...parts);
+  copyResolved(require.resolve('pdfjs-dist/legacy/build/pdf.min.js'), vendorPath('pdfjs', 'pdf.min.js'));
+  copyResolved(require.resolve('pdfjs-dist/legacy/build/pdf.worker.min.js'), vendorPath('pdfjs', 'pdf.worker.min.js'));
+  copyResolved(require.resolve('pdf-lib/dist/pdf-lib.min.js'), vendorPath('pdf-lib', 'pdf-lib.min.js'));
+
+  const tesseractDist = path.dirname(require.resolve('tesseract.js/dist/tesseract.min.js'));
+  copyResolved(path.join(tesseractDist, 'tesseract.min.js'), vendorPath('tesseract', 'tesseract.min.js'));
+  copyResolved(path.join(tesseractDist, 'worker.min.js'), vendorPath('tesseract', 'worker.min.js'));
+  const tesseractCore = path.dirname(require.resolve('tesseract.js-core/tesseract-core-simd-lstm.wasm.js'));
+  const tesseractTarget = vendorPath('tesseract');
+  [
+    'tesseract-core-simd-lstm.js', 'tesseract-core-simd-lstm.wasm', 'tesseract-core-simd-lstm.wasm.js',
+    'tesseract-core-lstm.js', 'tesseract-core-lstm.wasm', 'tesseract-core-lstm.wasm.js',
+    'tesseract-core-simd.js', 'tesseract-core-simd.wasm', 'tesseract-core-simd.wasm.js',
+    'tesseract-core.js', 'tesseract-core.wasm', 'tesseract-core.wasm.js'
+  ].forEach(file => copyResolved(path.join(tesseractCore, file), vendorPath('tesseract', file)));
+
+  const pdfjsRoot = path.dirname(require.resolve('pdfjs-dist/package.json'));
+  copyResolved(path.join(pdfjsRoot, 'LICENSE'), vendorPath('pdfjs', 'LICENSE'));
+  copyTree(path.join(pdfjsRoot, 'cmaps'), vendorPath('pdfjs', 'cmaps'));
+  copyTree(path.join(pdfjsRoot, 'standard_fonts'), vendorPath('pdfjs', 'standard_fonts'));
+  const pdfLibRoot = path.dirname(require.resolve('pdf-lib/package.json'));
+  copyResolved(path.join(pdfLibRoot, 'LICENSE.md'), vendorPath('pdf-lib', 'LICENSE.md'));
+  const devanagariFonts = path.dirname(require.resolve('@fontsource/noto-sans-devanagari/package.json'));
+  copyTree(devanagariFonts, vendorPath('fonts', 'noto-sans-devanagari'));
 }
 
 // Copy shared data modules (DMC palette used by pattern-studio.js)

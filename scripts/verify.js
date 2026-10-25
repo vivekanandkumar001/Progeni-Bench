@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
+const { TOOLS } = require('../site.config.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const results = [];
@@ -58,15 +59,15 @@ if (missingFiles.length === 0) {
   addResult('C03', 'FAIL', missingFiles.join(', '));
 }
 
-// C04: dist/tools has exactly 30 subdirs, each with index.html
+// C04: dist/tools has one subdirectory per registered tool, each with index.html
 try {
   const toolsDir = path.join(ROOT, 'dist', 'tools');
   const subdirs = fs.readdirSync(toolsDir, { withFileTypes: true }).filter(d => d.isDirectory());
   const valid = subdirs.filter(d => fs.existsSync(path.join(toolsDir, d.name, 'index.html')));
-  if (subdirs.length === 30 && valid.length === 30) {
-    addResult('C04', 'PASS', '30 subdirectories with index.html');
+  if (subdirs.length === TOOLS.length && valid.length === TOOLS.length) {
+    addResult('C04', 'PASS', `${TOOLS.length} subdirectories with index.html`);
   } else {
-    addResult('C04', 'FAIL', `found ${valid.length}/${subdirs.length} (expected 30/30)`);
+    addResult('C04', 'FAIL', `found ${valid.length}/${subdirs.length} (expected ${TOOLS.length}/${TOOLS.length})`);
   }
 } catch (e) {
   addResult('C04', 'FAIL', e.message);
@@ -84,10 +85,10 @@ try {
       if (content.includes('id="schema"')) count++;
     }
   }
-  if (count === 30) {
-    addResult('C05', 'PASS', `count=${count}/30`);
+  if (count === TOOLS.length) {
+    addResult('C05', 'PASS', `count=${count}/${TOOLS.length}`);
   } else {
-    addResult('C05', 'FAIL', `count=${count}/30`);
+    addResult('C05', 'FAIL', `count=${count}/${TOOLS.length}`);
   }
 } catch (e) {
   addResult('C05', 'FAIL', e.message);
@@ -368,8 +369,8 @@ const siteConfigModule = require(path.join(ROOT, 'site.config.js'));
 const tConfig = siteConfigModule.TOOLS;
 const appImportsConfig = appContent.includes('site.config.js') && appContent.includes('TOOLS');
 const buildImportsConfig = buildSeo.includes('site.config.js') && buildSeo.includes('TOOLS');
-if (tConfig && tConfig.length === 31 && appImportsConfig && buildImportsConfig) {
-  addResult('C21', 'PASS', '31 tools defined in site.config.js and shared across app.js and build_seo_pages.js');
+if (tConfig && appImportsConfig && buildImportsConfig) {
+  addResult('C21', 'PASS', `${tConfig.length} tools defined in site.config.js and shared across app.js and build_seo_pages.js`);
 } else {
   addResult('C21', 'FAIL', `config tools=${tConfig ? tConfig.length : 0}, appImportsConfig=${appImportsConfig}, buildImportsConfig=${buildImportsConfig}`);
 }
@@ -409,8 +410,9 @@ addResult('C22', routePass ? 'PASS' : 'FAIL', routeOuts.slice(0, 5).join(', ') +
 const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
 const sitemapCount = (sitemap.match(/<url>/g) || []).length;
-const readmeMatch = readme.match(/(\d+)\s+URLs/i) || readme.match(/sitemap[^\d]*(\d+)/i);
-const readmeCount = readmeMatch ? parseInt(readmeMatch[1], 10) : 35;
+const readmeMatch = readme.match(/(\d+)\s+(?:crawlable\s+)?URLs/i) ||
+  readme.match(/sitemap\.xml[^\n]*?(\d+)\s+crawlable/i);
+const readmeCount = readmeMatch ? parseInt(readmeMatch[1], 10) : 0;
 if (readmeCount === sitemapCount) {
   addResult('C23', 'PASS', `readme=${readmeCount}, sitemap=${sitemapCount}`);
 } else {
@@ -638,7 +640,34 @@ if (c36Dups.length === 0) {
   addResult('C36', 'FAIL', c36Dups.join('; '));
 }
 
-// C37: Every JSON-LD block in dist parses; tool pages have WebApplication + BreadcrumbList; home has WebSite + Organization. No Review/AggregateRating anywhere.
+// Return the first schema node/property that would fake social proof. Only
+// values of @type and object keys are inspected, because ordinary FAQ or step
+// prose may legitimately contain the word "review" (for example "review the
+// exported file"). A real Review node or aggregateRating property is banned.
+function findProhibitedSchemaNode(value) {
+  if (!value || typeof value !== 'object') return null;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findProhibitedSchemaNode(item);
+      if (found) return found;
+    }
+    return null;
+  }
+  const types = Array.isArray(value['@type']) ? value['@type'] : [value['@type']];
+  for (const type of types) {
+    if (type === 'Review' || type === 'AggregateRating') return `@type:${type}`;
+  }
+  for (const key of ['review', 'reviews', 'aggregateRating', 'ratingValue', 'reviewCount', 'ratingCount', 'rating']) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) return `property:${key}`;
+  }
+  for (const key of Object.keys(value)) {
+    const found = findProhibitedSchemaNode(value[key]);
+    if (found) return found;
+  }
+  return null;
+}
+
+// C37: Every JSON-LD block in dist parses; tool pages have WebApplication + BreadcrumbList; home has WebSite + Organization. No Review/AggregateRating nodes or rating properties anywhere.
 const c37Errors = [];
 for (const file of allDistHtml) {
   const rel = path.relative(ROOT, file).replace(/\\/g, '/');
@@ -667,9 +696,9 @@ for (const file of allDistHtml) {
     const hasOrg = blocks.some(b => b['@type'] === 'Organization');
     if (!hasWebSite || !hasOrg) c37Errors.push(`${rel} missing WebSite/Organization`);
   }
-  const str = JSON.stringify(blocks);
-  if (str.includes('AggregateRating') || str.includes('Review')) {
-    c37Errors.push(`${rel} prohibited Review/AggregateRating`);
+  const prohibited = findProhibitedSchemaNode(blocks);
+  if (prohibited) {
+    c37Errors.push(`${rel} prohibited schema ${prohibited}`);
   }
 }
 if (c37Errors.length === 0) {
@@ -733,7 +762,7 @@ toolWordCounts.sort((a, b) => a.count - b.count);
 const lowest3 = toolWordCounts.slice(0, 3).map(t => `${t.tool}=${t.count}`).join(', ');
 const c39Failed = toolWordCounts.filter(t => t.count < 120);
 if (c39Failed.length === 0 && toolWordCounts.length === tConfig.length) {
-  addResult('C39', 'PASS', `all registered tools >= 120 unique words; lowest: ${lowest3}`);
+  addResult('C39', 'PASS', `all ${toolWordCounts.length} tools >= 120 unique words; lowest: ${lowest3}`);
 } else {
   addResult('C39', 'FAIL', `below 120: ${c39Failed.map(t => `${t.tool}=${t.count}`).join(', ')}`);
 }
@@ -978,9 +1007,153 @@ if (c46Issues.length === 0) {
   addResult('C46', 'FAIL', c46Issues.join('; '));
 }
 
+// C47: GEO/AEO answer blocks and schema coverage on indexable tool and hub pages.
+const c47Issues = [];
+const c47Targets = allDistHtml.filter(file => {
+  if (path.basename(file) === '404.html' || path.basename(file).startsWith('google')) return false;
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  return rel === 'dist/index.html' ||
+    rel.startsWith('dist/tools/') ||
+    rel.startsWith('dist/image/') ||
+    rel.startsWith('dist/audio/');
+});
+for (const file of c47Targets) {
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  const isNoindex = /<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(content);
+  if (isNoindex) continue;
+  if (!/class=["'][^"']*\bquick-answer\b/.test(content)) c47Issues.push(`${rel} missing quick-answer block`);
+  if (!/class=["'][^"']*\banswer-text\b/.test(content)) c47Issues.push(`${rel} missing answer-text`);
+  if (!/class=["'][^"']*\bkey-facts\b/.test(content)) c47Issues.push(`${rel} missing key-facts`);
+  const blocks = [];
+  const scriptRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = scriptRegex.exec(content)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      if (parsed['@graph'] && Array.isArray(parsed['@graph'])) blocks.push(...parsed['@graph']);
+      else blocks.push(parsed);
+    } catch (e) {
+      c47Issues.push(`${rel} invalid JSON-LD: ${e.message}`);
+    }
+  }
+  const hasWebPage = blocks.some(block => block['@type'] === 'WebPage' || block['@type'] === 'CollectionPage');
+  const hasSpeakable = blocks.some(block => block.speakable || (block['@type'] === 'WebPage' && block.speakable));
+  const hasWebApp = blocks.some(block => block['@type'] === 'WebApplication');
+  const hasHowTo = blocks.some(block => block['@type'] === 'HowTo');
+  const hasFaq = blocks.some(block => block['@type'] === 'FAQPage');
+  if (!hasWebPage) c47Issues.push(`${rel} missing WebPage/CollectionPage schema`);
+  if (!hasSpeakable) c47Issues.push(`${rel} missing speakable schema`);
+  const isStudio = rel === 'dist/image/studio/index.html';
+  const isHub = rel === 'dist/image/index.html' || rel === 'dist/audio/index.html';
+  if (!isStudio && !hasFaq) c47Issues.push(`${rel} missing FAQPage schema`);
+  // Hubs are CollectionPage listings; WebApplication/HowTo belong to the
+  // individual tools and to Image Studio.
+  if ((rel.startsWith('dist/tools/') || rel.startsWith('dist/image/') || rel.startsWith('dist/audio/')) && !isStudio && !isHub) {
+    if (!hasWebApp) c47Issues.push(`${rel} missing WebApplication schema`);
+    if (!hasHowTo) c47Issues.push(`${rel} missing HowTo schema`);
+  }
+}
+if (c47Issues.length === 0) {
+  addResult('C47', 'PASS', `${c47Targets.length} indexable pages have answer blocks, key facts and GEO/AEO schema`);
+} else {
+  addResult('C47', 'FAIL', c47Issues.slice(0, 4).join('; '));
+}
+
+// C48: AI discovery files, crawler allowances and llms links.
+const c48Issues = [];
+const llmsPath = path.join(ROOT, 'dist', 'llms.txt');
+const llmsFullPath = path.join(ROOT, 'dist', 'llms-full.txt');
+const llmsText = fs.existsSync(llmsPath) ? fs.readFileSync(llmsPath, 'utf8') : '';
+const llmsFullText = fs.existsSync(llmsFullPath) ? fs.readFileSync(llmsFullPath, 'utf8') : '';
+if (!llmsText) c48Issues.push('dist/llms.txt missing or empty');
+if (!llmsFullText) c48Issues.push('dist/llms-full.txt missing or empty');
+if (llmsText) {
+  if (!llmsText.includes('122')) c48Issues.push('llms.txt missing current total (122)');
+  if (!llmsText.includes('32 core')) c48Issues.push('llms.txt missing core count (32)');
+  if (!llmsText.includes('42 image')) c48Issues.push('llms.txt missing image count (42)');
+  if (!llmsText.includes('48 audio')) c48Issues.push('llms.txt missing audio count (48)');
+  if (!/citation guidance/i.test(llmsText)) c48Issues.push('llms.txt missing citation guidance');
+  if (!llmsText.includes('/llms-full.txt')) c48Issues.push('llms.txt missing llms-full link');
+}
+if (llmsFullText) {
+  const expectedUrls = [
+    ...TOOLS.map(tool => `${siteConfig.SITE_URL}/tools/${tool.id}/`),
+    ...require('../image-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/image/${tool.slug}/`),
+    ...require('../audio-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/audio/${tool.slug}/`)
+  ];
+  const missingUrls = expectedUrls.filter(url => !llmsFullText.includes(url));
+  if (missingUrls.length) c48Issues.push(`llms-full.txt missing ${missingUrls.length} tool URLs (first: ${missingUrls[0]})`);
+  if (!/Experimental/.test(llmsFullText)) c48Issues.push('llms-full.txt missing experimental status labels');
+}
+const robotsForAi = fs.existsSync(path.join(ROOT, 'dist', 'robots.txt')) ? fs.readFileSync(path.join(ROOT, 'dist', 'robots.txt'), 'utf8') : '';
+['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended'].forEach(agent => {
+  if (!robotsForAi.includes(`User-agent: ${agent}`)) c48Issues.push(`robots.txt missing ${agent}`);
+});
+const homeForLlms = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
+if (!homeForLlms.includes('/llms.txt')) c48Issues.push('home missing /llms.txt discovery link');
+if (!homeForLlms.includes('/llms-full.txt')) c48Issues.push('home missing /llms-full.txt discovery link');
+const headersForLlms = fs.readFileSync(path.join(ROOT, '_headers'), 'utf8');
+const vercelForLlms = fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8');
+if (!headersForLlms.includes('/llms.txt')) c48Issues.push('_headers missing llms Link');
+if (!vercelForLlms.includes('/llms.txt')) c48Issues.push('vercel.json missing llms Link');
+if (c48Issues.length === 0) {
+  addResult('C48', 'PASS', 'llms.txt/llms-full.txt complete; AI crawlers allowed; discovery links present');
+} else {
+  addResult('C48', 'FAIL', c48Issues.slice(0, 4).join('; '));
+}
+
+// Guarantee language is only banned when it is an affirmative promise. Caveats
+// such as "not guaranteed", "cannot ... guarantee recovery" or "exact
+// typography is not guaranteed" are honest and must not fail the check.
+function findAffirmativeGuarantee(text) {
+  const re = /\bguarantee(?:s|d)?\b/gi;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    const start = Math.max(text.lastIndexOf('.', match.index), text.lastIndexOf('!', match.index), text.lastIndexOf('?', match.index)) + 1;
+    const clause = text.slice(start, match.index).toLowerCase();
+    if (/\b(?:not|never|no|none|without|cannot|can't|isn't|aren't|wasn't|weren't)\b/.test(clause)) continue;
+    return match[0];
+  }
+  return null;
+}
+
+// C49: Social-card completeness and unsupported-claim guard on indexable pages.
+const c49Issues = [];
+const claimPatterns = [
+  /best in the world/i,
+  /\brated\s+(?:5|five)(?:\s*\/\s*5|\s+stars?)?\b/i,
+  /\b#1\s+(?:free\s+)?(?:online|tool|app|site|website|browser|choice|rated|ranked)\b/i,
+  /\b100%\s+secure\b/i
+];
+for (const file of allDistHtml) {
+  if (path.basename(file) === '404.html' || path.basename(file).startsWith('google')) continue;
+  const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  const isNoindex = /<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(content);
+  if (!isNoindex) {
+    const robots = content.match(/<meta\s+name=["']robots["']\s+content=["']([^"']*)["']/i);
+    if (!robots || !/\bindex\b/i.test(robots[1])) c49Issues.push(`${rel} missing index robots directive`);
+    if (!content.includes('og:image:width" content="1200"')) c49Issues.push(`${rel} missing og:image:width`);
+    if (!content.includes('og:image:height" content="630"')) c49Issues.push(`${rel} missing og:image:height`);
+    if (!content.includes('og:image:alt')) c49Issues.push(`${rel} missing og:image:alt`);
+    if (!content.includes('twitter:description')) c49Issues.push(`${rel} missing twitter:description`);
+    if (!content.includes('twitter:image:alt')) c49Issues.push(`${rel} missing twitter:image:alt`);
+  }
+  for (const pattern of claimPatterns) {
+    if (pattern.test(content)) c49Issues.push(`${rel} unsupported claim ${pattern}`);
+  }
+  const guarantee = findAffirmativeGuarantee(content);
+  if (guarantee) c49Issues.push(`${rel} unsupported guarantee "${guarantee}"`);
+}
+if (c49Issues.length === 0) {
+  addResult('C49', 'PASS', 'social cards complete; no unsupported rating or guarantee claims');
+} else {
+  addResult('C49', 'FAIL', c49Issues.slice(0, 4).join('; '));
+}
+
 // SUMMARY
 const passCount = results.filter(r => r.status === 'PASS').length;
 const failCount = results.filter(r => r.status === 'FAIL').length;
 const skipCount = results.filter(r => r.status === 'SKIP').length;
 console.log(`SUMMARY | pass=${passCount} fail=${failCount} skip=${skipCount}`);
-

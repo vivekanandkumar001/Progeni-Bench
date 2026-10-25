@@ -1904,6 +1904,72 @@
     return '<div class="itk-field"' + show + '><label for="' + id + '">' + esc(opt.label) + "</label>" + input + (opt.help ? "<small>" + esc(opt.help) + "</small>" : "") + "</div>";
   }
 
+  const OUTPUT_LABELS = { audio: "Audio file", document: "Document", image: "Image file", report: "Report", text: "Text file", zip: "ZIP archive" };
+
+  function formatOutputList(list) {
+    const values = (list || []).map(function (item) { return OUTPUT_LABELS[item] || item; });
+    return values.length ? values.join(", ") : "Processed file";
+  }
+
+  function quickAnswerHtml(answerHtml, facts) {
+    return '<aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">' +
+      '<h2 id="quick-answer-title">Quick answer</h2>' +
+      '<p class="answer-text">' + answerHtml + "</p>" +
+      '<dl class="key-facts">' + facts.map(function (fact) {
+        return "<div><dt>" + esc(fact[0]) + "</dt><dd>" + esc(fact[1]) + "</dd></div>";
+      }).join("") + "</dl></aside>";
+  }
+
+  function engineShort(tool) {
+    return tool.engine === "ffmpeg"
+      ? "FFmpeg.wasm on your device"
+      : tool.engine === "media-recorder"
+        ? "Browser microphone capture"
+        : "Web Audio API in your browser";
+  }
+
+  function toolQuickAnswer(tool) {
+    return quickAnswerHtml(
+      "<strong>" + esc(tool.name) + "</strong> processes audio locally in your browser. " + esc(tool.summary || ""),
+      [
+        ["Cost", "Free \u00b7 no account needed"],
+        ["Uploads", "No audio is uploaded"],
+        ["Inputs", (tool.inputs || []).join(", ") || (tool.requiresFile === false ? "No file needed" : "Audio file")],
+        ["Output", formatOutputList(tool.outputs)],
+        ["Engine", engineShort(tool)],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB \u00b7 " + (LIMITS.maxDurationSec / 60) + " minutes per file"]
+      ]
+    );
+  }
+
+  function hubQuickAnswerHtml(publicTools) {
+    const implemented = publicTools.filter(function (t) { return t.status === "implemented"; }).length;
+    const experimental = publicTools.length - implemented;
+    return quickAnswerHtml(
+      "<strong>The Bench Audio Toolkit</strong> is a free set of " + publicTools.length + " browser-based audio tools: " + implemented + " ready tools and " + experimental + " experimental tools. Decoding, editing and encoding run locally with the Web Audio API and a same-origin FFmpeg.wasm engine, so audio is not uploaded.",
+      [
+        ["Tools", publicTools.length + " public audio tools"],
+        ["Engine", "Web Audio API + same-origin FFmpeg.wasm"],
+        ["Uploads", "No audio is uploaded"],
+        ["Account", "Not required"],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB \u00b7 " + (LIMITS.maxDurationSec / 60) + " minutes per file"]
+      ]
+    );
+  }
+
+  function studioQuickAnswerHtml() {
+    return quickAnswerHtml(
+      "<strong>Audio Studio</strong> applies several operations to one audio file in order, then exports the result. Decoding, editing and encoding run locally in your browser.",
+      [
+        ["Cost", "Free \u00b7 no account needed"],
+        ["Uploads", "No audio is uploaded"],
+        ["Inputs", "Audio file"],
+        ["Output", "Audio file"],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB \u00b7 " + (LIMITS.maxDurationSec / 60) + " minutes per file"]
+      ]
+    );
+  }
+
   function seoHtml(tool) {
     const config = cfg();
     const related = (config.TOOLS || []).filter(function (t) {
@@ -2023,7 +2089,7 @@
     setMeta(tool);
 
     if (tool.status === "unavailable" || tool.status === "deferred" || tool.status === "blocked") {
-      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>' + esc(tool.name) + "</h1><p>" + esc(tool.summary) + "</p></section>" +
+      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>' + esc(tool.name) + "</h1><p>" + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
         '<section class="toolbox itk-panel"><div class="itk-status warn"><strong>Status: ' + esc(statusLabel(tool.status)) + "</strong><p>" + esc(tool.reason || "This tool is not available.") + "</p></div>" +
         '<p><a class="btn" href="/audio/">Browse working audio tools</a></p></section>' + seoHtml(tool);
       return;
@@ -2086,7 +2152,7 @@
         '<div class="itk-meta">' + (tool.inputs || []).slice(0, 4).map(function (f) { return '<span class="itk-chip">' + esc(f) + "</span>"; }).join("") +
           '<span class="itk-chip">' + (tool.engine === "ffmpeg" ? "FFmpeg engine" : tool.engine === "media-recorder" ? "Microphone" : "Web Audio") + "</span>" +
           '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
-      "</section>" +
+      "</section>" + toolQuickAnswer(tool) +
       limitation +
       '<section class="itk" id="atk">' +
         '<div class="itk-grid">' +
@@ -2521,6 +2587,7 @@
     app.innerHTML = '<section class="tool-head itk-head atk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Private audio tools that run in your browser</h1>' +
       "<p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool has a real client-side handler and a tested download path.</p>" +
       '<div class="itk-meta"><span class="itk-chip">' + impl + ' implemented</span><span class="itk-chip">' + exp + ' experimental</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div></section>' +
+      hubQuickAnswerHtml(PUBLIC) +
       '<section class="itk-categories">' + cats + "</section>" + hubInfoHtml(config);
     setActiveNav();
   }
@@ -2532,6 +2599,7 @@
     unmount();
     app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Audio Studio</h1>' +
       "<p>Load one audio file, then apply several operations in order and export the result. Everything runs locally.</p></section>" +
+      studioQuickAnswerHtml() +
       '<section class="itk-grid"><div class="itk-panel"><h2>1. Add audio</h2><div id="atk-drop" class="drop" role="button" tabindex="0"><strong>Drop an audio file</strong><span>or click to browse. Stays on this device.</span><input id="atk-file" type="file" accept="' + AUDIO_ACCEPT + '" hidden></div>' +
       '<div class="itk-actions"><button class="btn btn-lg" id="atk-studio-run" type="button">Run chain</button></div>' +
       '<div class="itk-progress"><div class="itk-bar"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready.</p></div></div>' +

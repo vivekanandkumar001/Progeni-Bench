@@ -10,3 +10,11 @@ all_tests.txt
 Chart.csv
 Metadata.csv
 Table.csv
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+# Stale integration checkout (was a dangling junction)
+bench-main-integration/

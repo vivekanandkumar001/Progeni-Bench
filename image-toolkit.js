@@ -2646,6 +2646,67 @@
     return '<div class="itk-field"' + show + '><label for="' + id + '">' + esc(opt.label) + "</label>" + input + (opt.help ? '<small>' + esc(opt.help) + "</small>" : "") + "</div>";
   }
 
+  const OUTPUT_LABELS = { audio: "Audio file", document: "Document", image: "Image file", report: "Report", text: "Text file", zip: "ZIP archive" };
+
+  function formatOutputList(list) {
+    const values = (list || []).map(function (item) { return OUTPUT_LABELS[item] || item; });
+    return values.length ? values.join(", ") : "Processed file";
+  }
+
+  function quickAnswerHtml(answerHtml, facts) {
+    return '<aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">' +
+      '<h2 id="quick-answer-title">Quick answer</h2>' +
+      '<p class="answer-text">' + answerHtml + "</p>" +
+      '<dl class="key-facts">' + facts.map(function (fact) {
+        return "<div><dt>" + esc(fact[0]) + "</dt><dd>" + esc(fact[1]) + "</dd></div>";
+      }).join("") + "</dl></aside>";
+  }
+
+  function toolQuickAnswer(tool) {
+    const maxFiles = tool.maxFiles || 1;
+    return quickAnswerHtml(
+      "<strong>" + esc(tool.name) + "</strong> runs locally in your browser. " + esc(tool.summary || ""),
+      [
+        ["Cost", "Free \u00b7 no account needed"],
+        ["Uploads", "No image is uploaded"],
+        ["Inputs", (tool.inputs || []).join(", ") || "Image files"],
+        ["Output", formatOutputList(tool.outputs)],
+        ["Batch", maxFiles + " file" + (maxFiles === 1 ? "" : "s") + " per run"],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB per file \u00b7 " + (LIMITS.maxPixels / 1e6).toFixed(0) + " MP"]
+      ]
+    );
+  }
+
+  function hubQuickAnswerHtml() {
+    const all = cfg().TOOLS || [];
+    const publicTools = all.filter(function (t) { return t.status === "implemented" || t.status === "experimental"; });
+    const implemented = publicTools.filter(function (t) { return t.status === "implemented"; }).length;
+    const experimental = publicTools.length - implemented;
+    return quickAnswerHtml(
+      "<strong>The Bench Image Toolkit</strong> is a free set of " + publicTools.length + " browser-based image tools: " + implemented + " ready tools, " + experimental + " experimental tools and a batch Image Studio. Images are decoded, edited and encoded locally with Canvas, so the files are not uploaded.",
+      [
+        ["Tools", publicTools.length + " public image tools"],
+        ["Batch studio", "Image Studio: resize, convert, compress, ZIP export"],
+        ["Uploads", "No image is uploaded"],
+        ["Account", "Not required"],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB per file \u00b7 " + LIMITS.maxFiles + " files per batch"]
+      ]
+    );
+  }
+
+  function studioQuickAnswerHtml() {
+    return quickAnswerHtml(
+      "<strong>Image Studio</strong> applies one resize, format and quality recipe to up to " + LIMITS.maxFiles + " images, then exports each result or a ZIP. Decoding, cropping, conversion and compression all run locally in your browser.",
+      [
+        ["Batch size", "Up to " + LIMITS.maxFiles + " images"],
+        ["Outputs", "WebP, JPEG or PNG \u00b7 individual files or ZIP"],
+        ["Uploads", "No image is uploaded"],
+        ["Account", "Not required"],
+        ["Limit", (LIMITS.maxFileBytes / (1024 * 1024)) + " MB per file"]
+      ]
+    );
+  }
+
   function seoHtml(tool) {
     const related = (function () {
       const all = cfg().TOOLS || [];
@@ -2684,7 +2745,7 @@
     }
     setMeta(tool);
     if (tool.status === "unavailable" || tool.status === "deferred" || tool.status === "blocked") {
-      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" +
+      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
         '<section class="toolbox itk-panel"><div class="itk-status warn"><strong>Status: ' + esc(statusLabel(tool.status)) + "</strong><p>" + esc(tool.reason || "This tool is not available.") + "</p></div>" +
         '<p><a class="btn" href="/image/">Browse working image tools</a></p></section>' + seoHtml(tool);
       return;
@@ -2707,7 +2768,7 @@
         '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
           '<span class="itk-chip">up to ' + (tool.maxFiles || 1) + " file" + ((tool.maxFiles || 1) === 1 ? "" : "s") + "</span>" +
           '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
-      "</section>" +
+      "</section>" + toolQuickAnswer(tool) +
       limitation +
       '<section class="itk" id="itk">' +
         '<div class="itk-grid">' +
@@ -2902,7 +2963,7 @@
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/";
     const cats = config.CATEGORIES || [];
     const all = config.TOOLS || [];
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Browse the available tools below; processing happens on your device.</p><div class="itk-meta"><span class="itk-chip">' + all.filter(t => t.status === "implemented" || t.status === "experimental").length + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a></p></section>' +
+    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Browse the available tools below; processing happens on your device.</p><div class="itk-meta"><span class="itk-chip">' + all.filter(t => t.status === "implemented" || t.status === "experimental").length + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a></p></section>' + hubQuickAnswerHtml() +
       '<section class="itk-categories">' + cats.map(function (cat) {
         const list = all.filter(t => t.category === cat.id);
         const publicList = list.filter(t => t.status === "implemented" || t.status === "experimental");
@@ -2925,7 +2986,7 @@
     document.title = "Image Studio: batch resize, convert and watermark | Bench";
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/studio/";
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Image Studio</h1><p>A three-step batch recipe for real work: upload, choose one set of export settings, download every result or a ZIP. No account and no upload.</p></section>' +
+    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Image Studio</h1><p>A three-step batch recipe for real work: upload, choose one set of export settings, download every result or a ZIP. No account and no upload.</p></section>' + studioQuickAnswerHtml() +
       '<section class="itk"><div class="itk-grid"><div class="itk-panel itk-controls">' +
       '<h2>1. Add images</h2><div id="studio-drop" class="drop" role="button" tabindex="0" aria-label="Choose images"><strong>Drop images here</strong><span>or click to browse · up to 30 files</span><input id="studio-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.svg,.tif,.tiff" multiple hidden></div><div id="studio-files" class="itk-files"></div>' +
       '<h2>2. Recipe</h2><form id="studio-form" class="itk-options">' +

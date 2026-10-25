@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 
 const site = require('./site.config.js');
+const seo = require('./scripts/seo.js');
 const C = require('./image-tools.config.js');
 
 const SITE_URL = C.SITE_URL || site.SITE_URL;
@@ -26,6 +27,36 @@ const TAGLINE = site.TAGLINE || 'Fast, private browser utilities';
 const PUBLIC = C.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental');
 const IMPLEMENTED = PUBLIC.filter(t => t.status === 'implemented');
 const EXPERIMENTAL = PUBLIC.filter(t => t.status === 'experimental');
+
+const HUB_FAQ = [
+  {
+    q: 'Are my images uploaded when I use the Bench Image Toolkit?',
+    a: 'No. Decoding, editing and encoding run inside your browser using Canvas and File APIs. Image bytes are not sent to Bench or a third party.'
+  },
+  {
+    q: 'How many image tools are available?',
+    a: `${PUBLIC.length} public image tools are available: ${IMPLEMENTED.length} implemented tools and ${EXPERIMENTAL.length} experimental tools. Image Studio adds a batch resize, convert and ZIP workflow.`
+  },
+  {
+    q: 'Do the image tools cost anything or need an account?',
+    a: 'No. The tools are free and no account, password or subscription is required.'
+  },
+  {
+    q: 'What are the image tool limits?',
+    a: `Each file can be up to ${C.LIMITS.maxFileBytes / (1024 * 1024)} MB and ${(C.LIMITS.maxPixels / 1e6).toFixed(0)} megapixels, with ${C.LIMITS.maxFiles} files per batch and a maximum dimension of ${C.LIMITS.maxDimension} px.`
+  }
+];
+
+const hubQuickAnswer = seo.quickAnswerHtml({
+  answerHtml: `<strong>The Bench Image Toolkit</strong> is a free set of ${PUBLIC.length} browser-based image tools: ${IMPLEMENTED.length} ready tools, ${EXPERIMENTAL.length} experimental tools and a batch Image Studio. Images are decoded, edited and encoded locally with Canvas, so the files are not uploaded.`,
+  facts: seo.keyFacts([
+    ['Tools', `${PUBLIC.length} public image tools`],
+    ['Batch studio', 'Image Studio: resize, convert, compress, ZIP export'],
+    ['Uploads', 'No image is uploaded'],
+    ['Account', 'Not required'],
+    ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB per file · ${C.LIMITS.maxFiles} files per batch`]
+  ])
+});
 
 function esc(value) {
   return String(value == null ? '' : value)
@@ -77,31 +108,14 @@ function publicUrl(tool) {
 
 function headExtras(title, desc, canonicalUrl, opts) {
   opts = opts || {};
-  const image = `${SITE_URL}/assets/og-image.png`;
-  return `
-  <meta name="theme-color" content="#f4f6f9">
-  <meta property="og:site_name" content="${esc(SITE_NAME)}">
-  <meta property="og:title" content="${esc(title)}">
-  <meta property="og:description" content="${esc(desc)}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${esc(canonicalUrl)}">
-  <meta property="og:image" content="${esc(image)}">
-  <meta property="og:image:alt" content="${esc(SITE_NAME)} - private browser image tools">
-  <meta property="og:locale" content="${esc(LOCALE)}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${esc(title)}">
-  <meta name="twitter:description" content="${esc(desc)}">
-  <meta name="twitter:image" content="${esc(image)}">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="canonical" href="${esc(canonicalUrl)}">${opts.noindex ? '\n  <meta name="robots" content="noindex, follow">' : ''}
-  <script type="application/ld+json" id="schema">${json(opts.schema || {})}</script>`;
+  return seo.headMeta({
+    title,
+    description: desc,
+    canonicalUrl,
+    imageAlt: `${SITE_NAME} — private browser image tools`,
+    noindex: opts.noindex,
+    schema: opts.schema
+  });
 }
 
 function shell(title, desc, canonicalUrl, body, opts) {
@@ -143,8 +157,8 @@ ${body}
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
-  <div class="footer-directory">
-    <div class="footer-directory-title">Image tools by category</div>
+  <details class="footer-directory">
+    <summary class="footer-directory-title">Image tools by category</summary>
     <div class="category-blocks">
       ${C.CATEGORIES.map(cat => {
         const tools = PUBLIC.filter(t => t.category === cat.id);
@@ -152,7 +166,7 @@ ${body}
         return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/image/${esc(t.slug)}/">${esc(t.name)}</a></li>`).join('')}</ul></div>`;
       }).join('')}
     </div>
-  </div>
+  </details>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
@@ -196,6 +210,8 @@ function hubBody() {
   <p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
 </section>
 
+${hubQuickAnswer}
+
 <section class="itk-categories">
 ${categories}
 </section>
@@ -204,8 +220,26 @@ ${categories}
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real pixel work but have limited validation; their results should be checked before important use. Limits: ${esc(C.LIMITS.maxFileBytes / (1024 * 1024))} MB per file, ${esc((C.LIMITS.maxPixels / 1e6).toFixed(0))} megapixels per image, ${esc(C.LIMITS.maxFiles)} files per batch, and a maximum dimension of ${esc(C.LIMITS.maxDimension)} px.</p>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
+</section>
+
+<section class="home-faq" aria-labelledby="image-faq-title">
+  <h2 id="image-faq-title">Quick answers about the image toolkit</h2>
+  <div class="home-faq-grid">
+    ${HUB_FAQ.map(({ q, a }) => `<article class="home-faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('\n    ')}
+  </div>
 </section>`;
 }
+
+const studioQuickAnswer = seo.quickAnswerHtml({
+  answerHtml: `<strong>Image Studio</strong> applies one resize, format and quality recipe to up to ${C.LIMITS.maxFiles} images, then exports each result or a ZIP. Decoding, cropping, conversion and compression all run locally in your browser.`,
+  facts: seo.keyFacts([
+    ['Batch size', `Up to ${C.LIMITS.maxFiles} images`],
+    ['Outputs', 'WebP, JPEG or PNG · individual files or ZIP'],
+    ['Uploads', 'No image is uploaded'],
+    ['Account', 'Not required'],
+    ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB per file`]
+  ])
+});
 
 function studioBody() {
   return `<section class="tool-head itk-head">
@@ -214,6 +248,8 @@ function studioBody() {
   <p>A three-step batch recipe for real work: add images, choose one set of export settings, then download every result or a ZIP. Everything runs locally — the files never leave your device.</p>
   <div class="itk-meta"><span class="itk-chip">Up to ${esc(C.LIMITS.maxFiles)} files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div>
 </section>
+
+${studioQuickAnswer}
 
 <section class="itk-grid itk-studio-static">
   <div class="itk-panel">
@@ -272,6 +308,19 @@ function toolBody(tool) {
     <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
   </section>`;
 
+  const quickFacts = seo.keyFacts([
+    ['Cost', 'Free · no account needed'],
+    ['Uploads', 'No image is uploaded'],
+    ['Inputs', (tool.inputs || []).join(', ') || 'Image files'],
+    ['Output', seo.formatOutputs(tool.outputs)],
+    ['Batch', `${tool.maxFiles || 1} file${(tool.maxFiles || 1) === 1 ? '' : 's'} per run`],
+    ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB per file · ${(C.LIMITS.maxPixels / 1e6).toFixed(0)} MP`]
+  ]);
+  const quickAnswer = seo.quickAnswerHtml({
+    answerHtml: `<strong>${esc(tool.name)}</strong> runs locally in your browser. ${esc(tool.summary)}`,
+    facts: quickFacts
+  });
+
   return `<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/image/">Image toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">${esc(tool.name)}</span></nav>
 
 <section class="tool-head itk-head">
@@ -284,6 +333,8 @@ function toolBody(tool) {
     <span class="itk-chip">${esc((C.LIMITS.maxFileBytes / (1024 * 1024)).toFixed(0))} MB / file</span>
   </div>
 </section>
+
+${quickAnswer}
 
 ${experimental ? `<div class="itk-status warn"><strong>Experimental</strong><span>${esc(limitations)}</span></div>` : ''}
 
@@ -305,100 +356,90 @@ ${fallback}
 }
 
 function hubSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'CollectionPage',
-        name: 'Bench Image Toolkit',
-        url: `${SITE_URL}/image/`,
-        description: 'Private browser image tools for compression, resizing, conversion, editing, metadata and creation.',
-        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` }
-      },
-      {
-        '@type': 'ItemList',
-        name: 'Working image tools',
-        numberOfItems: PUBLIC.length,
-        itemListElement: PUBLIC.map((t, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: t.name,
-          url: publicUrl(t)
-        }))
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-          { '@type': 'ListItem', position: 2, name: 'Image toolkit', item: `${SITE_URL}/image/` }
-        ]
-      }
-    ]
-  };
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: `${SITE_URL}/image/`,
+      name: 'Bench Image Toolkit: private browser image tools',
+      description: 'Private browser image tools for compression, resizing, conversion, editing, metadata and creation.',
+      type: 'CollectionPage'
+    }),
+    {
+      '@type': 'ItemList',
+      name: 'Working image tools',
+      numberOfItems: PUBLIC.length,
+      itemListElement: PUBLIC.map((t, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: t.name,
+        url: publicUrl(t)
+      }))
+    },
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Image toolkit', url: `${SITE_URL}/image/` }
+    ]),
+    seo.faqPageNode(HUB_FAQ)
+  ]);
 }
 
 function studioSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebApplication',
-        name: 'Image Studio',
-        url: `${SITE_URL}/image/studio/`,
-        description: 'Batch resize, convert and compress images locally in the browser.',
-        applicationCategory: 'MultimediaApplication',
-        operatingSystem: 'Any',
-        browserRequirements: 'Requires a modern browser with Canvas support',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-        isAccessibleForFree: true
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-          { '@type': 'ListItem', position: 2, name: 'Image toolkit', item: `${SITE_URL}/image/` },
-          { '@type': 'ListItem', position: 3, name: 'Image Studio', item: `${SITE_URL}/image/studio/` }
-        ]
-      }
-    ]
-  };
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: `${SITE_URL}/image/studio/`,
+      name: 'Image Studio: batch resize and convert',
+      description: 'Batch resize, convert and compress images locally in the browser.'
+    }),
+    seo.softwareApplicationNode({
+      name: 'Image Studio',
+      url: `${SITE_URL}/image/studio/`,
+      description: 'Batch resize, convert and compress images locally in the browser.',
+      category: 'MultimediaApplication',
+      requirements: 'Requires a modern browser with Canvas support',
+      featureList: ['Batch resize', 'Format conversion', 'Compression', 'ZIP export']
+    }),
+    seo.howToNode('Image Studio', 'Batch resize, convert and compress images locally in the browser.', [
+      'Add images with the file picker or by dropping them onto the page.',
+      'Choose the output format, maximum width, square crop, quality and metadata settings.',
+      'Export each successful result, or download one ZIP containing every image.'
+    ], `${SITE_URL}/image/studio/`),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Image toolkit', url: `${SITE_URL}/image/` },
+      { name: 'Image Studio', url: `${SITE_URL}/image/studio/` }
+    ])
+  ]);
 }
 
 function toolSchema(tool) {
-  const graph = [
-    {
-      '@type': 'WebApplication',
+  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: publicUrl(tool),
+      name: tool.seoTitle || tool.name,
+      description: tool.seoDescription || tool.summary
+    }),
+    seo.softwareApplicationNode({
       name: tool.name,
       url: publicUrl(tool),
       description: tool.seoDescription || tool.summary,
-      applicationCategory: 'MultimediaApplication',
-      operatingSystem: 'Any',
-      browserRequirements: 'Requires a modern browser with Canvas support',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      isAccessibleForFree: true,
-      provider: { '@type': 'Organization', name: site.PARENT_BRAND, url: site.PARENT_URL }
-    },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-        { '@type': 'ListItem', position: 2, name: 'Image toolkit', item: `${SITE_URL}/image/` },
-        { '@type': 'ListItem', position: 3, name: tool.name, item: publicUrl(tool) }
-      ]
-    }
-  ];
-  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
-  if (faq.length) {
-    graph.push({
-      '@type': 'FAQPage',
-      mainEntity: faq.map(f => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: f.a }
-      }))
-    });
-  }
-  return { '@context': 'https://schema.org', '@graph': graph };
+      category: 'MultimediaApplication',
+      requirements: 'Requires a modern browser with Canvas support',
+      featureList: tool.useCases
+    }),
+    seo.howToNode(tool.name, tool.description || tool.summary, tool.howTo, publicUrl(tool)),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Image toolkit', url: `${SITE_URL}/image/` },
+      { name: tool.name, url: publicUrl(tool) }
+    ]),
+    seo.faqPageNode(faq)
+  ]);
 }
 
 function generateHubHtml() {
