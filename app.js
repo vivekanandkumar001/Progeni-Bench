@@ -1041,79 +1041,127 @@ function home() {
 
   const existingGrid = $("#grid");
   const existingSearch = $("#search");
-  const existingCats = $("#cats");
+  const existingToolkitFilter = $("#toolkit-filter");
+  const existingCategoryFilter = $("#category-filter");
 
-  const wireFilters = (searchEl, catContainer) => {
-    let cat = "All";
-    const render = (c = "All", q = "") => {
-      const qLower = q.trim().toLowerCase();
+  const wireFilters = (searchEl, toolkitFilter, categoryFilter) => {
+    const normalize = value => String(value || "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    const grid = $("#grid");
+    const cards = [...document.querySelectorAll("#grid .tool-card")];
+    const total = cards.length;
+    const searchIndex = new Map(cards.map(card => [
+      card,
+      normalize(`${card.dataset.search || ""} ${card.textContent}`)
+    ]));
+    const sectionHead = document.querySelector(".tools-section .section-head");
+    let categoryButtons = document.querySelector(".catalog-category-filters");
+    if (sectionHead && !categoryButtons) {
+      categoryButtons = document.createElement("div");
+      categoryButtons.className = "catalog-category-filters";
+      categoryButtons.setAttribute("role", "group");
+      categoryButtons.setAttribute("aria-label", "Filter tools by category");
+      const buttons = [...categoryFilter.options]
+        .filter(option => option.value !== "all")
+        .map(option => {
+          const label = option.textContent.trim();
+          const categoryName = label.replace(/^[^·]+·\s*/, "");
+          return `<button class="category-filter-button" type="button" data-category-filter="${esc(option.value)}" title="${esc(label)}" aria-label="${esc(label)}" aria-pressed="false">${esc(categoryName)}</button>`;
+        });
+      categoryButtons.innerHTML = `<button class="category-filter-button active" type="button" data-category-filter="all" aria-pressed="true">All categories</button>${buttons.join("")}`;
+      sectionHead.insertAdjacentElement("afterend", categoryButtons);
+      categoryButtons.addEventListener("click", event => {
+        const button = event.target.closest("[data-category-filter]");
+        if (!button) return;
+        categoryFilter.value = button.dataset.categoryFilter;
+        render();
+      });
+    }
+
+    const render = () => {
+      const queryTerms = normalize(searchEl.value).split(/\s+/).filter(Boolean);
+      const toolkit = toolkitFilter.value;
+      const category = categoryFilter.value;
+      if (categoryButtons) {
+        categoryButtons.querySelectorAll("[data-category-filter]").forEach(button => {
+          const active = button.dataset.categoryFilter === category;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+      }
       const cards = [...document.querySelectorAll("#grid .tool-card")];
       let visible = 0;
       cards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        const cardCat = card.dataset.cat || "";
-        const matchesCat = (c === "All" || cardCat === c);
-        const matchesQuery = (!qLower || text.includes(qLower));
-        const matches = matchesCat && matchesQuery;
-        card.style.display = matches ? "" : "none";
+        const searchText = searchIndex.get(card) || "";
+        const matchesToolkit = toolkit === "all" || card.dataset.toolkit === toolkit;
+        const matchesCategory = category === "all" || card.dataset.category === category;
+        const matchesQuery = queryTerms.every(term => searchText.includes(term));
+        const matches = matchesToolkit && matchesCategory && matchesQuery;
+        card.hidden = !matches;
         if (matches) visible++;
+      });
+
+      grid.querySelectorAll(".catalog-category").forEach(section => {
+        const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
+        section.hidden = count === 0;
+        const label = section.querySelector(".catalog-category-count");
+        if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
+      });
+      grid.querySelectorAll(".catalog-toolkit").forEach(section => {
+        const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
+        section.hidden = count === 0;
+        const label = section.querySelector(".catalog-group-count");
+        if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
       });
 
       const count = document.querySelector(".grid-count");
       if (count) {
         count.setAttribute("aria-live", "polite");
         count.setAttribute("aria-atomic", "true");
-        count.innerHTML = `Showing <strong>${visible}</strong> of ${TOOLS.length} core tools`;
+        count.innerHTML = `Showing <strong>${visible}</strong> of ${total} tools`;
       }
-
-      const grid = $("#grid");
       let empty = grid && grid.querySelector(".search-empty");
       if (grid && visible === 0 && !empty) {
         empty = document.createElement("div");
         empty.className = "empty search-empty";
         empty.setAttribute("role", "status");
         empty.innerHTML = `
-          <p>No core tools match these filters. Try a shorter search or browse a specialist toolkit.</p>
+          <p>No tools match these filters. Try a different search or broaden your filters.</p>
           <div class="search-empty-actions">
             <button class="btn secondary btn-sm" type="button" data-clear-filters>Clear search and filters</button>
             <a class="btn secondary btn-sm" href="/image/">Browse image tools</a>
             <a class="btn secondary btn-sm" href="/audio/">Browse audio tools</a>
           </div>`;
         grid.appendChild(empty);
-        empty.querySelector("[data-clear-filters]").onclick = () => {
-          searchEl.value = "";
-          cat = "All";
-          catContainer.querySelectorAll(".pill").forEach(button => {
-            const active = button.dataset.cat === "All";
-            button.classList.toggle("active", active);
-            button.setAttribute("aria-pressed", String(active));
-          });
-          render(cat, "");
-          searchEl.focus();
-        };
+        empty.querySelector("[data-clear-filters]").onclick = clearFilters;
       } else if (visible > 0 && empty) {
         empty.remove();
       }
     };
 
-    catContainer.querySelectorAll(".pill").forEach(b => {
-      b.onclick = () => {
-        catContainer.querySelectorAll(".pill").forEach(x => {
-          x.classList.remove("active");
-          x.setAttribute("aria-pressed", "false");
-        });
-        b.classList.add("active");
-        b.setAttribute("aria-pressed", "true");
-        cat = b.dataset.cat;
-        render(cat, searchEl.value);
-      };
-    });
+    const clearFilters = () => {
+      searchEl.value = "";
+      toolkitFilter.value = "all";
+      categoryFilter.value = "all";
+      render();
+      searchEl.focus();
+    };
 
-    searchEl.oninput = e => render(cat, e.target.value);
+    searchEl.addEventListener("input", render);
+    toolkitFilter.addEventListener("change", render);
+    categoryFilter.addEventListener("change", render);
+    document.querySelectorAll("[data-clear-filters]").forEach(button => {
+      button.addEventListener("click", clearFilters);
+    });
+    render();
   };
 
-  if (existingGrid && existingSearch && existingCats) {
-    wireFilters(existingSearch, existingCats);
+  if (existingGrid && existingSearch && existingToolkitFilter && existingCategoryFilter) {
+    wireFilters(existingSearch, existingToolkitFilter, existingCategoryFilter);
     return;
   }
 
@@ -1132,24 +1180,26 @@ function home() {
   app.innerHTML = `
     <section class="hero">
       <div class="hero-inner">
-        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · 30 core · 42 image · 48 audio · runs in your browser</span>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · private in your browser</span>
         <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
         <p class="hero-lede">${esc(TAGLINE)} Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
         <div class="hero-search">
           <label class="sr-only" for="search">Search tools</label>
-          <input id="search" class="search" type="search" aria-label="Search 30 core tools" placeholder="Search 30 core tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+          <input id="search" class="search" type="search" aria-label="Search all tools" placeholder="Search all tools by name, task, format or feature…">
+        </div>
+        <div class="catalog-controls" aria-label="Filter tools">
+          <label for="toolkit-filter">Toolkit
+            <select id="toolkit-filter"><option value="all">All toolkits</option><option value="core">Core tools</option><option value="image">Image tools</option><option value="audio">Audio tools</option></select>
+          </label>
+          <select id="category-filter" class="sr-only" aria-hidden="true" tabindex="-1"><option value="all">All categories</option></select>
+          <button class="catalog-clear" type="button" data-clear-filters>Clear filters</button>
         </div>
         <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
-          <span>Looking for a different kind of tool?</span>
-          <a href="/image/">Explore 42 image tools <span aria-hidden="true">→</span></a>
-          <a href="/audio/">Explore 48 audio tools <span aria-hidden="true">→</span></a>
+          <span>More tools:</span>
+          <a href="/image/">42 image tools <span aria-hidden="true">→</span></a>
+          <a href="/audio/">48 audio tools <span aria-hidden="true">→</span></a>
         </div>
-        <div id="cats" class="categories" role="group" aria-label="Filter tools by category"></div>
       </div>
-    </section>
-
-    <section class="trust" aria-label="Why use ${esc(SITE_NAME)}">
-      ${trustHtml}
     </section>
 
     <section class="tools-section" aria-label="Browser utility grid">
@@ -1158,6 +1208,10 @@ function home() {
         <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} core tools</p>
       </div>
       <div id="grid" class="grid"></div>
+    </section>
+
+    <section class="trust" aria-label="Why use ${esc(SITE_NAME)}">
+      ${trustHtml}
     </section>
 
     <section class="privacy-band">
@@ -1178,6 +1232,10 @@ function home() {
   `;
 
   const categories = [...new Set(TOOLS.map(t => t.cat))];
+  const categoryFilter = $("#category-filter");
+  categoryFilter.innerHTML += categories.map(cat =>
+    `<option value="${esc(`core:${cat}`)}">Core · ${esc(cat)}</option>`
+  ).join("");
   $(".category-blocks").innerHTML = categories.map(cat => `
     <div class="category-block" id="category-${esc(cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}">
       <h3>${esc(cat)}</h3>
@@ -1189,11 +1247,8 @@ function home() {
     </div>
   `).join("");
 
-  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
-  $("#cats").innerHTML = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${esc(c)}" aria-pressed="${i === 0 ? "true" : "false"}">${esc(c)}</button>`).join("");
-
   $("#grid").innerHTML = TOOLS.map(t => `
-    <a class="tool-card" href="/tools/${t.id}/" data-cat="${esc(t.cat)}">
+    <a class="tool-card" href="/tools/${t.id}/" data-toolkit="core" data-category="${esc(`core:${t.cat}`)}" data-search="${esc(`${t.id} ${t.keyword || ""} ${t.desc}`)}">
       <span class="go" aria-hidden="true">&rarr;</span>
       <div class="icon" aria-hidden="true">${t.icon}</div>
       <h2>${esc(t.name)}</h2>
@@ -1202,7 +1257,7 @@ function home() {
     </a>
   `).join("");
 
-  wireFilters($("#search"), $("#cats"));
+  wireFilters($("#search"), $("#toolkit-filter"), $("#category-filter"));
 }
 
 function toolPage(id) {
@@ -1532,6 +1587,7 @@ document.addEventListener("click", e => {
   if (a.target === "_blank" || a.hasAttribute("download")) return;
   const href = a.getAttribute("href");
   if (!href || href.startsWith("//") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+  if (href === "/" && location.pathname !== "/") return;
   // Legal/info pages are fully server-rendered with their own content. A
   // client-side route change would leave the previous page's body in place and
   // keep its title/canonical, so let the browser load the real document.

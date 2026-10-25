@@ -2614,9 +2614,12 @@
     active = null;
   }
   function statusLabel(status) {
-    return ({ implemented: "Implemented and tested", experimental: "Experimental", deferred: "Deferred", unavailable: "Not available", blocked: "Blocked" })[status] || status;
+    return ({ implemented: "Ready", experimental: "Experimental", deferred: "Deferred", unavailable: "Not available", blocked: "Blocked" })[status] || status;
   }
   function statusClass(status) { return status === "implemented" ? "ok" : status === "experimental" ? "warn" : "muted"; }
+  function statusBadge(status) {
+    return status === "implemented" ? "" : '<em class="itk-badge ' + statusClass(status) + '">' + esc(statusLabel(status)) + "</em>";
+  }
 
   function optionHtml(opt, idx) {
     const id = "itk-opt-" + idx;
@@ -2698,7 +2701,7 @@
 
     app.innerHTML =
       '<section class="tool-head itk-head">' +
-        '<span class="eyebrow">Bench Image Toolkit · <span class="itk-badge ' + statusClass(tool.status) + '">' + esc(statusLabel(tool.status)) + "</span></span>" +
+        '<span class="eyebrow">Bench Image Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
         "<h1>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
         '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
@@ -2899,21 +2902,18 @@
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/";
     const cats = config.CATEGORIES || [];
     const all = config.TOOLS || [];
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Every working tool has a real client-side handler; unavailable tools say so instead of pretending.</p><div class="itk-meta"><span class="itk-chip">' + all.filter(t => t.status === "implemented" || t.status === "experimental").length + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a></p></section>' +
+    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Browse the available tools below; processing happens on your device.</p><div class="itk-meta"><span class="itk-chip">' + all.filter(t => t.status === "implemented" || t.status === "experimental").length + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a></p></section>' +
       '<section class="itk-categories">' + cats.map(function (cat) {
         const list = all.filter(t => t.category === cat.id);
         const publicList = list.filter(t => t.status === "implemented" || t.status === "experimental");
+        if (!publicList.length) return "";
         return '<section class="itk-category"><div class="itk-category-head"><h2>' + esc(cat.name) + "</h2><p>" + esc(cat.blurb) + "</p></div>" +
-          (publicList.length ? '<div class="itk-tool-grid">' + publicList.map(function (t) {
-            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span><em class="' + statusClass(t.status) + '">' + esc(statusLabel(t.status)) + "</em></a>";
-          }).join("") + "</div>" : '<p class="itk-muted">No working tools in this category yet. ' + esc(list.map(t => t.name + ": " + (t.reason || statusLabel(t.status))).join(" ")) + "</p>") +
+          '<div class="itk-tool-grid">' + publicList.map(function (t) {
+            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span>' + statusBadge(t.status) + "</a>";
+          }).join("") + "</div>" +
           "</section>";
       }).join("") + "</section>" +
-      '<section class="toolbox itk-notice-box"><h2>Status and limits</h2><p>Implemented tools produce real files and are covered by automated tests. Experimental tools run real pixel work but have limited validation. Limits: ' + esc(formatBytes(LIMITS.maxFileBytes)) + ' per file, ' + esc((LIMITS.maxPixels / 1e6).toFixed(0)) + ' megapixels per image, ' + esc(LIMITS.maxFiles) + ' files per batch, and a maximum dimension of ' + esc(LIMITS.maxDimension) + ' px.</p>' +
-      '<h2>Not available yet</h2><p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p><div class="itk-status-list">' +
-      all.filter(t => t.status !== "implemented" && t.status !== "experimental").map(function (t) {
-        return '<div class="itk-status-row"><strong>' + esc(t.name) + '</strong><em class="' + statusClass(t.status) + '">' + esc(statusLabel(t.status)) + '</em><p>' + esc(t.reason || "Not available in this build.") + "</p></div>";
-      }).join("") + "</div></section>";
+      '<section class="toolbox itk-notice-box"><h2>Status and limits</h2><p>Implemented tools produce real files and are covered by automated tests. Experimental tools run real pixel work but have limited validation. Limits: ' + esc(formatBytes(LIMITS.maxFileBytes)) + ' per file, ' + esc((LIMITS.maxPixels / 1e6).toFixed(0)) + ' megapixels per image, ' + esc(LIMITS.maxFiles) + ' files per batch, and a maximum dimension of ' + esc(LIMITS.maxDimension) + ' px.</p></section>';
   }
 
   function mountStudio() {

@@ -480,17 +480,96 @@ function generateHomePageHtml() {
   const title = `${SITE_NAME}: Free Private File Tools in Your Browser`;
   const desc = `Fix everyday digital file tasks in your browser with ${SITE_NAME}. Convert CSVs, repair subtitles, format Avery labels, and crop photos with zero uploads.`;
   const canonicalUrl = `${SITE_URL}/`;
-  const cats = ["All", ...new Set(TOOLS.map(t => t.cat))];
-  const catsHtml = cats.map((c, i) => `<button class="pill ${i === 0 ? "active" : ""}" data-cat="${c}" aria-pressed="${i === 0 ? "true" : "false"}">${c}</button>`).join("");
-  const gridHtml = TOOLS.map(t => `
-      <a class="tool-card" href="/tools/${t.id}/" data-cat="${t.cat}">
-        <span class="go" aria-hidden="true">&rarr;</span>
-        <div class="icon" aria-hidden="true">${t.icon}</div>
-        <h2>${t.name}</h2>
-        <p>${t.desc}</p>
-        <span class="tag">${t.cat}</span>
-      </a>
-    `).join("");
+  const escapeHtml = value => String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+  const publicTools = tools => tools.filter(t => t.status === "implemented" || t.status === "experimental");
+  const imageTools = publicTools(imageConfig.TOOLS);
+  const audioTools = publicTools(audioConfig.TOOLS);
+  const catalogGroups = [
+    {
+      id: "core",
+      name: "Core tools",
+      description: "File, data, productivity, print and creator utilities.",
+      categories: [...new Set(TOOLS.map(t => t.cat))].map(name => ({
+        id: name,
+        name,
+        tools: TOOLS.filter(t => t.cat === name)
+      }))
+    },
+    {
+      id: "image",
+      name: "Image tools",
+      description: "Create, convert, resize, edit and inspect images privately.",
+      categories: imageConfig.CATEGORIES.map(category => ({
+        id: category.id,
+        name: category.name,
+        description: category.blurb,
+        tools: imageTools.filter(t => t.category === category.id)
+      })).filter(category => category.tools.length)
+    },
+    {
+      id: "audio",
+      name: "Audio tools",
+      description: "Convert, edit, record, clean and analyse audio locally.",
+      categories: audioConfig.CATEGORIES.map(category => ({
+        id: category.id,
+        name: category.name,
+        description: category.blurb,
+        tools: audioTools.filter(t => t.category === category.id)
+      })).filter(category => category.tools.length)
+    }
+  ];
+  const totalTools = TOOLS.length + imageTools.length + audioTools.length;
+  const categoryOptions = catalogGroups.flatMap(group => group.categories.map(category =>
+    `<option value="${escapeHtml(`${group.id}:${category.id}`)}">${escapeHtml(`${group.name.replace(/ tools$/, "")} · ${category.name}`)}</option>`
+  )).join("");
+  const catalogHtml = catalogGroups.map(group => {
+    const groupTools = group.categories.flatMap(category => category.tools);
+    const categoryHtml = group.categories.map(category => {
+      const categoryKey = `${group.id}:${category.id}`;
+      const cards = category.tools.map(tool => {
+        const slug = tool.slug || tool.id;
+        const name = tool.name;
+        const summary = tool.summary || tool.desc || tool.description || "";
+        const icon = tool.icon || (group.id === "image" ? "🖼️" : group.id === "audio" ? "🎧" : "🧰");
+        const status = tool.status || "implemented";
+        const statusLabel = status === "experimental" ? "Experimental" : "Ready";
+        const searchable = [
+          tool.id, tool.slug, tool.name, tool.keyword, tool.cat, tool.category,
+          tool.summary, tool.desc, tool.description, tool.seoDesc, tool.whatItDoes,
+          tool.handler, ...(tool.inputs || []), ...(tool.outputs || []),
+          ...(tool.tags || []), ...(tool.useCases || []), ...(tool.howTo || []),
+          ...(tool.howToUse || [])
+        ].filter(Boolean).join(" ");
+        const url = `/${group.id === "core" ? `tools/${slug}` : `${group.id}/${slug}`}/`;
+        return `<a class="tool-card catalog-tool-card" href="${escapeHtml(url)}" data-toolkit="${group.id}" data-category="${escapeHtml(categoryKey)}" data-search="${escapeHtml(searchable)}">
+          <span class="go" aria-hidden="true">&rarr;</span>
+          <div class="icon" aria-hidden="true">${escapeHtml(icon)}</div>
+          <h3>${escapeHtml(name)}</h3>
+          <p>${escapeHtml(summary)}</p>
+          <span class="catalog-card-meta"><span class="tag">${escapeHtml(category.name)}</span><span class="catalog-status catalog-status-${status}">${statusLabel}</span></span>
+        </a>`;
+      }).join("");
+      return `<section class="catalog-category" data-category-group="${escapeHtml(categoryKey)}">
+        <div class="catalog-category-head">
+          <div><h3>${escapeHtml(category.name)}</h3>${category.description ? `<p>${escapeHtml(category.description)}</p>` : ""}</div>
+          <span class="catalog-category-count">${category.tools.length} tools</span>
+        </div>
+        <div class="catalog-card-grid">${cards}</div>
+      </section>`;
+    }).join("");
+    return `<section class="catalog-toolkit" data-toolkit-group="${group.id}">
+      <div class="catalog-toolkit-head">
+        <div><h2>${escapeHtml(group.name)}</h2><p>${escapeHtml(group.description)}</p></div>
+        <span class="catalog-group-count">${groupTools.length} tools</span>
+      </div>
+      ${categoryHtml}
+    </section>`;
+  }).join("");
 
   const trustHtml = [
     { ico: "🔒", title: "Nothing leaves your device", body: "Files are processed in-browser with Web APIs — zero uploads, zero network transfer." },
@@ -504,7 +583,7 @@ function generateHomePageHtml() {
     </div>
   `).join("");
 
-  const imageWorking = imageConfig.TOOLS.filter(t => t.status === "implemented" || t.status === "experimental");
+  const imageWorking = imageTools;
   const imageFeatured = ["compress", "resize", "crop", "convert", "watermark", "metadata-viewer", "favicon", "qr-code"]
     .map(id => imageConfig.getTool(id))
     .filter(Boolean);
@@ -521,7 +600,7 @@ function generateHomePageHtml() {
     </div>
   </section>`;
 
-  const audioWorking = audioConfig.TOOLS.filter(t => t.status === "implemented" || t.status === "experimental");
+  const audioWorking = audioTools;
   const audioFeatured = ["convert", "trimmer", "compress", "joiner", "loudness-normalizer", "noise-reducer", "recorder", "waveform-image"]
     .map(id => audioConfig.getTool(id))
     .filter(Boolean);
@@ -628,34 +707,48 @@ function generateHomePageHtml() {
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · 30 core · 42 image · 48 audio · runs in your browser</span>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>120 tools · private in your browser</span>
       <h1>Fix everyday file jobs <span class="accent">without uploading a thing</span>.</h1>
       <p class="hero-lede">Free, client-side tools for crafters, creators and desk workers. Make Avery labels and sticker sheets, mirror T-shirt prints, repair subtitles, dedupe contacts and convert CSVs — all processed locally on your device.</p>
       <div class="hero-search">
-        <label class="sr-only" for="search">Search tools</label>
-        <input id="search" class="search" type="search" aria-label="Search 30 core tools" placeholder="Search 30 core tools (e.g., sticker sheet, avery labels, subtitle, csv, t-shirt)...">
+        <label class="sr-only" for="search">Search all ${totalTools} tools</label>
+        <input id="search" class="search" type="search" aria-label="Search all ${totalTools} tools" placeholder="Search all ${totalTools} tools by name, task, format or feature…">
+      </div>
+      <div class="catalog-controls" aria-label="Filter tools">
+        <label for="toolkit-filter">Toolkit
+          <select id="toolkit-filter">
+            <option value="all">All toolkits</option>
+            <option value="core">Core tools</option>
+            <option value="image">Image tools</option>
+            <option value="audio">Audio tools</option>
+          </select>
+        </label>
+        <select id="category-filter" class="sr-only" aria-hidden="true" tabindex="-1">
+          <option value="all">All categories</option>
+          ${categoryOptions}
+        </select>
+        <button class="catalog-clear" type="button" data-clear-filters>Clear filters</button>
       </div>
       <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
-        <span>Looking for a different kind of tool?</span>
-        <a href="/image/">Explore 42 image tools <span aria-hidden="true">→</span></a>
-        <a href="/audio/">Explore 48 audio tools <span aria-hidden="true">→</span></a>
+        <span>More tools:</span>
+        <a href="/image/">42 image tools <span aria-hidden="true">→</span></a>
+        <a href="/audio/">48 audio tools <span aria-hidden="true">→</span></a>
       </div>
-      <div id="cats" class="categories" role="group" aria-label="Filter tools by category">${catsHtml}</div>
+    </div>
+  </section>
+
+  <section class="tools-section" aria-label="Browser utility grid">
+    <div class="section-head">
+      <h2>All tools</h2>
+      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${totalTools}</strong> of ${totalTools} tools</p>
+    </div>
+    <div id="grid" class="catalog-groups">
+      ${catalogHtml}
     </div>
   </section>
 
   <section class="trust" aria-label="Why use ${SITE_NAME}">
     ${trustHtml}
-  </section>
-
-  <section class="tools-section" aria-label="Browser utility grid">
-    <div class="section-head">
-      <h2>Core tools</h2>
-      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${TOOLS.length}</strong> of ${TOOLS.length} core tools</p>
-    </div>
-    <div id="grid" class="grid">
-      ${gridHtml}
-    </div>
   </section>
 
   ${imageBandHtml}
@@ -915,6 +1008,14 @@ function generateManifestJson() {
       }
     ]
   }, null, 2);
+}
+
+if (process.argv.includes("--home-only")) {
+  const homeHtml = generateHomePageHtml();
+  fs.writeFileSync(path.join(baseDir, "index.html"), homeHtml, "utf8");
+  fs.writeFileSync(path.join(distDir, "index.html"), homeHtml, "utf8");
+  console.log("Generated the homepage catalog only.");
+  process.exit(0);
 }
 
 // 1. Build tool pages

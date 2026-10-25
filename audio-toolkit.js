@@ -1872,9 +1872,12 @@
     active = null;
   }
   function statusLabel(status) {
-    return ({ implemented: "Implemented and tested", experimental: "Experimental", deferred: "Deferred", unavailable: "Not available", blocked: "Blocked" })[status] || status;
+    return ({ implemented: "Ready", experimental: "Experimental", deferred: "Deferred", unavailable: "Not available", blocked: "Blocked" })[status] || status;
   }
   function statusClass(status) { return status === "implemented" ? "ok" : status === "experimental" ? "warn" : "muted"; }
+  function statusBadge(status) {
+    return status === "implemented" ? "" : '<em class="itk-badge ' + statusClass(status) + '">' + esc(statusLabel(status)) + "</em>";
+  }
 
   function optionHtml(opt, idx) {
     const id = "atk-opt-" + idx;
@@ -2077,7 +2080,7 @@
 
     app.innerHTML =
       '<section class="tool-head itk-head">' +
-        '<span class="eyebrow">Bench Audio Toolkit · <span class="itk-badge ' + statusClass(tool.status) + '">' + esc(statusLabel(tool.status)) + "</span></span>" +
+        '<span class="eyebrow">Bench Audio Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
         "<h1>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
         '<div class="itk-meta">' + (tool.inputs || []).slice(0, 4).map(function (f) { return '<span class="itk-chip">' + esc(f) + "</span>"; }).join("") +
@@ -2485,16 +2488,11 @@
 
   function hubInfoHtml(config) {
     const limits = config.LIMITS || {};
-    const notReady = (config.TOOLS || []).filter(function (t) { return t.status === "deferred" || t.status === "unavailable"; });
     return '<section class="toolbox itk-notice-box">' +
       '<h2>Status and limits</h2><p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: ' + esc(limits.maxFileBytes / (1024 * 1024)) + ' MB per file, ' + esc(limits.maxDurationSec / 60) + ' minutes per file, ' + esc(limits.maxFiles) + ' files per batch.</p>' +
       '<h2>How processing works</h2><p>Simple editing, analysis, recording and WAV export use the Web Audio API directly in the tab. Format conversion and complex filters (loudness normalisation, denoise, speed, EQ) use a WebAssembly build of FFmpeg that runs on your device. Either way, the audio bytes never leave your machine and Bench keeps no copy.</p>' +
       '<h2>Licences and source</h2><p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>' +
       '<p>Full attributions, exact version numbers and a written offer to supply the corresponding source code are published in <a href="/vendor/ffmpeg/NOTICE.txt">/vendor/ffmpeg/NOTICE.txt</a>. That notice names the upstream FFmpeg project and the ffmpeg.wasm packaging project, including their source repositories.</p>' +
-      (notReady.length ? '<h2>Not available yet</h2><p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p><div class="itk-status-list">' +
-        notReady.map(function (t) {
-          return '<div class="itk-status-row"><strong>' + esc(t.name) + '</strong><em class="itk-badge itk-badge-' + esc(t.status) + '">' + esc(statusLabel(t.status)) + '</em><p>' + esc(t.reason || '') + '</p></div>';
-        }).join("") + '</div>' : "") +
       '<p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>' +
       '</section>';
   }
@@ -2506,16 +2504,16 @@
     unmount();
     const config = cfg();
     // Landing directly on /audio/ keeps the richer server-rendered hub (status
-    // and limits, processing notes, GPL source offer, "not available" list).
+    // and limits, processing notes and GPL source offer).
     // Only rebuild the hub after client-side navigation, where #app is empty.
-    if (app.querySelector(".itk-status-list")) { setActiveNav(); return; }
+    if (app.querySelector(".itk-notice-box")) { setActiveNav(); return; }
     const PUBLIC = (config.TOOLS || []).filter(function (t) { return t.status === "implemented" || t.status === "experimental"; });
     const cats = (config.CATEGORIES || []).map(function (cat) {
       const tools = PUBLIC.filter(function (t) { return t.category === cat.id; });
       if (!tools.length) return "";
       return '<section class="itk-category"><div class="itk-category-head"><h2>' + esc(cat.name) + "</h2><p>" + esc(cat.blurb) + "</p></div>" +
         '<div class="itk-tool-grid">' + tools.map(function (t) {
-          return '<a class="itk-tool-card" href="/audio/' + esc(t.slug) + '/"><strong>' + esc(t.name) + "</strong><span>" + esc(t.summary) + "</span><em class=\"itk-badge itk-badge-" + esc(t.status) + '">' + esc(statusLabel(t.status)) + "</em></a>";
+          return '<a class="itk-tool-card" href="/audio/' + esc(t.slug) + '/"><strong>' + esc(t.name) + "</strong><span>" + esc(t.summary) + "</span>" + statusBadge(t.status) + "</a>";
         }).join("") + "</div></section>";
     }).join("");
     const impl = PUBLIC.filter(function (t) { return t.status === "implemented"; }).length;

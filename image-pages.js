@@ -26,7 +26,6 @@ const TAGLINE = site.TAGLINE || 'Fast, private browser utilities';
 const PUBLIC = C.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental');
 const IMPLEMENTED = PUBLIC.filter(t => t.status === 'implemented');
 const EXPERIMENTAL = PUBLIC.filter(t => t.status === 'experimental');
-const NOT_AVAILABLE = C.TOOLS.filter(t => t.status !== 'implemented' && t.status !== 'experimental');
 
 function esc(value) {
   return String(value == null ? '' : value)
@@ -44,7 +43,7 @@ function json(value) {
 
 function statusLabel(status) {
   return {
-    implemented: 'Implemented and tested',
+    implemented: 'Ready',
     experimental: 'Experimental',
     deferred: 'Deferred',
     unavailable: 'Unavailable',
@@ -54,6 +53,12 @@ function statusLabel(status) {
 
 function statusClass(status) {
   return 'itk-badge itk-badge-' + esc(status);
+}
+
+function statusBadge(status) {
+  return status === 'implemented'
+    ? ''
+    : `<em class="${statusClass(status)}">${esc(statusLabel(status))}</em>`;
 }
 
 function categoryName(id) {
@@ -161,7 +166,7 @@ function toolCard(tool) {
   return `<a class="itk-tool-card" href="/image/${esc(tool.slug)}/">
   <strong>${esc(tool.name)}</strong>
   <span>${esc(tool.summary)}</span>
-  <em class="${statusClass(tool.status)}">${esc(statusLabel(tool.status))}</em>
+  ${statusBadge(tool.status)}
 </a>`;
 }
 
@@ -178,13 +183,10 @@ function hubBody() {
 </section>`;
   }).join('\n');
 
-  const emptyCategories = C.CATEGORIES.filter(cat => !PUBLIC.some(t => t.category === cat.id))
-    .map(cat => `<li><strong>${esc(cat.name)}</strong> — no working tools in this category yet.</li>`).join('');
-
   return `<section class="tool-head itk-head">
   <span class="eyebrow">Bench Image Toolkit</span>
   <h1>Private image tools that run in your browser</h1>
-  <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
+  <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path.</p>
   <div class="itk-meta">
     <span class="itk-chip">${IMPLEMENTED.length} implemented tools</span>
     <span class="itk-chip">${EXPERIMENTAL.length} experimental</span>
@@ -201,12 +203,6 @@ ${categories}
 <section class="toolbox itk-notice-box">
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real pixel work but have limited validation; their results should be checked before important use. Limits: ${esc(C.LIMITS.maxFileBytes / (1024 * 1024))} MB per file, ${esc((C.LIMITS.maxPixels / 1e6).toFixed(0))} megapixels per image, ${esc(C.LIMITS.maxFiles)} files per batch, and a maximum dimension of ${esc(C.LIMITS.maxDimension)} px.</p>
-  ${emptyCategories ? `<p class="itk-muted">${emptyCategories}</p>` : ''}
-  <h2>Not available yet</h2>
-  <p>These entries exist so the catalogue stays honest. No page is generated for them and no upload control is offered.</p>
-  <div class="itk-status-list">
-    ${NOT_AVAILABLE.map(t => `<div class="itk-status-row"><strong>${esc(t.name)}</strong><em class="${statusClass(t.status)}">${esc(statusLabel(t.status))}</em><p>${esc(t.reason || 'Not available in this build.')}</p></div>`).join('\n')}
-  </div>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>`;
 }
@@ -279,7 +275,7 @@ function toolBody(tool) {
   return `<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/image/">Image toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">${esc(tool.name)}</span></nav>
 
 <section class="tool-head itk-head">
-  <span class="eyebrow">Bench Image Toolkit · <span class="${statusClass(tool.status)}">${esc(statusLabel(tool.status))}</span></span>
+  <span class="eyebrow">Bench Image Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
   <h1>${esc(tool.name)}</h1>
   <p>${esc(tool.summary)} <strong>Nothing is uploaded.</strong></p>
   <div class="itk-meta">
@@ -462,7 +458,6 @@ module.exports = {
   PUBLIC,
   IMPLEMENTED,
   EXPERIMENTAL,
-  NOT_AVAILABLE,
   generateHubHtml,
   generateStudioHtml,
   generateToolHtml,
