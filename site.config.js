@@ -1143,6 +1143,44 @@
   }
 ];
 
+  TOOLS.push({
+    "id": "pdf-page-manager",
+    "icon": "📑",
+    "cat": "Files & Data",
+    "name": "PDF Page Manager",
+    "keyword": "PDF Page Manager",
+    "desc": "Reorder, remove, duplicate, insert and merge PDF pages privately in your browser.",
+    "seoDesc": "Edit PDF page order locally: delete, duplicate, insert blank or image pages, and merge selected pages from another PDF. No uploads.",
+    "whatItDoes": "Builds a new PDF from the pages you choose, in the exact order shown in the editor. PDF.js reads documents and renders on-demand thumbnails; pdf-lib copies source pages, inserts blank pages and images, and writes the finished PDF entirely in browser memory. Original files are never modified or uploaded.",
+    "howToUse": [
+      "Choose or drop a PDF. Review its page count and select the pages you want to change.",
+      "Drag pages to reorder them, or use the accessible move buttons. Delete or duplicate selected pages, or undo and redo edits.",
+      "Insert pages from another PDF, append the whole document, add a blank page, or insert PNG/JPEG images. Choose the insertion point and page size.",
+      "Export the edited document, review the output page count, and download the validated PDF."
+    ],
+    "limits": "Accepts unencrypted PDFs up to 50 MB and 150 pages per source; output is limited to 250 pages. A second PDF is limited to 30 MB. Image insertion supports PNG and JPEG. Digital signatures are invalidated by any edit; links, annotations, bookmarks, form fields, metadata and other advanced PDF features may not be preserved. Always compare exported files when those features matter.",
+    "privacy": "PDF and image bytes are read and processed only in your browser. The editor does not call a PDF-processing API, send document contents to analytics, or persist files in localStorage or IndexedDB. Temporary thumbnails and output URLs are released when replaced or when you leave the page.",
+    "useCases": [
+      "Reorder or remove pages from reports, scanned documents and study materials.",
+      "Combine selected pages from a second PDF or append another document.",
+      "Add blank sheets or PNG/JPEG pages before printing or sharing a document."
+    ],
+    "faq": [
+      {
+        "q": "Are my documents uploaded?",
+        "a": "No. Reading, thumbnail rendering, page editing and PDF export happen locally in browser memory. The tool makes no document-processing network requests."
+      },
+      {
+        "q": "Can I edit an encrypted PDF?",
+        "a": "Password-protected PDFs are not supported. The tool reports that restriction without attempting to bypass document protection."
+      },
+      {
+        "q": "Will links, forms, bookmarks and signatures survive?",
+        "a": "Digital signatures are invalidated when a PDF is edited. Links, annotations, bookmarks, forms, metadata and other advanced features may be lost; this tool does not promise to preserve them."
+      }
+    ]
+  });
+
   return {
     PARENT_BRAND,
     PARENT_URL,

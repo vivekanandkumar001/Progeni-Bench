@@ -1,6 +1,6 @@
 # Progeni Bench - Production README
 
-Progeni Bench is a Progeni project delivering 120 browser utilities: 30 core tools, 42 image tools and 48 audio tools, with client-side processing.
+Progeni Bench is a Progeni project delivering 121 browser utilities: 31 core tools, 42 image tools and 48 audio tools, with client-side processing.
 
 ## 🚀 Quick Start
 
@@ -41,19 +41,20 @@ The `dist/` folder contains everything needed for static production hosting:
 
 - **index.html** - Single-page app root with fast category search
 - **app.js** - Client-side router + 30 tool processors (zero dependencies)
+- **PDF Page Manager** - Edit and combine PDF pages locally in your browser. See [PDF-PAGE-MANAGER.md](./PDF-PAGE-MANAGER.md).
 - **utils.js** - Pure utility helper module (XSS escaping, CSV parsing, SRT parser)
 - **site.config.js** - Single source of truth for site configuration & brand model
 - **styles.css** - Custom responsive styling and CSS variables
 - **_headers** - Strict Content-Security-Policy & security headers
 - **_redirects** - Netlify 404 handler
 - **manifest.webmanifest** - PWA configuration
-- **sitemap.xml** - 120 crawlable URLs for `bench.progeni.live` (5 core + 30 legacy tools + 41 image + 44 audio; experimental pages are `noindex` and excluded)
+- **sitemap.xml** - 121 crawlable URLs for `bench.progeni.live` (5 core + 31 legacy tools + 41 image + 44 audio; experimental pages are `noindex` and excluded)
 - **robots.txt** - Crawler directives
 - **about/index.html** - About page
 - **privacy/index.html** - Privacy policy
 - **terms/index.html** - Terms of service
 - **contact/index.html** - Contact & support page
-- **tools/** - 30 pre-rendered static tool pages with Schema.org JSON-LD
+- **tools/** - 31 pre-rendered static tool pages with Schema.org JSON-LD
 - **image/** - 44 pre-rendered Bench Image Toolkit pages (hub, studio, and 39 tools + experimental pages)
 - **audio/** - 49 pre-rendered Bench Audio Toolkit pages (hub and 48 public tools)
 - **image-tools.config.js** - Image toolkit registry (source of truth for tools, SEO and status)

@@ -368,8 +368,8 @@ const siteConfigModule = require(path.join(ROOT, 'site.config.js'));
 const tConfig = siteConfigModule.TOOLS;
 const appImportsConfig = appContent.includes('site.config.js') && appContent.includes('TOOLS');
 const buildImportsConfig = buildSeo.includes('site.config.js') && buildSeo.includes('TOOLS');
-if (tConfig && tConfig.length === 30 && appImportsConfig && buildImportsConfig) {
-  addResult('C21', 'PASS', '30 tools defined in site.config.js and shared across app.js and build_seo_pages.js');
+if (tConfig && tConfig.length === 31 && appImportsConfig && buildImportsConfig) {
+  addResult('C21', 'PASS', '31 tools defined in site.config.js and shared across app.js and build_seo_pages.js');
 } else {
   addResult('C21', 'FAIL', `config tools=${tConfig ? tConfig.length : 0}, appImportsConfig=${appImportsConfig}, buildImportsConfig=${buildImportsConfig}`);
 }
@@ -732,8 +732,8 @@ if (fs.existsSync(toolsDistDir)) {
 toolWordCounts.sort((a, b) => a.count - b.count);
 const lowest3 = toolWordCounts.slice(0, 3).map(t => `${t.tool}=${t.count}`).join(', ');
 const c39Failed = toolWordCounts.filter(t => t.count < 120);
-if (c39Failed.length === 0 && toolWordCounts.length === 30) {
-  addResult('C39', 'PASS', `all 30 tools >= 120 unique words; lowest: ${lowest3}`);
+if (c39Failed.length === 0 && toolWordCounts.length === tConfig.length) {
+  addResult('C39', 'PASS', `all registered tools >= 120 unique words; lowest: ${lowest3}`);
 } else {
   addResult('C39', 'FAIL', `below 120: ${c39Failed.map(t => `${t.tool}=${t.count}`).join(', ')}`);
 }
