@@ -175,6 +175,8 @@
 
   TOOLS.push(T({
     id: "convert",
+
+    icon: "🔄",
     name: "Audio Converter",
     category: "convert",
     handler: "convert",
@@ -207,6 +209,8 @@
 
   TOOLS.push(T({
     id: "compress",
+
+    icon: "🗜️",
     name: "Audio Compressor",
     category: "convert",
     handler: "compressAudio",
@@ -233,6 +237,8 @@
 
   TOOLS.push(T({
     id: "to-wav",
+
+    icon: "🌊",
     name: "Audio to WAV",
     category: "convert",
     handler: "toWav",
@@ -257,6 +263,8 @@
 
   TOOLS.push(T({
     id: "to-mp3",
+
+    icon: "🎵",
     name: "Audio to MP3",
     category: "convert",
     handler: "toMp3",
@@ -281,6 +289,8 @@
 
   TOOLS.push(T({
     id: "to-flac",
+
+    icon: "🎼",
     name: "Audio to FLAC",
     category: "convert",
     handler: "toFlac",
@@ -305,6 +315,8 @@
 
   TOOLS.push(T({
     id: "to-m4a",
+
+    icon: "📀",
     name: "Audio to M4A (AAC)",
     category: "convert",
     handler: "toM4a",
@@ -325,6 +337,8 @@
 
   TOOLS.push(T({
     id: "to-ogg",
+
+    icon: "🎶",
     name: "Audio to OGG / Opus",
     category: "convert",
     handler: "toOgg",
@@ -348,6 +362,8 @@
 
   TOOLS.push(T({
     id: "to-aiff",
+
+    icon: "💾",
     name: "Audio to AIFF",
     category: "convert",
     handler: "toAiff",
@@ -366,6 +382,8 @@
 
   TOOLS.push(T({
     id: "audio-to-base64",
+
+    icon: "🔤",
     name: "Audio to Base64",
     category: "developer",
     handler: "audioToBase64",
@@ -387,6 +405,8 @@
 
   TOOLS.push(T({
     id: "base64-to-audio",
+
+    icon: "🔡",
     name: "Base64 to Audio",
     category: "developer",
     handler: "base64ToAudio",
@@ -409,6 +429,8 @@
 
   TOOLS.push(T({
     id: "ringtone-maker",
+
+    icon: "🔔",
     name: "Ringtone Maker",
     category: "convert",
     handler: "ringtone",
@@ -432,6 +454,8 @@
 
   TOOLS.push(T({
     id: "batch-rename",
+
+    icon: "🔢",
     name: "Audio Batch Rename",
     category: "developer",
     handler: "batchRename",
@@ -456,6 +480,8 @@
 
   TOOLS.push(T({
     id: "audio-zip",
+
+    icon: "📦",
     name: "Audio to ZIP",
     category: "developer",
     handler: "audioZip",
@@ -477,6 +503,8 @@
 
   TOOLS.push(T({
     id: "trimmer",
+
+    icon: "✂️",
     name: "Audio Trimmer",
     category: "edit",
     handler: "trim",
@@ -506,6 +534,8 @@
 
   TOOLS.push(T({
     id: "silence-remover",
+
+    icon: "🤫",
     name: "Silence Remover",
     category: "clean",
     handler: "silenceRemove",
@@ -534,6 +564,8 @@
 
   TOOLS.push(T({
     id: "joiner",
+
+    icon: "🔗",
     name: "Audio Joiner",
     category: "edit",
     handler: "join",
@@ -558,6 +590,8 @@
 
   TOOLS.push(T({
     id: "splitter",
+
+    icon: "➗",
     name: "Audio Splitter",
     category: "edit",
     handler: "split",
@@ -586,6 +620,8 @@
 
   TOOLS.push(T({
     id: "fade",
+
+    icon: "🌗",
     name: "Fade In / Out",
     category: "edit",
     handler: "fade",
@@ -608,6 +644,8 @@
 
   TOOLS.push(T({
     id: "reverse",
+
+    icon: "⏪",
     name: "Reverse Audio",
     category: "edit",
     handler: "reverse",
@@ -626,6 +664,8 @@
 
   TOOLS.push(T({
     id: "speed",
+
+    icon: "⏩",
     name: "Change Speed",
     category: "edit",
     handler: "speed",
@@ -649,6 +689,8 @@
 
   TOOLS.push(T({
     id: "pitch",
+
+    icon: "🎹",
     name: "Pitch Shifter",
     category: "edit",
     handler: "pitch",
@@ -674,6 +716,8 @@
 
   TOOLS.push(T({
     id: "volume-adjust",
+
+    icon: "🔊",
     name: "Volume & Normalise",
     category: "clean",
     handler: "volumeNormalize",
@@ -702,6 +746,8 @@
 
   TOOLS.push(T({
     id: "loop-maker",
+
+    icon: "🔁",
     name: "Loop Maker",
     category: "edit",
     handler: "loop",
@@ -726,6 +772,8 @@
 
   TOOLS.push(T({
     id: "crossfade",
+
+    icon: "🔀",
     name: "Crossfade Editor",
     category: "edit",
     handler: "crossfade",
@@ -748,6 +796,8 @@
 
   TOOLS.push(T({
     id: "channel-tools",
+
+    icon: "🎛️",
     name: "Stereo & Channel Tools",
     category: "edit",
     handler: "channels",
@@ -777,6 +827,8 @@
 
   TOOLS.push(T({
     id: "noise-reducer",
+
+    icon: "🧹",
     name: "Noise Reducer",
     category: "clean",
     handler: "denoise",
@@ -804,6 +856,8 @@
 
   TOOLS.push(T({
     id: "voice-enhancer",
+
+    icon: "🗣️",
     name: "Voice Enhancer",
     category: "clean",
     handler: "voiceEnhance",
@@ -831,6 +885,8 @@
 
   TOOLS.push(T({
     id: "equalizer",
+
+    icon: "🎚️",
     name: "Bass, Treble & EQ",
     category: "clean",
     handler: "equalizer",
@@ -855,6 +911,8 @@
 
   TOOLS.push(T({
     id: "loudness-normalizer",
+
+    icon: "📈",
     name: "Loudness Normaliser (LUFS)",
     category: "clean",
     handler: "loudnorm",
@@ -884,6 +942,8 @@
 
   TOOLS.push(T({
     id: "clipping-detector",
+
+    icon: "⚠️",
     name: "Clipping Detector",
     category: "metadata",
     handler: "clipping",
@@ -905,6 +965,8 @@
 
   TOOLS.push(T({
     id: "silence-detector",
+
+    icon: "🤐",
     name: "Silence Detector",
     category: "metadata",
     handler: "silenceDetect",
@@ -928,6 +990,8 @@
 
   TOOLS.push(T({
     id: "recorder",
+
+    icon: "🎙️",
     name: "Voice Recorder",
     category: "record",
     handler: "record",
@@ -957,6 +1021,8 @@
 
   TOOLS.push(T({
     id: "mic-check",
+
+    icon: "🎤",
     name: "Microphone Check",
     category: "record",
     handler: "micCheck",
@@ -979,6 +1045,8 @@
 
   TOOLS.push(T({
     id: "stereo-test",
+
+    icon: "🎧",
     name: "Stereo Channel Test",
     category: "record",
     handler: "stereoTest",
@@ -1004,6 +1072,8 @@
 
   TOOLS.push(T({
     id: "tone-generator",
+
+    icon: "〰️",
     name: "Tone Generator",
     category: "music",
     handler: "tone",
@@ -1028,6 +1098,8 @@
 
   TOOLS.push(T({
     id: "noise-generator",
+
+    icon: "📻",
     name: "Noise Generator",
     category: "music",
     handler: "noise",
@@ -1051,6 +1123,8 @@
 
   TOOLS.push(T({
     id: "metronome",
+
+    icon: "🥁",
     name: "Metronome",
     category: "music",
     handler: "metronome",
@@ -1073,6 +1147,8 @@
 
   TOOLS.push(T({
     id: "bpm-detector",
+
+    icon: "⏱️",
     name: "BPM & Key Detector",
     category: "music",
     handler: "bpm",
@@ -1097,6 +1173,8 @@
 
   TOOLS.push(T({
     id: "spectrogram",
+
+    icon: "🌈",
     name: "Spectrogram / Spectrum Analyser",
     category: "music",
     handler: "spectrogram",
@@ -1118,6 +1196,8 @@
 
   TOOLS.push(T({
     id: "waveform-image",
+
+    icon: "📉",
     name: "Waveform Image",
     category: "developer",
     handler: "waveformImage",
@@ -1144,6 +1224,8 @@
 
   TOOLS.push(T({
     id: "metadata-viewer",
+
+    icon: "🏷️",
     name: "Audio Metadata Viewer",
     category: "metadata",
     handler: "metadata",
@@ -1164,6 +1246,8 @@
 
   TOOLS.push(T({
     id: "id3-editor",
+
+    icon: "✏️",
     name: "ID3 Tag Editor",
     category: "metadata",
     handler: "id3Edit",
@@ -1193,6 +1277,8 @@
 
   TOOLS.push(T({
     id: "loudness-analyzer",
+
+    icon: "📊",
     name: "Loudness & Peak Analyser",
     category: "metadata",
     handler: "loudnessAnalyze",
@@ -1215,6 +1301,8 @@
 
   TOOLS.push(T({
     id: "integrity-check",
+
+    icon: "✅",
     name: "Audio Integrity Check",
     category: "metadata",
     handler: "integrity",
@@ -1235,6 +1323,8 @@
 
   TOOLS.push(T({
     id: "duplicate-finder",
+
+    icon: "👯",
     name: "Duplicate Audio Finder",
     category: "metadata",
     handler: "audioDedupe",
@@ -1256,6 +1346,8 @@
 
   TOOLS.push(T({
     id: "mime-checker",
+
+    icon: "🧾",
     name: "Audio MIME & Signature Checker",
     category: "developer",
     handler: "mimeCheck",
@@ -1274,6 +1366,8 @@
 
   TOOLS.push(T({
     id: "player-generator",
+
+    icon: "▶️",
     name: "HTML Audio Player Generator",
     category: "developer",
     handler: "playerSnippet",
@@ -1298,6 +1392,8 @@
 
   TOOLS.push(T({
     id: "rss-validator",
+
+    icon: "📡",
     name: "Podcast RSS Enclosure Validator",
     category: "developer",
     handler: "rssValidate",

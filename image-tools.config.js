@@ -600,6 +600,8 @@
 
   TOOLS.push(T({
     id: "compress",
+
+    icon: "🗜️",
     name: "Image Compressor",
     category: "compress",
     handler: "compress",
@@ -621,6 +623,8 @@
 
   TOOLS.push(T({
     id: "compress-to-size",
+
+    icon: "🎯",
     name: "Compress to Target Size",
     category: "compress",
     handler: "targetSize",
@@ -642,6 +646,8 @@
 
   TOOLS.push(T({
     id: "resize",
+
+    icon: "📏",
     name: "Resize Image",
     category: "resize",
     handler: "resize",
@@ -662,6 +668,8 @@
 
   TOOLS.push(T({
     id: "crop",
+
+    icon: "✂️",
     name: "Crop Image",
     category: "resize",
     handler: "crop",
@@ -682,6 +690,8 @@
 
   TOOLS.push(T({
     id: "application-photo",
+
+    icon: "🪪",
     name: "Application Photo & Signature Presets",
     category: "resize",
     handler: "presetCrop",
@@ -702,6 +712,8 @@
 
   TOOLS.push(T({
     id: "social-resize",
+
+    icon: "📱",
     name: "Social Media & YouTube Image Sizes",
     category: "resize",
     handler: "presetCrop",
@@ -723,6 +735,8 @@
 
   TOOLS.push(T({
     id: "dpi",
+
+    icon: "🔍",
     name: "DPI Inspector & Setter",
     category: "resize",
     handler: "dpi",
@@ -745,6 +759,8 @@
 
   TOOLS.push(T({
     id: "convert",
+
+    icon: "🔄",
     name: "Image Converter",
     category: "convert",
     handler: "convert",
@@ -779,6 +795,8 @@
 
   TOOLS.push(T({
     id: "image-to-pdf",
+
+    icon: "📄",
     name: "Image to PDF",
     category: "convert",
     handler: "imageToPdf",
@@ -799,6 +817,8 @@
 
   TOOLS.push(T({
     id: "base64",
+
+    icon: "🔤",
     name: "Base64 & Data URI Converter",
     category: "convert",
     handler: "base64",
@@ -823,6 +843,8 @@
 
   TOOLS.push(T({
     id: "transform",
+
+    icon: "🔃",
     name: "Rotate, Flip & Straighten",
     category: "edit",
     handler: "transform",
@@ -843,6 +865,8 @@
 
   TOOLS.push(T({
     id: "adjust",
+
+    icon: "🎚️",
     name: "Colour Adjustments",
     category: "edit",
     handler: "adjust",
@@ -863,6 +887,8 @@
 
   TOOLS.push(T({
     id: "blur-redact",
+
+    icon: "🕶️",
     name: "Blur, Pixelate & Redact",
     category: "edit",
     handler: "redact",
@@ -883,6 +909,8 @@
 
   TOOLS.push(T({
     id: "annotate",
+
+    icon: "✍️",
     name: "Text, Captions & Annotations",
     category: "edit",
     handler: "annotate",
@@ -903,6 +931,8 @@
 
   TOOLS.push(T({
     id: "border-padding",
+
+    icon: "🖼️",
     name: "Border, Padding & Rounded Corners",
     category: "edit",
     handler: "border",
@@ -923,6 +953,8 @@
 
   TOOLS.push(T({
     id: "watermark",
+
+    icon: "💧",
     name: "Visible Watermark",
     category: "edit",
     handler: "watermark",
@@ -943,6 +975,8 @@
 
   TOOLS.push(T({
     id: "meme",
+
+    icon: "😂",
     name: "Meme Generator",
     category: "edit",
     handler: "meme",
@@ -962,6 +996,8 @@
 
   TOOLS.push(T({
     id: "collage",
+
+    icon: "🧩",
     name: "Collage Maker",
     category: "edit",
     handler: "collage",
@@ -982,6 +1018,8 @@
 
   TOOLS.push(T({
     id: "splitter",
+
+    icon: "🔲",
     name: "Image Splitter & Grid Cutter",
     category: "edit",
     handler: "split",
@@ -1002,6 +1040,8 @@
 
   TOOLS.push(T({
     id: "merge",
+
+    icon: "↔️",
     name: "Side-by-Side Image Merge",
     category: "edit",
     handler: "merge",
@@ -1022,6 +1062,8 @@
 
   TOOLS.push(T({
     id: "compare",
+
+    icon: "🆚",
     name: "Image Compare & Similarity",
     category: "edit",
     handler: "compare",
@@ -1042,6 +1084,8 @@
 
   TOOLS.push(T({
     id: "product-shadow",
+
+    icon: "🛍️",
     name: "Product Photo Shadow & Background",
     category: "edit",
     handler: "productShadow",
@@ -1064,6 +1108,8 @@
 
   TOOLS.push(T({
     id: "scan-cleanup",
+
+    icon: "🧹",
     name: "Scan Cleanup & Deskew",
     category: "documents",
     handler: "scanCleanup",
@@ -1087,6 +1133,8 @@
 
   TOOLS.push(T({
     id: "metadata-viewer",
+
+    icon: "🏷️",
     name: "Metadata & EXIF Viewer",
     category: "metadata",
     handler: "inspect",
@@ -1107,6 +1155,8 @@
 
   TOOLS.push(T({
     id: "strip-metadata",
+
+    icon: "🧽",
     name: "EXIF & GPS Remover",
     category: "metadata",
     handler: "stripMetadata",
@@ -1134,6 +1184,8 @@
 
   TOOLS.push(T({
     id: "image-hash",
+
+    icon: "#️⃣",
     name: "Image Hash Generator",
     category: "metadata",
     handler: "hash",
@@ -1161,6 +1213,8 @@
 
   TOOLS.push(T({
     id: "duplicate-finder",
+
+    icon: "👯",
     name: "Duplicate & Similar Photo Finder",
     category: "metadata",
     handler: "dedupe",
@@ -1185,6 +1239,8 @@
 
   TOOLS.push(T({
     id: "palette",
+
+    icon: "🎨",
     name: "Colour Palette & Histogram",
     category: "metadata",
     handler: "palette",
@@ -1210,6 +1266,8 @@
 
   TOOLS.push(T({
     id: "favicon",
+
+    icon: "⭐",
     name: "Favicon & App Icon Generator",
     category: "create",
     handler: "favicon",
@@ -1229,6 +1287,8 @@
 
   TOOLS.push(T({
     id: "og-image",
+
+    icon: "📣",
     name: "Open Graph Image Generator",
     category: "create",
     handler: "ogImage",
@@ -1248,6 +1308,8 @@
 
   TOOLS.push(T({
     id: "qr-code",
+
+    icon: "🔳",
     name: "QR Code Generator",
     category: "create",
     handler: "qrCode",
@@ -1268,6 +1330,8 @@
 
   TOOLS.push(T({
     id: "qr-decode",
+
+    icon: "📷",
     name: "QR Code Reader",
     category: "create",
     handler: "qrDecode",
@@ -1288,6 +1352,8 @@
 
   TOOLS.push(T({
     id: "barcode",
+
+    icon: "🧾",
     name: "Barcode Generator",
     category: "create",
     handler: "barcode",
@@ -1308,6 +1374,8 @@
 
   TOOLS.push(T({
     id: "svg-optimizer",
+
+    icon: "🧬",
     name: "SVG Optimiser & Validator",
     category: "create",
     handler: "svgOptimize",
@@ -1329,6 +1397,8 @@
 
   TOOLS.push(T({
     id: "placeholder",
+
+    icon: "⬜",
     name: "Image Placeholder Generator",
     category: "create",
     handler: "placeholder",
@@ -1349,6 +1419,8 @@
 
   TOOLS.push(T({
     id: "srcset",
+
+    icon: "🖥️",
     name: "Responsive Image srcset Generator",
     category: "create",
     handler: "srcset",
@@ -1371,6 +1443,8 @@
 
   TOOLS.push(T({
     id: "gif-studio",
+
+    icon: "🎬",
     name: "GIF Studio: Create & Extract",
     category: "animation",
     handler: "gif",
@@ -1392,6 +1466,8 @@
 
   TOOLS.push(T({
     id: "sprite-sheet",
+
+    icon: "🎞️",
     name: "Sprite Sheet Generator",
     category: "animation",
     handler: "spriteSheet",
@@ -1412,6 +1488,8 @@
 
   TOOLS.push(T({
     id: "batch-rename",
+
+    icon: "🔢",
     name: "Batch Rename & Export",
     category: "animation",
     handler: "batchRename",
@@ -1434,6 +1512,8 @@
 
   TOOLS.push(T({
     id: "inspection",
+
+    icon: "🔬",
     name: "Image Inspector & Diagnostics",
     category: "diagnostics",
     handler: "diagnose",
@@ -1454,6 +1534,8 @@
 
   TOOLS.push(T({
     id: "recovery",
+
+    icon: "🩹",
     name: "Corruption Recovery (Best Effort)",
     category: "diagnostics",
     handler: "recover",
@@ -1478,6 +1560,8 @@
 
   TOOLS.push(T({
     id: "photo-signature",
+
+    icon: "🖊️",
     name: "Photo & Signature Composition",
     category: "resize",
     handler: "composePhotoSignature",

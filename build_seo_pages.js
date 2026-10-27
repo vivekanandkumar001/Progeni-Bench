@@ -363,7 +363,7 @@ ${seo.headMeta({ title, description: tool.seoDesc, canonicalUrl, imageAlt: `${SI
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
     <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-    <h1>${tool.keyword}</h1>
+    <h1><span class="tool-head-icon" aria-hidden="true">${tool.icon || '🧰'}</span>${tool.keyword}</h1>
     <p>${tool.desc} ${isPdfTranslator
       ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
       : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
@@ -580,7 +580,7 @@ function generateHomePageHtml() {
       <p class="image-band-actions"><a class="btn btn-lg" href="/image/">Open the image toolkit</a> <a class="btn secondary" href="/image/studio/">Try Image Studio</a></p>
     </div>
     <div class="image-band-grid">
-      ${imageFeatured.map(t => `<a class="image-band-card" href="/image/${t.slug}/"><strong>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+      ${imageFeatured.map(t => `<a class="image-band-card" href="/image/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${t.icon || '🖼️'}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
     </div>
   </section>`;
 
@@ -597,7 +597,7 @@ function generateHomePageHtml() {
       <p class="image-band-actions"><a class="btn btn-lg" href="/audio/">Open the audio toolkit</a> <a class="btn secondary" href="/audio/recorder/">Try the voice recorder</a></p>
     </div>
     <div class="image-band-grid">
-      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${t.icon || '🎧'}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
     </div>
   </section>`;
 

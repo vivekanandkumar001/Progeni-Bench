@@ -269,7 +269,7 @@ function layout({ tool, body }) {
     </nav>
     <section class="tool-head">
       <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-      <h1>${esc(tool.keyword || tool.name)}</h1>
+      <h1><span class="tool-head-icon" aria-hidden="true">${esc(tool.icon || "🧰")}</span>${esc(tool.keyword || tool.name)}</h1>
       <p>${esc(tool.desc)} ${hasTranslationBackend
         ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
         : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>

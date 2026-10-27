@@ -2718,7 +2718,7 @@
       "<h2>Limits &amp; considerations</h2><p>" + esc(tool.limitations || "") + "</p>" +
       "<h2>Privacy &amp; security</h2><p>" + esc(tool.privacy || "") + "</p>" +
       (tool.faq && tool.faq.length ? "<h2>Frequently asked questions</h2><div class=\"faq-list\">" + tool.faq.map(f => '<div class="faq-item"><strong>' + esc(f.q) + "</strong><p>" + esc(f.a) + "</p></div>").join("") + "</div>" : "") +
-      (related.length ? "<h2>Related image tools</h2><div class=\"tool-links\">" + related.map(t => '<a href="/image/' + esc(t.slug) + '/">' + esc(t.name) + "</a>").join("") + "</div>" : "") +
+      (related.length ? "<h2>Related image tools</h2><div class=\"tool-links\">" + related.map(t => '<a href="/image/' + esc(t.slug) + '/">' + esc(t.icon || "🖼️") + " " + esc(t.name) + "</a>").join("") + "</div>" : "") +
       "</section>";
   }
 
@@ -2745,7 +2745,7 @@
     }
     setMeta(tool);
     if (tool.status === "unavailable" || tool.status === "deferred" || tool.status === "blocked") {
-      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
+      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1><span class="tool-head-icon" aria-hidden="true">' + esc(tool.icon || "🖼️") + '</span>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
         '<section class="toolbox itk-panel"><div class="itk-status warn"><strong>Status: ' + esc(statusLabel(tool.status)) + "</strong><p>" + esc(tool.reason || "This tool is not available.") + "</p></div>" +
         '<p><a class="btn" href="/image/">Browse working image tools</a></p></section>' + seoHtml(tool);
       return;
@@ -2763,7 +2763,7 @@
     app.innerHTML =
       '<section class="tool-head itk-head">' +
         '<span class="eyebrow">Bench Image Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
-        "<h1>" + esc(tool.name) + "</h1>" +
+        "<h1><span class=\"tool-head-icon\" aria-hidden=\"true\">" + esc(tool.icon || "🖼️") + "</span>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
         '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
           '<span class="itk-chip">up to ' + (tool.maxFiles || 1) + " file" + ((tool.maxFiles || 1) === 1 ? "" : "s") + "</span>" +
@@ -2970,7 +2970,7 @@
         if (!publicList.length) return "";
         return '<section class="itk-category"><div class="itk-category-head"><h2>' + esc(cat.name) + "</h2><p>" + esc(cat.blurb) + "</p></div>" +
           '<div class="itk-tool-grid">' + publicList.map(function (t) {
-            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span>' + statusBadge(t.status) + "</a>";
+            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong><span class="itk-card-icon" aria-hidden="true">' + esc(t.icon || "🖼️") + '</span>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span>' + statusBadge(t.status) + "</a>";
           }).join("") + "</div>" +
           "</section>";
       }).join("") + "</section>" +

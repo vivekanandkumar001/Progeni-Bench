@@ -157,7 +157,7 @@ ${body}
       ${C.CATEGORIES.map(cat => {
         const tools = PUBLIC.filter(t => t.category === cat.id);
         if (!tools.length) return '';
-        return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/audio/${esc(t.slug)}/">${esc(t.name)}</a></li>`).join('')}</ul></div>`;
+        return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/audio/${esc(t.slug)}/">${esc(t.icon || '🎧')} ${esc(t.name)}</a></li>`).join('')}</ul></div>`;
       }).join('')}
     </div>
   </details>
@@ -172,7 +172,7 @@ ${body}
 
 function toolCard(tool) {
   return `<a class="itk-tool-card" href="/audio/${esc(tool.slug)}/">
-  <strong>${esc(tool.name)}</strong>
+  <strong><span class="itk-card-icon" aria-hidden="true">${esc(tool.icon || '🎧')}</span>${esc(tool.name)}</strong>
   <span>${esc(tool.summary)}</span>
   ${statusBadge(tool.status)}
 </a>`;
@@ -274,7 +274,7 @@ function toolBody(tool) {
 
 <section class="tool-head itk-head">
   <span class="eyebrow">Bench Audio Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
-  <h1>${esc(tool.name)}</h1>
+  <h1><span class="tool-head-icon" aria-hidden="true">${esc(tool.icon || '🎧')}</span>${esc(tool.name)}</h1>
   <p>${esc(tool.summary)} <strong>Nothing is uploaded.</strong></p>
   <div class="itk-meta">
     ${(tool.inputs || []).slice(0, 5).map(f => `<span class="itk-chip">${esc(f)}</span>`).join('')}
@@ -302,7 +302,7 @@ ${fallback}
   <h2>Privacy &amp; security</h2>
   <p>${esc(tool.privacy || 'Processing runs locally in your browser. Nothing is uploaded.')}</p>
   ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(f.a)}</p></div>`).join('')}</div>` : ''}
-  ${related.length ? `<h2>Related audio tools</h2><div class="tool-links">${related.map(t => `<a href="/audio/${esc(t.slug)}/">${esc(t.name)}</a>`).join('')}</div>` : ''}
+  ${related.length ? `<h2>Related audio tools</h2><div class="tool-links">${related.map(t => `<a href="/audio/${esc(t.slug)}/">${esc(t.icon || '🎧')} ${esc(t.name)}</a>`).join('')}</div>` : ''}
 </section>`;
 }
 
