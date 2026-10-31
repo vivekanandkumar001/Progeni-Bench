@@ -537,9 +537,9 @@ nav a.active{
 .catalog-tool-card{
   position:relative;
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   gap:12px;
-  padding:12px 14px;
+  padding:14px;
   background:var(--card);
   border:1px solid var(--line);
   border-radius:10px;
@@ -547,7 +547,7 @@ nav a.active{
   color:inherit;
   box-shadow:none;
   min-height:76px;
-  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  transition:border-color .16s ease, box-shadow .16s ease, background .16s ease, transform .16s ease;
 }
 .catalog-tool-card::before{
   display:none;
@@ -558,34 +558,39 @@ nav a.active{
   top:50%;
   transform:translateY(-50%);
   color:var(--muted);
-  opacity:.6;
+  opacity:.55;
+  transition:opacity .16s ease, color .16s ease;
 }
 .catalog-tool-card:hover{
   transform:none;
   border-color:#c7d2fe;
-  box-shadow:0 1px 0 rgba(29,78,216,.02);
   background:#fbfdff;
 }
 .catalog-tool-card:hover .go{opacity:1;color:var(--brand)}
+.catalog-tool-card:focus-visible{
+  outline:3px solid rgba(29,104,221,.5);
+  outline-offset:2px;
+}
 .catalog-tool-card .icon{
   width:36px;
   height:36px;
   font-size:18px;
-  margin:2px 0 0;
+  margin:0;
   border-radius:10px;
   flex:0 0 auto;
-  background:var(--brand-tint);
-  border:1px solid var(--eyebrow-bd);
-  box-shadow:none;
+  background:linear-gradient(180deg,#f4f8ff 0%,var(--brand-tint) 100%);
+  border:1px solid var(--fk-line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
 }
 .catalog-tool-card h3{
   margin:0;
   font-size:14.5px;
   font-weight:700;
-  line-height:1.4;
+  line-height:1.35;
+  color:var(--text);
 }
 .catalog-tool-card p{
-  margin:4px 0 0;
+  margin:3px 0 0;
   font-size:12.5px;
   color:var(--muted);
   line-height:1.5;
