@@ -24,12 +24,12 @@
   <meta name="twitter:image" content="https://bench.progeni.live/assets/og-image.png">
   <meta name="twitter:image:alt" content="Progeni Bench — private browser audio tools">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico?v=806dd25f" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png?v=806dd25f">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png?v=806dd25f">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=806dd25f">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=806dd25f">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=806dd25f">
+  <link rel="icon" href="/favicon.ico?v=0b940904" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png?v=0b940904">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png?v=0b940904">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="https://bench.progeni.live/audio/player-generator/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -40,7 +40,7 @@
 <header class="topbar" role="banner">
   <div class="topbar-row">
     <a class="brand" href="/" aria-label="Progeni Bench home">
-      <img src="/assets/favicon.svg?v=806dd25f" alt="" width="32" height="32" class="brand-logo">
+      <img src="/assets/favicon.svg?v=0b940904" alt="" width="32" height="32" class="brand-logo">
       <span class="brand-name">Progeni Bench</span>
     </a>
     <div class="topbar-search" id="header-search" role="search">
@@ -56,9 +56,22 @@
       <p class="sr-only" id="search-status" role="status" aria-live="polite"></p>
     </div>
     <nav id="primary-nav" aria-label="Primary navigation">
-      <a href="/">All tools</a><a href="/image/">Image</a><a href="/audio/" class="active" aria-current="page">Audio</a><a href="/about/">About</a>
+      <a href="/">All tools</a><a href="/image/">Images</a><a href="/audio/" class="active" aria-current="page">Audio &amp; Video</a><a href="/about/">About</a>
     </nav>
-    <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav">
+      <span></span><span></span><span></span>
+    </button>
+    
+    <div class="mobile-nav" id="mobile-nav">
+      <button class="mobile-nav-close" aria-label="Close menu">&times;</button>
+      <ul>
+        <li><a href="/">All tools</a></li>
+        <li><a href="/image/">Images</a></li>
+        <li><a href="/audio/" class="active">Audio & Video</a></li>
+        <li><a href="/about/">About</a></li>
+      </ul>
+    </div>
+  
   </div>
 </header>
 

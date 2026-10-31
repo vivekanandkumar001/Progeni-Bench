@@ -24,10 +24,14 @@ const toolCounts = {
 };
 toolCounts.all = toolCounts.core + toolCounts.image + toolCounts.audio;
 
+/**
+ * Top navigation items – matching existing routed directories.
+ * The mobile hamburger menu shows all top-level pages.
+ */
 const NAV_ITEMS = [
   { key: 'home', href: '/', label: 'All tools' },
-  { key: 'image', href: '/image/', label: 'Image' },
-  { key: 'audio', href: '/audio/', label: 'Audio' },
+  { key: 'image', href: '/image/', label: 'Images' },
+  { key: 'audio', href: '/audio/', label: 'Audio & Video' },
   { key: 'about', href: '/about/', label: 'About' }
 ];
 
@@ -53,14 +57,29 @@ function searchHtml() {
 }
 
 /**
- * @param {{active?: 'home'|'image'|'audio'|'about'|string}} [options]
+ * @param {{active?: string}} [options]
  */
 function siteHeader(options) {
   const active = (options && options.active) || '';
+
   const nav = NAV_ITEMS.map(item => {
     const isActive = item.key === active;
     return `<a href="${item.href}"${isActive ? ' class="active" aria-current="page"' : ''}>${esc(item.label)}</a>`;
   }).join('');
+
+  // Mobile hamburger menu – simple list of top-level pages
+  const mobileMenu = `
+    <div class="mobile-nav" id="mobile-nav">
+      <button class="mobile-nav-close" aria-label="Close menu">&times;</button>
+      <ul>
+        <li><a href="/"${active === '' ? ' class="active"' : ''}>All tools</a></li>
+        <li><a href="/image/"${active === 'image' ? ' class="active"' : ''}>Images</a></li>
+        <li><a href="/audio/"${active === 'audio' ? ' class="active"' : ''}>Audio & Video</a></li>
+        <li><a href="/about/"${active === 'about' ? ' class="active"' : ''}>About</a></li>
+      </ul>
+    </div>
+  `;
+
   return `<header class="topbar" role="banner">
   <div class="topbar-row">
     <a class="brand" href="/" aria-label="${esc(SITE_NAME)} home">
@@ -71,7 +90,10 @@ function siteHeader(options) {
     <nav id="primary-nav" aria-label="Primary navigation">
       ${nav}
     </nav>
-    <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav">
+      <span></span><span></span><span></span>
+    </button>
+    ${mobileMenu}
   </div>
 </header>`;
 }
