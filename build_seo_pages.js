@@ -409,26 +409,6 @@ function getRelatedTools(currentTool) {
   return selected;
 }
 
-function getFooterDirectoryHtml() {
-  const categories = [...new Set(TOOLS.map(t => t.cat))];
-  return `
-  <details class="footer-directory">
-    <summary class="footer-directory-title">Explore all ${totalPublicTools} private browser tools across core, image and audio toolkits</summary>
-    <div class="category-blocks">
-      ${categories.map(cat => `
-        <div class="category-block">
-          <h3>${cat}</h3>
-          <ul>
-            ${TOOLS.filter(t => t.cat === cat).map(t => `
-              <li><a href="/tools/${t.id}/">${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a></li>
-            `).join('')}
-          </ul>
-        </div>
-      `).join('')}
-    </div>
-  </details>`;
-}
-
 function generateToolPageHtml(tool) {
   const title = getToolTitle(tool);
   const isPdfTranslator = tool.id === "pdf-translator";
@@ -477,8 +457,7 @@ function generateToolPageHtml(tool) {
 
   const schema = seo.graph(graph);
 
-  const footerDir = getFooterDirectoryHtml();
-
+  
   return `<!doctype html>
 <html lang="${LOCALE}">
 <head>
@@ -567,7 +546,7 @@ ${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
-  ${footerDir}
+  
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
@@ -748,8 +727,7 @@ function generateHomePageHtml() {
         </ul>
       </div>
     `).join("");
-  const footerDir = getFooterDirectoryHtml();
-
+  
   const homeAnswer = seo.quickAnswerHtml({
     className: 'home-answer',
     answerHtml: `<strong>${seo.esc(SITE_NAME)}</strong> is a free suite of ${totalTools} browser-based file, image and audio tools. Most tools process selected files locally in your browser; PDF Translator keeps the PDF on your device and sends only extracted text to DeepL.`,
@@ -905,7 +883,7 @@ ${siteHeader({ active: 'home' })}
     <a href="/about/">About</a>
     <a href="/contact/">Contact</a>
   </div>
-  ${footerDir}
+  
 </footer>
 
 <script src="/site.config.js"></script>
