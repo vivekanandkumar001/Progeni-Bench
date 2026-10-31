@@ -17,6 +17,10 @@
 
   const C = (typeof root !== "undefined" && root.ImageToolConfig) ||
     (typeof require === "function" ? require("./image-tools.config.js") : {});
+  const ICONS = (typeof root !== "undefined" && root.BenchIcons) ||
+    (typeof require === "function" ? require("./icons.js") : null);
+  const iconSvg = (tool) => ICONS ? ICONS.toolIcon("image", tool.slug, tool.icon) : "";
+  const iconName = (tool) => ICONS ? ICONS.iconName("image", tool.slug, tool.icon) : "";
   const LIMITS = C.LIMITS || { maxFileBytes: 50 * 1024 * 1024, maxPixels: 40e6, maxDimension: 12000, maxFiles: 30, maxBatchPixels: 160e6, maxPdfPages: 40, concurrency: 2 };
 
   /* ==================================================================== core */
@@ -2718,7 +2722,7 @@
       "<h2>Limits &amp; considerations</h2><p>" + esc(tool.limitations || "") + "</p>" +
       "<h2>Privacy &amp; security</h2><p>" + esc(tool.privacy || "") + "</p>" +
       (tool.faq && tool.faq.length ? "<h2>Frequently asked questions</h2><div class=\"faq-list\">" + tool.faq.map(f => '<div class="faq-item"><strong>' + esc(f.q) + "</strong><p>" + esc(f.a) + "</p></div>").join("") + "</div>" : "") +
-      (related.length ? "<h2>Related image tools</h2><div class=\"tool-links\">" + related.map(t => '<a href="/image/' + esc(t.slug) + '/">' + esc(t.icon || "🖼️") + " " + esc(t.name) + "</a>").join("") + "</div>" : "") +
+      (related.length ? "<h2>Related image tools</h2><div class=\"tool-links\">" + related.map(t => '<a href="/image/' + esc(t.slug) + '/">' + iconSvg(t) + " " + esc(t.name) + "</a>").join("") + "</div>" : "") +
       "</section>";
   }
 
@@ -2745,7 +2749,7 @@
     }
     setMeta(tool);
     if (tool.status === "unavailable" || tool.status === "deferred" || tool.status === "blocked") {
-      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1><span class="tool-head-icon" aria-hidden="true">' + esc(tool.icon || "🖼️") + '</span>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
+      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Image Toolkit</span><h1><span class="tool-head-icon" data-icon="' + esc(iconName(tool)) + '" aria-hidden="true">' + iconSvg(tool) + '</span>' + esc(tool.name) + '</h1><p>' + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
         '<section class="toolbox itk-panel"><div class="itk-status warn"><strong>Status: ' + esc(statusLabel(tool.status)) + "</strong><p>" + esc(tool.reason || "This tool is not available.") + "</p></div>" +
         '<p><a class="btn" href="/image/">Browse working image tools</a></p></section>' + seoHtml(tool);
       return;
@@ -2755,7 +2759,7 @@
     const multi = (tool.maxFiles || 1) > 1;
     const drop = tool.requiresFile === false
       ? '<div class="itk-manual">' + (tool.maxFiles === 1 ? '<label class="itk-inline-file">Optional image<input id="itk-file" type="file" accept="image/*,.svg,.tif,.tiff"></label>' : "") + "</div>"
-      : '<div id="itk-drop" class="drop" role="button" tabindex="0" aria-label="Choose image files"><strong>Drop ' + (multi ? "images" : "an image") + ' here</strong><span>or click to browse. Files stay on this device.</span><input id="itk-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.avif,.svg" ' + (multi ? "multiple" : "") + " hidden></div>";
+      : '<div id="itk-drop" class="drop" role="button" tabindex="0"><strong>Drop ' + (multi ? "images" : "an image") + ' here</strong><span>or click to browse. Files stay on this device.</span><input id="itk-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.avif,.svg" ' + (multi ? "multiple" : "") + " hidden></div>";
 
     const limitation = tool.status === "experimental"
       ? '<div class="itk-status warn"><strong>Experimental</strong><span>' + esc(tool.limitations || "This workflow is still under evaluation.") + "</span></div>" : "";
@@ -2763,7 +2767,7 @@
     app.innerHTML =
       '<section class="tool-head itk-head">' +
         '<span class="eyebrow">Bench Image Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
-        "<h1><span class=\"tool-head-icon\" aria-hidden=\"true\">" + esc(tool.icon || "🖼️") + "</span>" + esc(tool.name) + "</h1>" +
+        "<h1><span class=\"tool-head-icon\" data-icon=\"" + esc(iconName(tool)) + "\" aria-hidden=\"true\">" + iconSvg(tool) + "</span>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
         '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
           '<span class="itk-chip">up to ' + (tool.maxFiles || 1) + " file" + ((tool.maxFiles || 1) === 1 ? "" : "s") + "</span>" +
@@ -2970,7 +2974,7 @@
         if (!publicList.length) return "";
         return '<section class="itk-category"><div class="itk-category-head"><h2>' + esc(cat.name) + "</h2><p>" + esc(cat.blurb) + "</p></div>" +
           '<div class="itk-tool-grid">' + publicList.map(function (t) {
-            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong><span class="itk-card-icon" aria-hidden="true">' + esc(t.icon || "🖼️") + '</span>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span>' + statusBadge(t.status) + "</a>";
+            return '<a class="itk-tool-card" href="/image/' + esc(t.slug) + '/"><strong><span class="itk-card-icon" aria-hidden="true">' + iconSvg(t) + '</span>' + esc(t.name) + '</strong><span>' + esc(t.summary) + '</span>' + statusBadge(t.status) + "</a>";
           }).join("") + "</div>" +
           "</section>";
       }).join("") + "</section>" +
@@ -2988,7 +2992,7 @@
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/studio/";
     app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Image Studio</h1><p>A three-step batch recipe for real work: upload, choose one set of export settings, download every result or a ZIP. No account and no upload.</p></section>' + studioQuickAnswerHtml() +
       '<section class="itk"><div class="itk-grid"><div class="itk-panel itk-controls">' +
-      '<h2>1. Add images</h2><div id="studio-drop" class="drop" role="button" tabindex="0" aria-label="Choose images"><strong>Drop images here</strong><span>or click to browse · up to 30 files</span><input id="studio-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.svg,.tif,.tiff" multiple hidden></div><div id="studio-files" class="itk-files"></div>' +
+      '<h2>1. Add images</h2><div id="studio-drop" class="drop" role="button" tabindex="0"><strong>Drop images here</strong><span>or click to browse · up to 30 files</span><input id="studio-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.svg,.tif,.tiff" multiple hidden></div><div id="studio-files" class="itk-files"></div>' +
       '<h2>2. Recipe</h2><form id="studio-form" class="itk-options">' +
       '<div class="itk-field"><label for="studio-format">Output format</label><select id="studio-format" data-opt="format"><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>' +
       '<div class="itk-field"><label for="studio-width">Maximum width (0 = original)</label><input id="studio-width" type="number" data-opt="maxWidth" min="0" max="12000" value="1600"></div>' +

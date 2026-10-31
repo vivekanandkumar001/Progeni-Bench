@@ -18,3 +18,4 @@ Thumbs.db
 
 # Stale integration checkout (was a dangling junction)
 bench-main-integration/
+.opencode

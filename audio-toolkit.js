@@ -24,6 +24,20 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
+  function benchIcons() {
+    if (typeof window !== "undefined" && window.BenchIcons) return window.BenchIcons;
+    if (typeof globalThis !== "undefined" && globalThis.BenchIcons) return globalThis.BenchIcons;
+    return null;
+  }
+  function iconSvg(tool) {
+    const icons = benchIcons();
+    return icons ? icons.toolIcon("audio", tool.slug, tool.icon) : "";
+  }
+  function iconName(tool) {
+    const icons = benchIcons();
+    return icons ? icons.iconName("audio", tool.slug, tool.icon) : "";
+  }
+
   function cfg() {
     if (typeof window !== "undefined" && window.AudioToolConfig) return window.AudioToolConfig;
     if (typeof globalThis !== "undefined" && globalThis.AudioToolConfig) return globalThis.AudioToolConfig;
@@ -1985,7 +1999,7 @@
       "<h2>Limits &amp; considerations</h2><p>" + esc(tool.limitations || tool.reason || "No additional limitations are documented.") + "</p>" +
       "<h2>Privacy &amp; security</h2><p>" + esc(tool.privacy || "Processing runs locally in your browser. Nothing is uploaded.") + "</p>" +
       (faq.length ? '<h2>Frequently asked questions</h2><div class="faq-list">' + faq.map(function (f) { return '<div class="faq-item"><strong>' + esc(f.q) + "</strong><p>" + esc(f.a) + "</p></div>"; }).join("") + "</div>" : "") +
-      (related.length ? '<h2>Related audio tools</h2><div class="tool-links">' + related.map(function (t) { return '<a href="/audio/' + esc(t.slug) + '/">' + esc(t.icon || "🎧") + " " + esc(t.name) + "</a>"; }).join("") + "</div>" : "") +
+      (related.length ? '<h2>Related audio tools</h2><div class="tool-links">' + related.map(function (t) { return '<a href="/audio/' + esc(t.slug) + '/">' + iconSvg(t) + " " + esc(t.name) + "</a>"; }).join("") + "</div>" : "") +
       "</section>";
   }
 
@@ -2089,7 +2103,7 @@
     setMeta(tool);
 
     if (tool.status === "unavailable" || tool.status === "deferred" || tool.status === "blocked") {
-      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Audio Toolkit</span><h1><span class="tool-head-icon" aria-hidden="true">' + esc(tool.icon || "🎧") + '</span>' + esc(tool.name) + "</h1><p>" + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
+      app.innerHTML = '<section class="tool-head"><span class="eyebrow">Bench Audio Toolkit</span><h1><span class="tool-head-icon" data-icon="' + esc(iconName(tool)) + '" aria-hidden="true">' + iconSvg(tool) + '</span>' + esc(tool.name) + "</h1><p>" + esc(tool.summary) + "</p></section>" + toolQuickAnswer(tool) +
         '<section class="toolbox itk-panel"><div class="itk-status warn"><strong>Status: ' + esc(statusLabel(tool.status)) + "</strong><p>" + esc(tool.reason || "This tool is not available.") + "</p></div>" +
         '<p><a class="btn" href="/audio/">Browse working audio tools</a></p></section>' + seoHtml(tool);
       return;
@@ -2100,7 +2114,7 @@
     const multi = (tool.maxFiles || 1) > 1;
     const drop = tool.requiresFile === false
       ? ""
-      : '<div id="atk-drop" class="drop" role="button" tabindex="0" aria-label="Choose audio files"><strong>Drop ' + (multi ? "audio files" : "an audio file") + ' here</strong><span>or click to browse. Files stay on this device.</span><input id="atk-file" type="file" accept="' + AUDIO_ACCEPT + '" ' + (multi ? "multiple" : "") + " hidden></div>";
+      : '<div id="atk-drop" class="drop" role="button" tabindex="0"><strong>Drop ' + (multi ? "audio files" : "an audio file") + ' here</strong><span>or click to browse. Files stay on this device.</span><input id="atk-file" type="file" accept="' + AUDIO_ACCEPT + '" ' + (multi ? "multiple" : "") + " hidden></div>";
 
     const limitation = tool.status === "experimental"
       ? '<div class="itk-status warn"><strong>Experimental</strong><span>' + esc(tool.limitations || tool.reason || "This workflow is still under evaluation.") + "</span></div>" : "";
@@ -2147,7 +2161,7 @@
     app.innerHTML =
       '<section class="tool-head itk-head">' +
         '<span class="eyebrow">Bench Audio Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
-        "<h1><span class=\"tool-head-icon\" aria-hidden=\"true\">" + esc(tool.icon || "🎧") + "</span>" + esc(tool.name) + "</h1>" +
+        "<h1><span class=\"tool-head-icon\" data-icon=\"" + esc(iconName(tool)) + "\" aria-hidden=\"true\">" + iconSvg(tool) + "</span>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
         '<div class="itk-meta">' + (tool.inputs || []).slice(0, 4).map(function (f) { return '<span class="itk-chip">' + esc(f) + "</span>"; }).join("") +
           '<span class="itk-chip">' + (tool.engine === "ffmpeg" ? "FFmpeg engine" : tool.engine === "media-recorder" ? "Microphone" : "Web Audio") + "</span>" +
@@ -2579,7 +2593,7 @@
       if (!tools.length) return "";
       return '<section class="itk-category"><div class="itk-category-head"><h2>' + esc(cat.name) + "</h2><p>" + esc(cat.blurb) + "</p></div>" +
         '<div class="itk-tool-grid">' + tools.map(function (t) {
-          return '<a class="itk-tool-card" href="/audio/' + esc(t.slug) + '/"><strong><span class="itk-card-icon" aria-hidden="true">' + esc(t.icon || "🎧") + "</span>" + esc(t.name) + "</strong><span>" + esc(t.summary) + "</span>" + statusBadge(t.status) + "</a>";
+          return '<a class="itk-tool-card" href="/audio/' + esc(t.slug) + '/"><strong><span class="itk-card-icon" aria-hidden="true">' + iconSvg(t) + "</span>" + esc(t.name) + "</strong><span>" + esc(t.summary) + "</span>" + statusBadge(t.status) + "</a>";
         }).join("") + "</div></section>";
     }).join("");
     const impl = PUBLIC.filter(function (t) { return t.status === "implemented"; }).length;

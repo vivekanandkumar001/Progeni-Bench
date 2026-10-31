@@ -8,6 +8,8 @@ const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
 const audioConfig = require('./audio-tools.config.js');
 const audioPages = require('./audio-pages.js');
+const { siteHeader } = require('./scripts/site-chrome.js');
+const icons = require('./icons.js');
 const publicTools = tools => tools.filter(tool => tool.status === 'implemented' || tool.status === 'experimental');
 const publicToolCounts = {
   core: TOOLS.length,
@@ -129,21 +131,45 @@ function encodeIco(entries) {
   return Buffer.concat([header, dir, ...entries.map(e => e.png)]);
 }
 
-function pointInPoly(px, py, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i];
-    const [xj, yj] = poly[j];
-    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
+// The Bench mark: a geometric "B" built from three round-capped strokes and two
+// semicircular bowls. It stays legible at 16px and needs one ink colour.
+const MARK_BRAND = [31, 104, 221];
+const MARK_WHITE = [255, 255, 255];
+
+function inCapsule(px, py, x1, y1, x2, y2, radius) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / len2)) : 0;
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)) <= radius;
 }
 
-// Light corporate brand art: soft gray field + rounded brand-blue tile + white bolt
+function inBowl(px, py, cx, cy, outer, inner) {
+  if (px < cx) return false;
+  const distance = Math.hypot(px - cx, py - cy);
+  return distance >= inner && distance <= outer;
+}
+
+// Coordinates are in the same 128x128 space as assets/favicon.svg.
+function benchMarkAt(px, py) {
+  return inCapsule(px, py, 44, 34, 44, 94, 6.5)
+    || inCapsule(px, py, 44, 34, 65, 34, 6.5)
+    || inBowl(px, py, 65, 49, 21.5, 8.5)
+    || inCapsule(px, py, 44, 64, 69, 64, 6.5)
+    || inBowl(px, py, 69, 79, 21.5, 8.5);
+}
+
+function inRoundedTile(px, py, half, radius) {
+  const qx = Math.abs(px - half) - (half - radius);
+  const qy = Math.abs(py - half) - (half - radius);
+  const dx = Math.max(qx, 0);
+  const dy = Math.max(qy, 0);
+  return Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) <= radius;
+}
+
+// Light corporate brand art: soft gray field + rounded brand-blue tile.
 function drawBrandMark(setPx, width, height) {
   const bg = [244, 246, 249];
-  const brand = [29, 78, 216];
-  const white = [255, 255, 255];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) setPx(x, y, bg[0], bg[1], bg[2]);
   }
@@ -151,32 +177,31 @@ function drawBrandMark(setPx, width, height) {
   const tile = Math.round(Math.min(width, height) * 0.68);
   const tx = Math.round((width - tile) / 2);
   const ty = Math.round((height - tile) / 2);
-  const rad = tile * 0.22;
   const half = tile / 2;
-  const inner = half - rad;
-  const bolt = [
-    [0.58, 0.16], [0.33, 0.55], [0.49, 0.55],
-    [0.33, 0.85], [0.67, 0.45], [0.50, 0.45]
-  ];
+  const radius = tile * 0.235;
 
   for (let y = 0; y < tile; y++) {
     for (let x = 0; x < tile; x++) {
-      const qx = Math.abs(x + 0.5 - half) - inner;
-      const qy = Math.abs(y + 0.5 - half) - inner;
-      const dx = Math.max(qx, 0);
-      const dy = Math.max(qy, 0);
-      if (Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) > rad) continue;
-      const c = pointInPoly(x / tile, y / tile, bolt) ? white : brand;
+      if (!inRoundedTile(x + 0.5, y + 0.5, half, radius)) continue;
+      const c = benchMarkAt(((x + 0.5) / tile) * 128, ((y + 0.5) / tile) * 128) ? MARK_WHITE : MARK_BRAND;
       setPx(tx + x, ty + y, c[0], c[1], c[2]);
     }
   }
 }
 
-// Favicon art: transparent surround + a full-bleed rounded brand-blue tile with
-// a white bolt. Supersampled 2x2 for smooth edges at small sizes.
+// Full-bleed square icon for Apple touch / maskable surfaces (no transparency).
+function drawSquareMark(setPx, width, height) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const c = benchMarkAt(((x + 0.5) / width) * 128, ((y + 0.5) / height) * 128) ? MARK_WHITE : MARK_BRAND;
+      setPx(x, y, c[0], c[1], c[2]);
+    }
+  }
+}
+
+// Favicon art: transparent surround + a rounded brand-blue tile. Supersampled
+// 2x2 so the mark stays smooth in a 16px browser tab.
 function drawFaviconMark(setPx, width, height) {
-  const brand = [29, 78, 216];
-  const white = [255, 255, 255];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) setPx(x, y, 0, 0, 0, 0);
   }
@@ -184,37 +209,28 @@ function drawFaviconMark(setPx, width, height) {
   const pad = Math.max(0, Math.round(width * 0.03));
   const tile = width - pad * 2;
   const half = tile / 2;
-  const rad = tile * 0.22;
-  const inner = half - rad;
-  const bolt = [
-    [0.58, 0.16], [0.33, 0.55], [0.49, 0.55],
-    [0.33, 0.85], [0.67, 0.45], [0.50, 0.45]
-  ];
+  const radius = tile * 0.235;
 
   for (let y = 0; y < tile; y++) {
     for (let x = 0; x < tile; x++) {
       let hits = 0;
-      let boltHits = 0;
+      let markHits = 0;
       for (let sy = 0; sy < 2; sy++) {
         for (let sx = 0; sx < 2; sx++) {
           const px = x + (sx + 0.5) / 2;
           const py = y + (sy + 0.5) / 2;
-          const qx = Math.abs(px - half) - inner;
-          const qy = Math.abs(py - half) - inner;
-          const dx = Math.max(qx, 0);
-          const dy = Math.max(qy, 0);
-          if (Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) > rad) continue;
+          if (!inRoundedTile(px, py, half, radius)) continue;
           hits++;
-          if (pointInPoly(px / tile, py / tile, bolt)) boltHits++;
+          if (benchMarkAt((px / tile) * 128, (py / tile) * 128)) markHits++;
         }
       }
       if (!hits) continue;
-      const w = boltHits / hits;
+      const w = markHits / hits;
       setPx(
         pad + x, pad + y,
-        Math.round(brand[0] * (1 - w) + white[0] * w),
-        Math.round(brand[1] * (1 - w) + white[1] * w),
-        Math.round(brand[2] * (1 - w) + white[2] * w),
+        Math.round(MARK_BRAND[0] * (1 - w) + MARK_WHITE[0] * w),
+        Math.round(MARK_BRAND[1] * (1 - w) + MARK_WHITE[1] * w),
+        Math.round(MARK_BRAND[2] * (1 - w) + MARK_WHITE[2] * w),
         Math.round((hits / 4) * 255)
       );
     }
@@ -222,7 +238,7 @@ function drawFaviconMark(setPx, width, height) {
 }
 
 const ogPng = encodePng(1200, 630, drawBrandMark);
-const iconPng = encodePng(180, 180, drawBrandMark);
+const iconPng = encodePng(180, 180, drawSquareMark);
 fs.writeFileSync(path.join(assetsDir, 'og-image.png'), ogPng);
 fs.writeFileSync(path.join(distAssetsDir, 'og-image.png'), ogPng);
 fs.writeFileSync(path.join(assetsDir, 'apple-touch-icon.png'), iconPng);
@@ -238,6 +254,13 @@ faviconSizes.forEach(size => {
   faviconPngs[size] = png;
   fs.writeFileSync(path.join(assetsDir, `favicon-${size}.png`), png);
   fs.writeFileSync(path.join(distAssetsDir, `favicon-${size}.png`), png);
+});
+
+// Maskable icons must be full-bleed: the launcher crops them to its own shape.
+[192, 512].forEach(size => {
+  const png = encodePng(size, size, drawSquareMark);
+  fs.writeFileSync(path.join(assetsDir, `maskable-${size}.png`), png);
+  fs.writeFileSync(path.join(distAssetsDir, `maskable-${size}.png`), png);
 });
 
 // /favicon.ico — classic fallback requested by browsers and used by Googlebot.
@@ -277,7 +300,7 @@ function getFooterDirectoryHtml() {
           <h3>${cat}</h3>
           <ul>
             ${TOOLS.filter(t => t.cat === cat).map(t => `
-              <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a></li>
+              <li><a href="/tools/${t.id}/">${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a></li>
             `).join('')}
           </ul>
         </div>
@@ -346,24 +369,15 @@ function generateToolPageHtml(tool) {
 ${seo.headMeta({ title, description: tool.seoDesc, canonicalUrl, imageAlt: `${SITE_NAME} — ${tool.name}`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
-<header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
-  <nav id="primary-nav" aria-label="Primary navigation">
-    <a href="/">All tools</a>
-    <a href="/image/">Image toolkit</a>
-    <a href="/audio/">Audio toolkit</a>
-    <a href="/about/">About</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/contact/">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
-</header>
+${siteHeader({ active: 'home' })}
 
 <main id="app" class="container" tabindex="-1">
+  <nav class="tool-breadcrumb" aria-label="Breadcrumb">
+    <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${tool.cat}</span><span aria-hidden="true">/</span><span aria-current="page">${tool.name}</span>
+  </nav>
   <section class="tool-head">
     <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-    <h1><span class="tool-head-icon" aria-hidden="true">${tool.icon || '🧰'}</span>${tool.keyword}</h1>
+    <h1><span class="tool-head-icon" data-icon="${icons.iconName('core', tool.id, tool.icon)}">${icons.toolIcon('core', tool.id, tool.icon)}</span>${tool.keyword}</h1>
     <p>${tool.desc} ${isPdfTranslator
       ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
       : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
@@ -412,7 +426,7 @@ ${seo.headMeta({ title, description: tool.seoDesc, canonicalUrl, imageAlt: `${SI
     <h2>Related ${tool.cat} Tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        ${related.map(r => `<li><a href="/tools/${r.id}/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">${r.icon} ${r.name}</a></li>`).join('\n        ')}
+        ${related.map(r => `<li><a href="/tools/${r.id}/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a></li>`).join('\n        ')}
       </ul>
     </div>
 
@@ -420,7 +434,7 @@ ${seo.headMeta({ title, description: tool.seoDesc, canonicalUrl, imageAlt: `${SI
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       ${TOOLS.filter(t => t.cat === tool.cat && t.id !== tool.id).map(t => `<a href="/tools/${t.id}/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
-${t.icon} ${t.name}</a>`).join('\n      ')}
+${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
     </div>
   </article>
 </main>
@@ -437,6 +451,7 @@ ${t.icon} ${t.name}</a>`).join('\n      ')}
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/icons.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -519,7 +534,8 @@ function generateHomePageHtml() {
         const slug = tool.slug || tool.id;
         const name = tool.name;
         const summary = tool.summary || tool.desc || tool.description || "";
-        const icon = tool.icon || (group.id === "image" ? "🖼️" : group.id === "audio" ? "🎧" : "🧰");
+        const icon = icons.toolIcon(group.id, slug, tool.icon);
+        const iconName = icons.iconName(group.id, slug, tool.icon);
         const status = tool.status || "implemented";
         const statusLabel = status === "experimental" ? "Experimental" : "Ready";
         const searchable = [
@@ -530,9 +546,9 @@ function generateHomePageHtml() {
           ...(tool.howToUse || [])
         ].filter(Boolean).join(" ");
         const url = `/${group.id === "core" ? `tools/${slug}` : `${group.id}/${slug}`}/`;
-        return `<a class="tool-card catalog-tool-card" href="${escapeHtml(url)}" data-toolkit="${group.id}" data-category="${escapeHtml(categoryKey)}" data-search="${escapeHtml(searchable)}">
+        return `<a class="tool-card catalog-tool-card" href="${escapeHtml(url)}" data-toolkit="${group.id}" data-category="${escapeHtml(categoryKey)}" data-icon="${escapeHtml(iconName)}" data-search="${escapeHtml(searchable)}">
           <span class="go" aria-hidden="true">&rarr;</span>
-          <div class="icon" aria-hidden="true">${escapeHtml(icon)}</div>
+          <div class="icon" aria-hidden="true">${icon}</div>
           <h3>${escapeHtml(name)}</h3>
           <p>${escapeHtml(summary)}</p>
           <span class="catalog-card-meta"><span class="tag">${escapeHtml(category.name)}</span><span class="catalog-status catalog-status-${status}">${statusLabel}</span></span>
@@ -556,10 +572,10 @@ function generateHomePageHtml() {
   }).join("");
 
   const trustHtml = [
-    { ico: "🔒", title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
-    { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
-    { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: `${totalPublicTools} tools across three toolkits`, body: `${publicToolCounts.core} core utilities, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools for crafters, creators and desk workers.` }
+    { ico: icons.svgIcon("lock"), title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
+    { ico: icons.svgIcon("zap"), title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
+    { ico: icons.svgIcon("user-round-x"), title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
+    { ico: icons.svgIcon("wrench"), title: `${totalPublicTools} tools across three toolkits`, body: `${publicToolCounts.core} core utilities, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools for crafters, creators and desk workers.` }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -580,7 +596,7 @@ function generateHomePageHtml() {
       <p class="image-band-actions"><a class="btn btn-lg" href="/image/">Open the image toolkit</a> <a class="btn secondary" href="/image/studio/">Try Image Studio</a></p>
     </div>
     <div class="image-band-grid">
-      ${imageFeatured.map(t => `<a class="image-band-card" href="/image/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${t.icon || '🖼️'}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+      ${imageFeatured.map(t => `<a class="image-band-card" href="/image/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${icons.toolIcon('image', t.slug, t.icon)}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
     </div>
   </section>`;
 
@@ -597,7 +613,7 @@ function generateHomePageHtml() {
       <p class="image-band-actions"><a class="btn btn-lg" href="/audio/">Open the audio toolkit</a> <a class="btn secondary" href="/audio/recorder/">Try the voice recorder</a></p>
     </div>
     <div class="image-band-grid">
-      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${t.icon || '🎧'}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
+      ${audioFeatured.map(t => `<a class="image-band-card" href="/audio/${t.slug}/"><strong><span class="image-band-icon" aria-hidden="true">${icons.toolIcon('audio', t.slug, t.icon)}</span>${t.name}</strong><span>${t.summary}</span></a>`).join("")}
     </div>
   </section>`;
 
@@ -607,7 +623,7 @@ function generateHomePageHtml() {
         <h3>${cat}</h3>
         <ul>
           ${TOOLS.filter(t => t.cat === cat).map(t => `
-                        <li><a href="/tools/${t.id}/">${t.icon} ${t.name}</a> — <span class="cat-desc">${(function(d){var x=String(d||"").replace(/\s+/g," ").trim().replace(/[.!?]+$/,""); if(!x)return ""; if(x.length>72){var i=x.lastIndexOf(" ",72); if(i>40)x=x.slice(0,i); else x=x.slice(0,72); x=x.replace(/[.,;:—–-]+$/,"");} x+="…"; return x;})(t.desc)}</span></li>
+                        <li><a href="/tools/${t.id}/">${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a> — <span class="cat-desc">${(function(d){var x=String(d||"").replace(/\s+/g," ").trim().replace(/[.!?]+$/,""); if(!x)return ""; if(x.length>72){var i=x.lastIndexOf(" ",72); if(i>40)x=x.slice(0,i); else x=x.slice(0,72); x=x.replace(/[.,;:—–-]+$/,"");} x+="…"; return x;})(t.desc)}</span></li>
           `).join('')}
         </ul>
       </div>
@@ -648,72 +664,94 @@ function generateHomePageHtml() {
 ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME} — free, private browser tools`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
-<header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
-  <nav id="primary-nav" aria-label="Primary navigation">
-    <a href="/">All tools</a>
-    <a href="/image/">Image toolkit</a>
-    <a href="/audio/">Audio toolkit</a>
-    <a href="/about/">About</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/contact/">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
-  <div class="header-search" id="header-search">
-    <label class="sr-only" for="search">Search Bench tools</label>
-    <input id="search" class="search" type="search" aria-label="Search Bench tools" placeholder="Search tools by name, task or format…">
-  </div>
-</header>
+${siteHeader({ active: 'home' })}
 
 <main id="app" class="container" tabindex="-1">
   <section class="hero">
     <div class="hero-inner">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>${totalPublicTools} tools · private in your browser</span>
-      <h1>Fix everyday file jobs <span class="accent">with local processing by default</span>.</h1>
-      <p class="hero-lede">Free tools for crafters, creators and desk workers. Most tools process files locally; PDF Translator keeps pages on your device and sends extracted text to DeepL.</p>
-      <div class="catalog-controls" aria-label="Filter tools">
-        <label for="toolkit-filter">Toolkit
-          <select id="toolkit-filter">
-            <option value="all">All toolkits</option>
-            <option value="core">Core tools</option>
-            <option value="image">Image tools</option>
-            <option value="audio">Audio tools</option>
-          </select>
-        </label>
-        <select id="category-filter" class="sr-only" aria-hidden="true" tabindex="-1">
-          <option value="all">All categories</option>
-          ${categoryOptions}
-        </select>
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>${totalPublicTools} tools · no upload · no signup</span>
+      <h1>Every file job, done <span class="accent">privately in your browser</span>.</h1>
+      <p class="hero-lede">Compress, convert, resize, print, clean and inspect files without sending them to a server. Pick a tool and drop a file — most tools never upload anything.</p>
+      <div class="hero-actions">
+        <a class="hero-cta" href="#tools">Browse all ${totalPublicTools} tools</a>
+        <div class="hero-tasks" aria-label="Popular tasks">
+          <span class="hero-tasks-label">Popular:</span>
+          <a href="/image/compress/">Compress image</a>
+          <a href="/image/resize/">Resize image</a>
+          <a href="/image/convert/">Convert image</a>
+          <a href="/audio/convert/">Convert audio</a>
+          <a href="/audio/trimmer/">Trim audio</a>
+          <a href="/tools/sticker-sheet/">Sticker sheet</a>
+        </div>
+      </div>
+      <ul class="hero-badges">
+        <li>Files stay on your device</li>
+        <li>No account needed</li>
+        <li>Free, with no daily limit</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="tools-section" id="tools" aria-label="Browser utility grid">
+    <h2 class="sr-only">All tools</h2>
+    <div class="catalog-toolbar" id="catalog-toolbar">
+      <div class="toolkit-tabs" role="group" aria-label="Choose a toolkit">
+        <button type="button" class="toolkit-tab active" data-toolkit-tab="all" aria-pressed="true">All <span>${totalPublicTools}</span></button>
+        <button type="button" class="toolkit-tab" data-toolkit-tab="core" aria-pressed="false">Core <span>${publicToolCounts.core}</span></button>
+        <button type="button" class="toolkit-tab" data-toolkit-tab="image" aria-pressed="false">Image <span>${publicToolCounts.image}</span></button>
+        <button type="button" class="toolkit-tab" data-toolkit-tab="audio" aria-pressed="false">Audio <span>${publicToolCounts.audio}</span></button>
+      </div>
+      <div class="catalog-toolbar-meta">
+        <p class="grid-count" aria-live="polite" aria-atomic="true">${totalTools} tools</p>
         <button class="catalog-clear" type="button" data-clear-filters>Clear filters</button>
       </div>
-      <div class="toolkit-shortcuts" aria-label="Browse specialist toolkits">
-        <span>More tools:</span>
-        <a href="/image/">42 image tools <span aria-hidden="true">→</span></a>
-        <a href="/audio/">48 audio tools <span aria-hidden="true">→</span></a>
-      </div>
+    </div>
+    <div class="catalog-category-filters" role="group" aria-label="Filter tools by category"></div>
+    <div class="catalog-filter-state">
+      <label class="sr-only" for="toolkit-filter">Toolkit</label>
+      <select id="toolkit-filter" class="sr-only" tabindex="-1" aria-hidden="true">
+        <option value="all">All toolkits</option>
+        <option value="core">Core tools</option>
+        <option value="image">Image tools</option>
+        <option value="audio">Audio tools</option>
+      </select>
+      <select id="category-filter" class="sr-only" tabindex="-1" aria-hidden="true">
+        <option value="all">All categories</option>
+        ${categoryOptions}
+      </select>
+    </div>
+    <div id="recent-tools" class="recent-tools" hidden></div>
+    <div id="grid" class="catalog-groups catalog-groups--clean">
+      ${catalogHtml}
     </div>
   </section>
 
   ${homeAnswer}
 
-  <section class="tools-section" aria-label="Browser utility grid">
-    <div class="section-head">
-      <h2>All tools</h2>
-      <p class="grid-count" aria-live="polite" aria-atomic="true">Showing <strong>${totalTools}</strong> of ${totalTools} tools</p>
-    </div>
-    <div id="grid" class="catalog-groups">
-      ${catalogHtml}
-    </div>
-  </section>
-
   <section class="trust" aria-label="Why use ${SITE_NAME}">
     ${trustHtml}
   </section>
 
-  ${imageBandHtml}
-
-  ${audioBandHtml}
+  <section class="toolkit-bands" aria-label="Specialist toolkits">
+    <article class="toolkit-band">
+      <span class="toolkit-band-icon" aria-hidden="true">${icons.svgIcon("image")}</span>
+      <h2>Bench Image Toolkit</h2>
+      <p>${publicToolCounts.image} image tools that never upload your files — compress, resize, convert, crop, annotate, inspect metadata and batch-export.</p>
+      <div class="toolkit-band-links">
+        ${imageFeatured.slice(0, 4).map(t => `<a href="/image/${t.slug}/">${escapeHtml(t.name)}</a>`).join("")}
+      </div>
+      <p class="toolkit-band-actions"><a class="btn" href="/image/">Open image toolkit</a> <a class="btn secondary" href="/image/studio/">Image Studio</a></p>
+    </article>
+    <article class="toolkit-band">
+      <span class="toolkit-band-icon" aria-hidden="true">${icons.svgIcon("music")}</span>
+      <h2>Bench Audio Toolkit</h2>
+      <p>${publicToolCounts.audio} audio tools that never upload your files — convert, trim, join, clean, record and analyse, with a local WebAssembly engine for heavy filters.</p>
+      <div class="toolkit-band-links">
+        ${audioFeatured.slice(0, 4).map(t => `<a href="/audio/${t.slug}/">${escapeHtml(t.name)}</a>`).join("")}
+      </div>
+      <p class="toolkit-band-actions"><a class="btn" href="/audio/">Open audio toolkit</a> <a class="btn secondary" href="/audio/recorder/">Voice recorder</a></p>
+    </article>
+  </section>
 
   <section class="privacy-band">
     <h2>Local file processing, with an explicit translation exception</h2>
@@ -736,12 +774,6 @@ ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME}
     </div>
   </section>
 
-  <section class="category-directory">
-    <h2>Browse utilities by category</h2>
-    <p>Every utility runs 100% client-side in your web browser. Pick a category below to jump straight to a specialised file tool.</p>
-    <div class="category-blocks">
-      ${categoryBlocksHtml}
-    </div>
   </section>
 </main>
 
@@ -758,6 +790,7 @@ ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME}
 
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/icons.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -792,19 +825,7 @@ function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
 ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME} — ${h1}`, schema })}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
-<header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${SITE_NAME}" width="34" height="34" class="brand-logo"> ${SITE_NAME}<span>.</span></a>
-  <nav id="primary-nav" aria-label="Primary navigation">
-    <a href="/">All tools</a>
-    <a href="/image/">Image toolkit</a>
-    <a href="/audio/">Audio toolkit</a>
-    <a href="/about/">About</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/contact/">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
-</header>
+${siteHeader({ active: '' })}
 
 <main id="app" class="container" tabindex="-1">
   <section class="tool-head">
@@ -827,6 +848,7 @@ ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME}
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/icons.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -869,6 +891,7 @@ function generate404Html() {
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/icons.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -927,7 +950,13 @@ function generateManifestJson() {
         "purpose": "any"
       },
       {
-        "src": "/assets/favicon-512.png",
+        "src": "/assets/maskable-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+      },
+      {
+        "src": "/assets/maskable-512.png",
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "maskable"
@@ -1095,7 +1124,7 @@ console.log(`Generated llms-full.txt (${llmsFullText.length} characters).`);
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt'
+  'site.config.js', 'icons.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {

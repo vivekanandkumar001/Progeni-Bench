@@ -18,6 +18,8 @@ const path = require('path');
 const site = require('./site.config.js');
 const seo = require('./scripts/seo.js');
 const C = require('./image-tools.config.js');
+const chrome = require('./scripts/site-chrome.js');
+const icons = require('./icons.js');
 
 const SITE_URL = C.SITE_URL || site.SITE_URL;
 const SITE_NAME = C.SITE_NAME || site.SITE_NAME;
@@ -129,19 +131,7 @@ function shell(title, desc, canonicalUrl, body, opts) {
   <meta name="description" content="${esc(desc)}">${headExtras(title, desc, canonicalUrl, opts)}
 </head>
 <body><a class="skip-link" href="#app">Skip to main content</a>
-<header class="topbar" role="banner">
-  <a class="brand" href="/"><img src="/assets/favicon.svg" alt="${esc(SITE_NAME)}" width="34" height="34" class="brand-logo"> ${esc(SITE_NAME)}<span>.</span></a>
-  <nav id="primary-nav" aria-label="Primary navigation">
-    <a href="/">All tools</a>
-    <a href="/image/">Image toolkit</a>
-    <a href="/audio/">Audio toolkit</a>
-    <a href="/about/">About</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/contact/">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav"><span></span><span></span><span></span></button>
-</header>
+${chrome.siteHeader({ active: 'image' })}
 
 <main id="app" class="container" tabindex="-1">
 ${body}
@@ -163,13 +153,14 @@ ${body}
       ${C.CATEGORIES.map(cat => {
         const tools = PUBLIC.filter(t => t.category === cat.id);
         if (!tools.length) return '';
-        return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/image/${esc(t.slug)}/">${esc(t.icon || '🖼️')} ${esc(t.name)}</a></li>`).join('')}</ul></div>`;
+        return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/image/${esc(t.slug)}/">${icons.toolIcon('image', t.slug, t.icon)} ${esc(t.name)}</a></li>`).join('')}</ul></div>`;
       }).join('')}
     </div>
   </details>
 </footer>
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
+<script src="/icons.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
@@ -178,7 +169,7 @@ ${body}
 
 function toolCard(tool) {
   return `<a class="itk-tool-card" href="/image/${esc(tool.slug)}/">
-  <strong><span class="itk-card-icon" aria-hidden="true">${esc(tool.icon || '🖼️')}</span>${esc(tool.name)}</strong>
+  <strong><span class="itk-card-icon" aria-hidden="true">${icons.toolIcon('image', tool.slug, tool.icon)}</span>${esc(tool.name)}</strong>
   <span>${esc(tool.summary)}</span>
   ${statusBadge(tool.status)}
 </a>`;
@@ -270,11 +261,11 @@ ${studioQuickAnswer}
     <p>Batch resize, batch convert and batch compression share exactly the same decode → transform → encode pipeline. Folding them into one recipe avoids three thin, duplicate pages while keeping the individual single-purpose tools available.</p>
     <h2>Related tools</h2>
     <div class="tool-links">
-      <a href="/image/compress/">🗜️ Image Compressor</a>
-      <a href="/image/resize/">📏 Resize Image</a>
-      <a href="/image/convert/">🔄 Image Converter</a>
-      <a href="/image/strip-metadata/">🧽 EXIF &amp; GPS Remover</a>
-      <a href="/image/batch-rename/">🔢 Batch Rename &amp; Export</a>
+      <a href="/image/compress/">${icons.toolIcon('image', 'compress')} Image Compressor</a>
+      <a href="/image/resize/">${icons.toolIcon('image', 'resize')} Resize Image</a>
+      <a href="/image/convert/">${icons.toolIcon('image', 'convert')} Image Converter</a>
+      <a href="/image/strip-metadata/">${icons.toolIcon('image', 'strip-metadata')} EXIF &amp; GPS Remover</a>
+      <a href="/image/batch-rename/">${icons.toolIcon('image', 'batch-rename')} Batch Rename &amp; Export</a>
     </div>
     <p><a class="btn" href="/image/">Browse every image tool</a></p>
   </div>
@@ -325,7 +316,7 @@ function toolBody(tool) {
 
 <section class="tool-head itk-head">
   <span class="eyebrow">Bench Image Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
-  <h1><span class="tool-head-icon" aria-hidden="true">${esc(tool.icon || '🖼️')}</span>${esc(tool.name)}</h1>
+  <h1><span class="tool-head-icon" data-icon="${icons.iconName('image', tool.slug, tool.icon)}">${icons.toolIcon('image', tool.slug, tool.icon)}</span>${esc(tool.name)}</h1>
   <p>${esc(tool.summary)} <strong>Nothing is uploaded.</strong></p>
   <div class="itk-meta">
     ${(tool.inputs || []).map(f => `<span class="itk-chip">${esc(f)}</span>`).join('')}
@@ -351,7 +342,7 @@ ${fallback}
   <h2>Privacy &amp; security</h2>
   <p>${esc(tool.privacy || 'Processing runs locally in your browser. Nothing is uploaded.')}</p>
   ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(f.a)}</p></div>`).join('')}</div>` : ''}
-  ${related.length ? `<h2>Related image tools</h2><div class="tool-links">${related.map(t => `<a href="/image/${esc(t.slug)}/">${esc(t.icon || '🖼️')} ${esc(t.name)}</a>`).join('')}</div>` : ''}
+  ${related.length ? `<h2>Related image tools</h2><div class="tool-links">${related.map(t => `<a href="/image/${esc(t.slug)}/">${icons.toolIcon('image', t.slug, t.icon)} ${esc(t.name)}</a>`).join('')}</div>` : ''}
 </section>`;
 }
 

@@ -28,6 +28,13 @@ const {
   TOOLS
 } = (typeof window !== "undefined" && window.SiteConfig) ? window.SiteConfig : (typeof require === "function" ? require("./site.config.js") : {});
 
+// Icon set: same Lucide-derived inline SVGs the static builders use.
+const benchIcons = (typeof window !== "undefined" && window.BenchIcons)
+  ? window.BenchIcons
+  : (typeof require === "function" ? require("./icons.js") : null);
+const benchIcon = (name, className) => benchIcons ? benchIcons.svgIcon(name, className) : "";
+const benchToolIcon = (group, id, emoji) => benchIcons ? benchIcons.toolIcon(group, id, emoji) : "";
+
 // Global DMC Palette References for Crafters
 // (The shared DMC floss table now lives in data/dmc.js — loaded as window.DMC_PALETTE
 // and consumed by pattern-studio.js for the cross-stitch / diamond / embroidery tools.)
@@ -231,8 +238,6 @@ const imageFromFile = async f => {
 };
 
 function layout({ tool, body }) {
-  const headerSearch = document.getElementById("header-search");
-  if (headerSearch) headerSearch.hidden = true;
   const related = TOOLS.filter(t => t.id !== tool.id && (t.cat === tool.cat || (["Images","Print & Craft"].includes(t.cat) && ["Images","Print & Craft"].includes(tool.cat)))).slice(0, 6);
   const hasTranslationBackend = tool.id === "pdf-translator";
 
@@ -265,11 +270,11 @@ function layout({ tool, body }) {
 
   app.innerHTML = `
     <nav class="tool-breadcrumb" aria-label="Breadcrumb">
-      <a href="/">All tools</a><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
+      <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${esc(tool.cat)}</span><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
     </nav>
     <section class="tool-head">
       <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-      <h1><span class="tool-head-icon" aria-hidden="true">${esc(tool.icon || "🧰")}</span>${esc(tool.keyword || tool.name)}</h1>
+      <h1><span class="tool-head-icon" data-icon="${esc(benchIcons ? benchIcons.iconName("core", tool.id, tool.icon) : "")}" aria-hidden="true">${benchToolIcon("core", tool.id, tool.icon)}</span>${esc(tool.keyword || tool.name)}</h1>
       <p>${esc(tool.desc)} ${hasTranslationBackend
         ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
         : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
@@ -318,14 +323,14 @@ function layout({ tool, body }) {
 
       <h2>Related ${esc(tool.cat)} Tools</h2>
       <div class="tool-links">
-        ${related.map(t => `<a href="/tools/${t.id}/">${esc(t.icon)} ${esc(t.name)}</a>`).join("")}
+        ${related.map(t => `<a href="/tools/${t.id}/">${benchToolIcon("core", t.id, t.icon)} ${esc(t.name)}</a>`).join("")}
       </div>
     </section>
   `;
 }
 
 function picker(multiple = false, accept = "*/*") {
-  return `<div class="drop" id="drop" role="button" tabindex="0" aria-label="Choose ${multiple ? "files" : "a file"} to process">
+  return `<div class="drop" id="drop" role="button" tabindex="0">
     <strong>Drop ${multiple ? "files" : "a file"} here</strong>
     <span>or click to browse from device</span>
     <input id="file" type="file" ${multiple ? "multiple" : ""} accept="${accept}" hidden>
@@ -1055,7 +1060,360 @@ async function panorama(f, rs) {
    photoTimeline() was retired. Duplicate Finder (2.3) and Best-Shot Finder
    (2.4) run inside the shared PhotoBatch engine (photo-batch-studio.js). */
 
+/* ---------- Search, suggestions and recently viewed ---------- */
+const BENCH_RECENT_KEY = "bench:recent-tools";
+let benchCatalogRender = null;
+
+function benchNormalize(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function benchReadRecent() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BENCH_RECENT_KEY) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(item => item && typeof item.href === "string" && typeof item.name === "string")
+      .slice(0, 6);
+  } catch (err) {
+    return [];
+  }
+}
+
+function benchRememberTool(href, name, icon) {
+  if (!href || !name) return;
+  try {
+    const iconName = (benchIcons && benchIcons.paths[icon]) ? icon : (benchIcons ? benchIcons.iconFromHref(href) : "");
+    const next = [{ href, name, icon: iconName, t: Date.now() }, ...benchReadRecent().filter(item => item.href !== href)].slice(0, 6);
+    localStorage.setItem(BENCH_RECENT_KEY, JSON.stringify(next));
+  } catch (err) { /* storage may be blocked or full */ }
+}
+
+function benchRememberCurrentTool() {
+  const match = location.pathname.match(/^\/(tools|image|audio)\/([^/]+)\/?$/);
+  if (!match) return;
+  const head = document.querySelector(".tool-head h1");
+  if (!head) return;
+  const iconEl = document.querySelector(".tool-head-icon");
+  const iconName = iconEl ? iconEl.dataset.icon : "";
+  const name = head.textContent.trim() || match[2].replace(/-/g, " ");
+  benchRememberTool(location.pathname, name, iconName);
+}
+
+let benchCategoryNames = null;
+
+/* Image/audio category ids are slugs ("image:compress"); show the readable
+   label from the hidden category select instead. */
+function benchCategoryName(value) {
+  if (!value) return "";
+  if (!benchCategoryNames) {
+    benchCategoryNames = new Map();
+    const select = document.getElementById("category-filter");
+    if (select) {
+      [...select.options].forEach(option => {
+        if (!option.value || option.value === "all") return;
+        benchCategoryNames.set(option.value, option.textContent.replace(/^(Core|Image|Audio)\s*·\s*/, "").trim());
+      });
+    }
+  }
+  return benchCategoryNames.get(value) || value;
+}
+
+function benchRenderRecent() {
+  const wrap = document.getElementById("recent-tools");
+  if (!wrap) return;
+  const items = benchReadRecent();
+  if (!items.length) {
+    wrap.hidden = true;
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.hidden = false;
+  wrap.innerHTML = `
+    <div class="recent-head">
+      <h2>Recently viewed</h2>
+      <button type="button" class="recent-clear" data-clear-recent>Clear</button>
+    </div>
+    <div class="recent-list">
+      ${items.map(item => `<a class="recent-item" href="${esc(item.href)}"><span class="recent-icon" aria-hidden="true">${benchIcon((benchIcons && benchIcons.paths[item.icon]) ? item.icon : (benchIcons ? benchIcons.iconFromHref(item.href) : ""))}</span><span>${esc(item.name)}</span></a>`).join("")}
+    </div>`;
+  const clear = wrap.querySelector("[data-clear-recent]");
+  if (clear) clear.addEventListener("click", () => {
+    try { localStorage.removeItem(BENCH_RECENT_KEY); } catch (err) { /* ignore */ }
+    benchRenderRecent();
+  });
+}
+
+function benchSearchIndex() {
+  return [...document.querySelectorAll("#grid .tool-card")].map(card => {
+    const title = card.querySelector("h3");
+    return {
+      href: card.getAttribute("href") || "/",
+      name: title ? title.textContent.trim() : "",
+      icon: card.dataset.icon || (benchIcons ? benchIcons.iconFromHref(card.getAttribute("href")) : ""),
+      category: benchCategoryName(card.dataset.category),
+      text: benchNormalize(`${card.dataset.search || ""} ${card.textContent}`)
+    };
+  }).filter(item => item.name);
+}
+
+function benchSearchMatches(index, query, limit) {
+  const terms = benchNormalize(query).split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  const scored = [];
+  index.forEach(item => {
+    const name = benchNormalize(item.name);
+    const category = benchNormalize(item.category);
+    let score = 0;
+    for (const term of terms) {
+      if (name.startsWith(term)) score += 8;
+      else if (name.includes(term)) score += 5;
+      else if (category.includes(term)) score += 2;
+      else if (item.text.includes(term)) score += 1;
+      else return;
+    }
+    scored.push({ item, score });
+  });
+  scored.sort((a, b) => b.score - a.score || a.item.name.localeCompare(b.item.name));
+  return scored.slice(0, limit || 7).map(entry => entry.item);
+}
+
+function installHeaderSearch() {
+  const input = document.getElementById("search");
+  const wrap = document.getElementById("header-search");
+  const panel = document.getElementById("search-suggestions");
+  const status = document.getElementById("search-status");
+  if (!input || !wrap || !panel) return;
+  // Checked per keystroke: the catalogue disappears when a tool view mounts.
+  const onHome = () => !!document.getElementById("grid");
+  let active = -1;
+
+  const close = () => {
+    panel.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    active = -1;
+  };
+
+  const visibleItems = () => [...panel.querySelectorAll(".search-suggestion")];
+
+  const setActive = index => {
+    const items = visibleItems();
+    if (!items.length) return;
+    active = (index + items.length) % items.length;
+    items.forEach((el, i) => {
+      el.classList.toggle("active", i === active);
+      el.setAttribute("aria-selected", i === active ? "true" : "false");
+    });
+    input.setAttribute("aria-activedescendant", items[active].id);
+    items[active].scrollIntoView({ block: "nearest" });
+  };
+
+  const paint = matches => {
+    if (!matches.length) { close(); return; }
+    panel.innerHTML = matches.map((item, i) => `
+      <a class="search-suggestion" role="option" id="search-option-${i}" href="${esc(item.href)}" tabindex="-1" aria-selected="false">
+        <span class="suggestion-icon" aria-hidden="true">${benchIcon(item.icon)}</span>
+        <span class="suggestion-text"><strong>${esc(item.name)}</strong><small>${esc(item.category)}</small></span>
+        <span class="suggestion-go" aria-hidden="true">↵</span>
+      </a>`).join("");
+    panel.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    active = -1;
+    if (status) status.textContent = `${matches.length} matching tools`;
+  };
+
+  const paintAllToolsHint = value => {
+    panel.innerHTML = `
+      <a class="search-suggestion search-suggestion-all" role="option" href="/?q=${encodeURIComponent(value)}" tabindex="-1" aria-selected="false">
+        <span class="suggestion-icon" aria-hidden="true">${benchIcon("search")}</span>
+        <span class="suggestion-text"><strong>Search all tools for “${esc(value)}”</strong><small>Opens the full catalogue</small></span>
+        <span class="suggestion-go" aria-hidden="true">↵</span>
+      </a>`;
+    panel.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    if (status) status.textContent = "Press Enter to search all tools";
+  };
+
+  const refresh = () => {
+    const value = input.value.trim();
+    if (onHome()) {
+      paint(benchSearchMatches(benchSearchIndex(), value, 7));
+      if (benchCatalogRender) benchCatalogRender();
+    } else if (value) {
+      paintAllToolsHint(value);
+    } else {
+      close();
+    }
+  };
+
+  input.addEventListener("input", refresh);
+  input.addEventListener("focus", () => { if (input.value.trim()) refresh(); });
+  input.addEventListener("keydown", event => {
+    if (event.key === "ArrowDown") { event.preventDefault(); setActive(active + 1); return; }
+    if (event.key === "ArrowUp") { event.preventDefault(); setActive(active - 1); return; }
+    if (event.key === "Enter") {
+      const items = visibleItems();
+      if (active >= 0 && items[active]) { event.preventDefault(); items[active].click(); return; }
+      if (onHome()) { event.preventDefault(); refresh(); }
+      else { event.preventDefault(); location.href = `/?q=${encodeURIComponent(input.value.trim())}`; }
+      return;
+    }
+    if (event.key === "Escape") {
+      if (!panel.hidden) { event.preventDefault(); close(); }
+      else if (input.value) { input.value = ""; refresh(); }
+    }
+  });
+  document.addEventListener("click", event => {
+    if (!wrap.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target;
+    if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)) return;
+    event.preventDefault();
+    input.focus();
+    input.select();
+  });
+}
+
+function initHomeCatalog() {
+  const grid = document.getElementById("grid");
+  if (!grid) return;
+  const searchEl = document.getElementById("search");
+  const toolkitSelect = document.getElementById("toolkit-filter");
+  const categorySelect = document.getElementById("category-filter");
+  const tabs = [...document.querySelectorAll("[data-toolkit-tab]")];
+  const chipRow = document.querySelector(".catalog-category-filters");
+  const countEl = document.querySelector(".grid-count");
+  const cards = [...grid.querySelectorAll(".tool-card")];
+  const total = cards.length;
+  let activeToolkit = "all";
+  let activeCategory = "all";
+
+  const index = new Map(cards.map(card => [card, benchNormalize(`${card.dataset.search || ""} ${card.textContent}`)]));
+  const categories = categorySelect
+    ? [...categorySelect.options].slice(1).map(option => {
+        const parts = option.value.split(":");
+        return { value: option.value, toolkit: parts[0], name: parts.slice(1).join(":") };
+      })
+    : [];
+
+  const renderChips = () => {
+    if (!chipRow) return;
+    const visible = categories.filter(item => activeToolkit === "all" || item.toolkit === activeToolkit);
+    chipRow.innerHTML = `<button class="category-filter-button${activeCategory === "all" ? " active" : ""}" type="button" data-category-tab="all" aria-pressed="${activeCategory === "all"}">All categories</button>`
+      + visible.map(item => `<button class="category-filter-button${activeCategory === item.value ? " active" : ""}" type="button" data-category-tab="${esc(item.value)}" aria-pressed="${activeCategory === item.value}">${esc(item.name)}</button>`).join("");
+  };
+
+  const render = () => {
+    const terms = benchNormalize(searchEl ? searchEl.value : "").split(/\s+/).filter(Boolean);
+    let visible = 0;
+    cards.forEach(card => {
+      const text = index.get(card) || "";
+      const matches = (activeToolkit === "all" || card.dataset.toolkit === activeToolkit)
+        && (activeCategory === "all" || card.dataset.category === activeCategory)
+        && terms.every(term => text.includes(term));
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    grid.querySelectorAll(".catalog-category").forEach(section => {
+      const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
+      section.hidden = count === 0;
+      const label = section.querySelector(".catalog-category-count");
+      if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
+    });
+    grid.querySelectorAll(".catalog-toolkit").forEach(section => {
+      const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
+      section.hidden = count === 0;
+      const label = section.querySelector(".catalog-group-count");
+      if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
+    });
+    if (countEl) countEl.innerHTML = visible === total ? `<strong>${total}</strong> tools` : `Showing <strong>${visible}</strong> of ${total} tools`;
+    tabs.forEach(tab => {
+      const on = tab.dataset.toolkitTab === activeToolkit;
+      tab.classList.toggle("active", on);
+      tab.setAttribute("aria-pressed", String(on));
+    });
+    if (toolkitSelect) toolkitSelect.value = activeToolkit;
+    if (categorySelect) categorySelect.value = activeCategory;
+    renderEmpty(visible);
+  };
+
+  const renderEmpty = visible => {
+    let empty = grid.querySelector(".search-empty");
+    if (visible === 0 && !empty) {
+      const query = searchEl && searchEl.value.trim();
+      empty = document.createElement("div");
+      empty.className = "empty search-empty";
+      empty.setAttribute("role", "status");
+      empty.innerHTML = `<p><strong>No tools match ${query ? `“${esc(query)}”` : "these filters"}.</strong> Try a shorter search or a different category.</p>
+        <div class="search-empty-actions">
+          <button class="btn secondary btn-sm" type="button" data-clear-filters>Clear search and filters</button>
+          <a class="btn secondary btn-sm" href="/image/">Browse image tools</a>
+          <a class="btn secondary btn-sm" href="/audio/">Browse audio tools</a>
+        </div>`;
+      grid.appendChild(empty);
+      const clear = empty.querySelector("[data-clear-filters]");
+      if (clear) clear.addEventListener("click", reset);
+    } else if (visible > 0 && empty) {
+      empty.remove();
+    }
+  };
+
+  const reset = () => {
+    activeToolkit = "all";
+    activeCategory = "all";
+    if (searchEl) searchEl.value = "";
+    renderChips();
+    render();
+  };
+
+  const setToolkit = value => {
+    activeToolkit = value;
+    if (activeCategory !== "all" && activeCategory.split(":")[0] !== value) activeCategory = "all";
+    renderChips();
+    render();
+  };
+
+  tabs.forEach(tab => tab.addEventListener("click", () => setToolkit(tab.dataset.toolkitTab)));
+  if (chipRow) chipRow.addEventListener("click", event => {
+    const chip = event.target.closest("[data-category-tab]");
+    if (!chip) return;
+    activeCategory = chip.dataset.categoryTab;
+    renderChips();
+    render();
+  });
+  document.querySelectorAll("[data-clear-filters]").forEach(button => button.addEventListener("click", reset));
+  if (toolkitSelect) toolkitSelect.addEventListener("change", () => setToolkit(toolkitSelect.value));
+  if (categorySelect) categorySelect.addEventListener("change", () => {
+    activeCategory = categorySelect.value;
+    renderChips();
+    render();
+  });
+
+  benchCatalogRender = () => render();
+  const initialQuery = new URLSearchParams(location.search).get("q");
+  if (initialQuery && searchEl) searchEl.value = initialQuery;
+  renderChips();
+  render();
+  benchRenderRecent();
+}
+
 function home() {
+  // If #app was replaced by a tool view earlier in this session, the catalogue
+  // markup is gone. Rebuilding it from JS would produce the legacy layout, so
+  // load the pre-rendered home document instead.
+  if (!document.getElementById("grid")) {
+    window.location.replace("/");
+    return;
+  }
+
   const topbar = document.querySelector(".topbar");
   let headerSearch = document.getElementById("header-search");
   if (!headerSearch && topbar) {
@@ -1080,136 +1438,17 @@ function home() {
   }
 
   const existingGrid = $("#grid");
-  const existingSearch = $("#search");
-  const existingToolkitFilter = $("#toolkit-filter");
-  const existingCategoryFilter = $("#category-filter");
-
-  const wireFilters = (searchEl, toolkitFilter, categoryFilter) => {
-    const normalize = value => String(value || "")
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, " ")
-      .trim();
-    const grid = $("#grid");
-    const cards = [...document.querySelectorAll("#grid .tool-card")];
-    const total = cards.length;
-    const searchIndex = new Map(cards.map(card => [
-      card,
-      normalize(`${card.dataset.search || ""} ${card.textContent}`)
-    ]));
-    const sectionHead = document.querySelector(".tools-section .section-head");
-    let categoryButtons = document.querySelector(".catalog-category-filters");
-    if (sectionHead && !categoryButtons) {
-      categoryButtons = document.createElement("div");
-      categoryButtons.className = "catalog-category-filters";
-      categoryButtons.setAttribute("role", "group");
-      categoryButtons.setAttribute("aria-label", "Filter tools by category");
-      const buttons = [...categoryFilter.options]
-        .filter(option => option.value !== "all")
-        .map(option => {
-          const label = option.textContent.trim();
-          const categoryName = label.replace(/^[^·]+·\s*/, "");
-          return `<button class="category-filter-button" type="button" data-category-filter="${esc(option.value)}" title="${esc(label)}" aria-label="${esc(label)}" aria-pressed="false">${esc(categoryName)}</button>`;
-        });
-      categoryButtons.innerHTML = `<button class="category-filter-button active" type="button" data-category-filter="all" aria-pressed="true">All categories</button>${buttons.join("")}`;
-      sectionHead.insertAdjacentElement("afterend", categoryButtons);
-      categoryButtons.addEventListener("click", event => {
-        const button = event.target.closest("[data-category-filter]");
-        if (!button) return;
-        categoryFilter.value = button.dataset.categoryFilter;
-        render();
-      });
-    }
-
-    const render = () => {
-      const queryTerms = normalize(searchEl.value).split(/\s+/).filter(Boolean);
-      const toolkit = toolkitFilter.value;
-      const category = categoryFilter.value;
-      if (categoryButtons) {
-        categoryButtons.querySelectorAll("[data-category-filter]").forEach(button => {
-          const active = button.dataset.categoryFilter === category;
-          button.classList.toggle("active", active);
-          button.setAttribute("aria-pressed", String(active));
-        });
-      }
-      const cards = [...document.querySelectorAll("#grid .tool-card")];
-      let visible = 0;
-      cards.forEach(card => {
-        const searchText = searchIndex.get(card) || "";
-        const matchesToolkit = toolkit === "all" || card.dataset.toolkit === toolkit;
-        const matchesCategory = category === "all" || card.dataset.category === category;
-        const matchesQuery = queryTerms.every(term => searchText.includes(term));
-        const matches = matchesToolkit && matchesCategory && matchesQuery;
-        card.hidden = !matches;
-        if (matches) visible++;
-      });
-
-      grid.querySelectorAll(".catalog-category").forEach(section => {
-        const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
-        section.hidden = count === 0;
-        const label = section.querySelector(".catalog-category-count");
-        if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
-      });
-      grid.querySelectorAll(".catalog-toolkit").forEach(section => {
-        const count = [...section.querySelectorAll(".tool-card")].filter(card => !card.hidden).length;
-        section.hidden = count === 0;
-        const label = section.querySelector(".catalog-group-count");
-        if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
-      });
-
-      const count = document.querySelector(".grid-count");
-      if (count) {
-        count.setAttribute("aria-live", "polite");
-        count.setAttribute("aria-atomic", "true");
-        count.innerHTML = `Showing <strong>${visible}</strong> of ${total} tools`;
-      }
-      let empty = grid && grid.querySelector(".search-empty");
-      if (grid && visible === 0 && !empty) {
-        empty = document.createElement("div");
-        empty.className = "empty search-empty";
-        empty.setAttribute("role", "status");
-        empty.innerHTML = `
-          <p>No tools match these filters. Try a different search or broaden your filters.</p>
-          <div class="search-empty-actions">
-            <button class="btn secondary btn-sm" type="button" data-clear-filters>Clear search and filters</button>
-            <a class="btn secondary btn-sm" href="/image/">Browse image tools</a>
-            <a class="btn secondary btn-sm" href="/audio/">Browse audio tools</a>
-          </div>`;
-        grid.appendChild(empty);
-        empty.querySelector("[data-clear-filters]").onclick = clearFilters;
-      } else if (visible > 0 && empty) {
-        empty.remove();
-      }
-    };
-
-    const clearFilters = () => {
-      searchEl.value = "";
-      toolkitFilter.value = "all";
-      categoryFilter.value = "all";
-      render();
-      searchEl.focus();
-    };
-
-    searchEl.addEventListener("input", render);
-    toolkitFilter.addEventListener("change", render);
-    categoryFilter.addEventListener("change", render);
-    document.querySelectorAll("[data-clear-filters]").forEach(button => {
-      button.addEventListener("click", clearFilters);
-    });
-    render();
-  };
-
-  if (existingGrid && existingSearch && existingToolkitFilter && existingCategoryFilter) {
-    wireFilters(existingSearch, existingToolkitFilter, existingCategoryFilter);
+  if (existingGrid) {
+    benchRenderRecent();
+    initHomeCatalog();
     return;
   }
 
   const trustHtml = [
-    { ico: "🔒", title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
-    { ico: "⚡", title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
-    { ico: "🙅", title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
-    { ico: "🧰", title: `${TOOLS.length + 42 + 48} tools across three toolkits`, body: `${TOOLS.length} core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers.` }
+    { ico: benchIcon("lock"), title: "Local processing by default", body: "Most selected files stay in your browser. PDF Translator sends extracted text to DeepL, not the PDF itself." },
+    { ico: benchIcon("zap"), title: "Instant, no waiting", body: "No queues, no render farms. Results appear as soon as you drop a file." },
+    { ico: benchIcon("user-round-x"), title: "No account, ever", body: "No signup, no passwords, no subscriptions. Open a tool and get to work." },
+    { ico: benchIcon("wrench"), title: `${TOOLS.length + 42 + 48} tools across three toolkits`, body: `${TOOLS.length} core utilities, 42 image tools, and 48 audio tools for crafters, creators and desk workers.` }
   ].map(f => `
     <div class="trust-item">
       <span class="t-ico" aria-hidden="true">${f.ico}</span>
@@ -1277,23 +1516,23 @@ function home() {
       <h3>${esc(cat)}</h3>
       <ul>
         ${TOOLS.filter(t => t.cat === cat).map(t => `
-          <li><a href="/tools/${t.id}/">${t.icon} ${esc(t.name)}</a> — <span class="cat-desc">${esc(t.desc.slice(0, 70))}…</span></li>
+          <li><a href="/tools/${t.id}/">${benchToolIcon("core", t.id, t.icon)} ${esc(t.name)}</a> — <span class="cat-desc">${esc(t.desc.slice(0, 70))}…</span></li>
         `).join('')}
       </ul>
     </div>
   `).join("");
 
   $("#grid").innerHTML = TOOLS.map(t => `
-    <a class="tool-card" href="/tools/${t.id}/" data-toolkit="core" data-category="${esc(`core:${t.cat}`)}" data-search="${esc(`${t.id} ${t.keyword || ""} ${t.desc}`)}">
+    <a class="tool-card" href="/tools/${t.id}/" data-toolkit="core" data-category="${esc(`core:${t.cat}`)}" data-icon="${esc(benchIcons ? benchIcons.iconName("core", t.id, t.icon) : "")}" data-search="${esc(`${t.id} ${t.keyword || ""} ${t.desc}`)}">
       <span class="go" aria-hidden="true">&rarr;</span>
-      <div class="icon" aria-hidden="true">${t.icon}</div>
+      <div class="icon" aria-hidden="true">${benchToolIcon("core", t.id, t.icon)}</div>
       <h2>${esc(t.name)}</h2>
       <p>${esc(t.desc)}</p>
       <span class="tag">${esc(t.cat)}</span>
     </a>
   `).join("");
 
-  wireFilters($("#search"), $("#toolkit-filter"), $("#category-filter"));
+  initHomeCatalog();
 }
 
 function toolPage(id) {
@@ -1303,7 +1542,7 @@ function toolPage(id) {
   if (id === "pdf-page-manager") {
     const body = `
       <section class="pdfpm" id="pdfpm" aria-busy="false">
-        <div class="pdfpm-drop" id="pdfpm-drop" role="button" tabindex="0" aria-label="Choose a PDF to edit">
+        <div class="pdfpm-drop" id="pdfpm-drop" role="button" tabindex="0">
           <strong>Drop a PDF here or choose a file</strong>
           <span>PDFs are read and edited locally · Maximum 50 MB and 150 pages</span>
           <input id="pdfpm-file" type="file" accept=".pdf,application/pdf" hidden>
@@ -1400,7 +1639,7 @@ function toolPage(id) {
   if (id === "pdf-translator") {
     const body = `
       <div class="pdf-translator" id="pdf-controls" aria-busy="false">
-        <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0" aria-label="Choose a PDF to translate">
+        <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0">
           <strong>Drop a PDF here</strong>
           <span>or choose a file from your device · maximum 15 MB and 30 pages</span>
           <input id="pdf-file" type="file" accept=".pdf,application/pdf" hidden>
@@ -1749,11 +1988,11 @@ function setActiveNav() {
   const path = location.pathname;
   document.querySelectorAll("#primary-nav a").forEach(a => {
     const href = a.getAttribute("href");
-    if (href && (path === href || (href !== "/" && path.startsWith(href)))) {
-      a.classList.add("active");
-    } else {
-      a.classList.remove("active");
-    }
+    const isHomeLink = href === "/" && (path === "/" || path.startsWith("/tools/"));
+    const isActive = isHomeLink || (href && href !== "/" && (path === href || path.startsWith(href)));
+    a.classList.toggle("active", !!isActive);
+    if (isActive) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
   });
 }
 
@@ -1770,8 +2009,6 @@ function route() {
   const path = location.pathname.replace(/^\/+/, "/") || "/";
   let p = path || hash || "/";
   p = p.replace(/\/+$/, "") || "/";
-  const headerSearch = document.getElementById("header-search");
-  if (headerSearch) headerSearch.hidden = p !== "/";
 
   leaveImageToolkit();
   leaveAudioToolkit();
@@ -1834,6 +2071,8 @@ function subtitleCheck(srtText) {
   return issues;
 }
 
+installHeaderSearch();
+benchRememberCurrentTool();
 addEventListener("hashchange", route);
 addEventListener("popstate", route);
 route();
@@ -1850,6 +2089,11 @@ document.addEventListener("click", e => {
   // client-side route change would leave the previous page's body in place and
   // keep its title/canonical, so let the browser load the real document.
   if (/^\/(about|privacy|terms|contact)(\/|$)/.test(href)) return;
+  const card = a.closest(".tool-card");
+  if (card) {
+    const cardTitle = card.querySelector("h3");
+    if (cardTitle) benchRememberTool(href, cardTitle.textContent.trim(), card.dataset.icon || "");
+  }
   e.preventDefault();
   history.pushState(null, "", href);
   closeMobileNav();
