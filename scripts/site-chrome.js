@@ -6,6 +6,7 @@
 const { SITE_NAME, TOOLS } = require('../site.config.js');
 const imageConfig = require('../image-tools.config.js');
 const audioConfig = require('../audio-tools.config.js');
+const brand = require('./brand.js');
 
 const esc = value => String(value == null ? '' : value)
   .replace(/&/g, '&amp;')
@@ -63,7 +64,7 @@ function siteHeader(options) {
   return `<header class="topbar" role="banner">
   <div class="topbar-row">
     <a class="brand" href="/" aria-label="${esc(SITE_NAME)} home">
-      <img src="/assets/favicon.svg" alt="" width="32" height="32" class="brand-logo">
+      <img src="${brand.logo}" alt="" width="32" height="32" class="brand-logo">
       <span class="brand-name">${esc(SITE_NAME)}</span>
     </a>
     ${searchHtml()}

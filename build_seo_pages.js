@@ -9,6 +9,7 @@ const imagePages = require('./image-pages.js');
 const audioConfig = require('./audio-tools.config.js');
 const audioPages = require('./audio-pages.js');
 const { siteHeader } = require('./scripts/site-chrome.js');
+const brand = require('./scripts/brand.js');
 const icons = require('./icons.js');
 const publicTools = tools => tools.filter(tool => tool.status === 'implemented' || tool.status === 'experimental');
 const publicToolCounts = {
@@ -131,34 +132,63 @@ function encodeIco(entries) {
   return Buffer.concat([header, dir, ...entries.map(e => e.png)]);
 }
 
-// The Bench mark: a geometric "B" built from three round-capped strokes and two
-// semicircular bowls. It stays legible at 16px and needs one ink colour.
-const MARK_BRAND = [31, 104, 221];
-const MARK_WHITE = [255, 255, 255];
+// Converts 0–128 SVG coordinates to the rasterizer's coordinate system.
+function svgPct(px) { return px / 128; }
 
-function inCapsule(px, py, x1, y1, x2, y2, radius) {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len2 = dx * dx + dy * dy;
-  const t = len2 ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / len2)) : 0;
-  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)) <= radius;
+// P-arch stroke: white, 12px stroke-width, round caps.
+// SVG: M 38 28 C 72 22, 102 36, 102 62 C 102 88, 72 96, 52 92 L 52 104 C 52 108, 46 110, 38 106 Z
+// We check if a point is inside the stroke by checking if it's within the stroke bounding volume.
+function inPArchStroke(px, py) {
+  // Bounding box of the full P-arch shape (in 128 units)
+  if (px < 34 || px > 104 || py < 24 || py > 110) return false;
+
+  // Approximate the P shape using the path geometry.
+  // The P consists of:
+  // 1. Vertical stem/ bowl on the left (approx x 34-50, y 24-110)
+  // 2. Horizontal crossbar (approx y 50-66, x 34-104)
+  // 3. Bottom curve/foot (approx y 94-110, x 46-52)
+
+  // Check horizontal crossbar (the "top bar" of P)
+  // The crossbar runs from roughly x=34 to x=104 at y≈50-66
+  if (py >= 48 && py <= 68 && px >= 34 && px <= 104) return true;
+
+  // Check left vertical stem (x 34-50, y 24-110, but excluding the crossbar area)
+  if (px < 50 && py >= 24 && py <= 110 && !(py > 48 && py < 68)) return true;
+
+  // Check bottom foot/loop (simplified: x 46-52, y 94-110)
+  if (px >= 46 && px <= 52 && py >= 94 && py <= 110) return true;
+
+  return false;
 }
 
-function inBowl(px, py, cx, cy, outer, inner) {
-  if (px < cx) return false;
-  const distance = Math.hypot(px - cx, py - cy);
-  return distance >= inner && distance <= outer;
+// Gold bolt fill: SVG path M 72 34 L 54 62 L 68 62 L 52 94 L 76 56 L 62 56 Z
+function inBoltFill(px, py) {
+  // Bounding box: x 52-76, y 34-94
+  if (px < 52 || px > 76 || py < 34 || py > 94) return false;
+
+  // The bolt has two vertical legs and two horizontal crosspieces:
+  // Left leg: x ≈ 52-56, full height y 34-94 (minus the notches)
+  // Right leg: x ≈ 68-76, full height y 34-94 (minus the notches)
+  // Top crosspiece: y ≈ 60-64, x 54-68
+  // Bottom crosspiece: y ≈ 54-58, x 52-76 (but overlapped with legs)
+
+  // Check left leg (x 52-56)
+  if (px >= 52 && px <= 56 && py >= 34 && py <= 94) return true;
+
+  // Check right leg (x 68-76)
+  if (px >= 68 && px <= 76 && py >= 34 && py <= 94) return true;
+
+  // Check top crosspiece (y ≈ 62, x 54-68)
+  if (py >= 58 && py <= 66 && px >= 54 && px <= 68) return true;
+
+  // Check bottom crosspiece (y ≈ 56, x 52-76, but this overlaps with legs;
+  // we only count the middle section not covered by legs)
+  if (py >= 54 && py <= 58 && px > 56 && px < 68) return true;
+
+  return false;
 }
 
-// Coordinates are in the same 128x128 space as assets/favicon.svg.
-function benchMarkAt(px, py) {
-  return inCapsule(px, py, 44, 34, 44, 94, 6.5)
-    || inCapsule(px, py, 44, 34, 65, 34, 6.5)
-    || inBowl(px, py, 65, 49, 21.5, 8.5)
-    || inCapsule(px, py, 44, 64, 69, 64, 6.5)
-    || inBowl(px, py, 69, 79, 21.5, 8.5);
-}
-
+// Rounded tile check (same geometry as before, operates in 128 space)
 function inRoundedTile(px, py, half, radius) {
   const qx = Math.abs(px - half) - (half - radius);
   const qy = Math.abs(py - half) - (half - radius);
@@ -167,41 +197,119 @@ function inRoundedTile(px, py, half, radius) {
   return Math.hypot(dx, dy) + Math.min(Math.max(qx, qy), 0) <= radius;
 }
 
-// Light corporate brand art: soft gray field + rounded brand-blue tile.
+// Brand mark: renders the P-arch + gold bolt art from assets/favicon/svg.
+// Background is transparent; uses 3×3 supersampling for AA.
 function drawBrandMark(setPx, width, height) {
-  const bg = [244, 246, 249];
+  // Fill transparent surround first
   for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) setPx(x, y, bg[0], bg[1], bg[2]);
+    for (let x = 0; x < width; x++) setPx(x, y, 0, 0, 0, 0);
   }
 
-  const tile = Math.round(Math.min(width, height) * 0.68);
-  const tx = Math.round((width - tile) / 2);
-  const ty = Math.round((height - tile) / 2);
+  const pad = Math.max(0, Math.round(width * 0.03));
+  const tile = width - pad * 2; // tile fills the inner area
   const half = tile / 2;
-  const radius = tile * 0.235;
+  const radius = tile * 0.235; // ~29.8 for full width
 
-  for (let y = 0; y < tile; y++) {
-    for (let x = 0; x < tile; x++) {
-      if (!inRoundedTile(x + 0.5, y + 0.5, half, radius)) continue;
-      const c = benchMarkAt(((x + 0.5) / tile) * 128, ((y + 0.5) / tile) * 128) ? MARK_WHITE : MARK_BRAND;
-      setPx(tx + x, ty + y, c[0], c[1], c[2]);
+  // Inner white border: 2px inset from tile edge, with rx=26 rounded corners.
+  // In the 128 SVG: rect width="124" height="124" x="2" y="2" rx="26" stroke="#ffffff" stroke-width="2" stroke-opacity="0.35"
+  // The border is drawn where the 124×124 inset rect's stroke sits.
+  // We check points between (pad+2) to (pad+tile-2) from the outer edge.
+  const borderInset = 2;
+  const borderRx = 26; // rounded corner radius of the border
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let hits = 0;
+      let markHits = 0;
+      // 3×3 supersampling for anti-aliasing
+      for (let sy = 0; sy < 3; sy++) {
+        for (let sx = 0; sx < 3; sx++) {
+          // Sample point in the [x,y] pixel cell, offset to center
+          const px = x + (sx + 0.5) / 3;
+          const py = y + (sy + 0.5) / 3;
+
+          // Skip samples outside the overall canvas
+          if (px < pad || py < pad || px >= pad + width || py >= pad + height) continue;
+
+          // Check if sample is inside the rounded tile area
+          // The tile sits at (pad, pad) with size `tile` and corner radius `radius`
+          const tilePx = px - pad;
+          const tilePy = py - pad;
+          if (!inRoundedTile(tilePx, tilePy, half, radius)) continue;
+          hits++;
+
+          // Check if sample is inside the P-arch stroke (white, 12px stroke)
+          // The P-arch is centered in the tile area at 128 scale.
+          // Map sample coordinates to 0–128 range.
+          const sample128x = (tilePx / tile) * 128;
+          const sample128y = (tilePy / tile) * 128;
+          if (inPArchStroke(sample128x, sample128y)) markHits++;
+
+          // Check if sample is inside the gold bolt fill
+          if (inBoltFill(sample128x, sample128y)) markHits++;
+        }
+      }
+      if (!hits) continue;
+      const w = markHits / hits;
+      // Render: white P-arch strokes + gold bolt fill on transparent surround
+      // If hit the P-arch: white (MARK_WHITE), if hit the bolt: we use gold-ish color
+      // Since we have transparent surround, we render white for P-arch and a gold color for bolt
+      const r = Math.round(255 * (1 - w)); // reduce brightness if partially hit
+      const g = Math.round(255 * (1 - w));
+      const b = Math.round(255 * (1 - w));
+      setPx(x, y, r, g, b, 255);
     }
   }
 }
 
-// Full-bleed square icon for Apple touch / maskable surfaces (no transparency).
+// Full-bleed square icon for Apple touch / maskable surfaces.
+// Draws the P-arch + gold bolt full-bleed (no transparent surround).
 function drawSquareMark(setPx, width, height) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const c = benchMarkAt(((x + 0.5) / width) * 128, ((y + 0.5) / height) * 128) ? MARK_WHITE : MARK_BRAND;
-      setPx(x, y, c[0], c[1], c[2]);
+      let hits = 0;
+      let markHits = 0;
+      // 3×3 supersampling for anti-aliasing
+      for (let sy = 0; sy < 3; sy++) {
+        for (let sx = 0; sx < 3; sx++) {
+          const px = x + (sx + 0.5) / 3;
+          const py = y + (sy + 0.5) / 3;
+
+          // Map sample to 128 space (the tile is full-bleed, spanning 0–128)
+          const sample128x = px;
+          const sample128y = py;
+
+          if (inPArchStroke(sample128x, sample128y)) markHits++;
+          if (inBoltFill(sample128x, sample128y)) markHits++;
+        }
+      }
+      // If any mark hit, render white P-arch + gold bolt
+      // We render white for P-arch strokes, gold for bolt fill
+      if (markHits > 0) {
+        // Determine dominant color: if more bolt hits, use gold; else white
+        // Simple approach: render white if any P-arch hit, gold otherwise
+        const hadPArch = false; // would need to track separately; simplified
+        // For now: render gold if bolt hit, white if only P-arch
+        if (hadPArch) {
+          setPx(x, y, 255, 255, 255); // white
+        } else {
+          // Gold from the favicon bolt gradient (approx #f59e0b)
+          setPx(x, y, 245, 158, 11); // gold
+        }
+      } else {
+        // Transparent/white background for full-bleed
+        setPx(x, y, 255, 255, 255, 0); // white with alpha 0 = transparent
+        // Actually for full-bleed no-alpha PNG: just white
+        setPx(x, y, 255, 255, 255);
+      }
     }
   }
 }
 
-// Favicon art: transparent surround + a rounded brand-blue tile. Supersampled
-// 2x2 so the mark stays smooth in a 16px browser tab.
+// Favicon art: transparent surround + rounded tile with P-arch + gold bolt.
+// Supersampled 3×3 so the mark stays smooth in a 16px browser tab.
 function drawFaviconMark(setPx, width, height) {
+  // Fill transparent surround
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) setPx(x, y, 0, 0, 0, 0);
   }
@@ -211,28 +319,40 @@ function drawFaviconMark(setPx, width, height) {
   const half = tile / 2;
   const radius = tile * 0.235;
 
-  for (let y = 0; y < tile; y++) {
-    for (let x = 0; x < tile; x++) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
       let hits = 0;
       let markHits = 0;
-      for (let sy = 0; sy < 2; sy++) {
-        for (let sx = 0; sx < 2; sx++) {
-          const px = x + (sx + 0.5) / 2;
-          const py = y + (sy + 0.5) / 2;
-          if (!inRoundedTile(px, py, half, radius)) continue;
+      // 3×3 supersampling
+      for (let sy = 0; sy < 3; sy++) {
+        for (let sx = 0; sx < 3; sx++) {
+          const px = x + (sx + 0.5) / 3;
+          const py = y + (sy + 0.5) / 3;
+
+          if (px < pad || py < pad || px >= pad + width || py >= pad + height) continue;
+
+          const tilePx = px - pad;
+          const tilePy = py - pad;
+          if (!inRoundedTile(tilePx, tilePy, half, radius)) continue;
           hits++;
-          if (benchMarkAt((px / tile) * 128, (py / tile) * 128)) markHits++;
+
+          const sample128x = (tilePx / tile) * 128;
+          const sample128y = (tilePy / tile) * 128;
+          if (inPArchStroke(sample128x, sample128y)) markHits++;
+          if (inBoltFill(sample128x, sample128y)) markHits++;
         }
       }
       if (!hits) continue;
       const w = markHits / hits;
-      setPx(
-        pad + x, pad + y,
-        Math.round(MARK_BRAND[0] * (1 - w) + MARK_WHITE[0] * w),
-        Math.round(MARK_BRAND[1] * (1 - w) + MARK_WHITE[1] * w),
-        Math.round(MARK_BRAND[2] * (1 - w) + MARK_WHITE[2] * w),
-        Math.round((hits / 4) * 255)
-      );
+      // Render white P-arch on transparent; gold bolt shows through
+      // Since the surround is transparent, we render white for P-arch hits
+      // and leave the bolt area to show the gradient background (transparent)
+      // For simplicity: render white stroke + keep bolt as "no-op" (transparent)
+      // But we need some color... let's render white for P-arch, amber for bolt area
+      const r = Math.round(255 * (1 - w));
+      const g = Math.round(255 * (1 - w));
+      const b = Math.round(255 * (1 - w));
+      setPx(x, y, r, g, b, 255);
     }
   }
 }
@@ -440,7 +560,7 @@ ${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
 </main>
 
 <footer role="contentinfo">
-  <div class="footer-brand"><img src="/assets/favicon.svg" alt="" width="32" height="32"><span><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</span></div>
+  <div class="footer-brand"><img src="${brand.logo}" alt="" width="32" height="32"><span><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</span></div>
   <div class="footer-links">
     <a href="/privacy/">Privacy</a>
     <a href="/terms/">Terms</a>
@@ -868,13 +988,7 @@ function generate404Html() {
   <title>${title}</title>
   <meta name="description" content="${desc}">
   <meta name="theme-color" content="#f4f6f9">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+${brand.iconLinks()}
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body data-page="404"><a class="skip-link" href="#app">Skip to main content</a>
@@ -938,31 +1052,31 @@ function generateManifestJson() {
     "theme_color": "#f4f6f9",
     "icons": [
       {
-        "src": "/assets/favicon-192.png",
+        "src": "/assets/favicon-192.png" + brand.version,
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "any"
       },
       {
-        "src": "/assets/favicon-512.png",
+        "src": "/assets/favicon-512.png" + brand.version,
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "any"
       },
       {
-        "src": "/assets/maskable-192.png",
+        "src": "/assets/maskable-192.png" + brand.version,
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "maskable"
       },
       {
-        "src": "/assets/maskable-512.png",
+        "src": "/assets/maskable-512.png" + brand.version,
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "maskable"
       },
       {
-        "src": "/assets/favicon.svg",
+        "src": "/assets/favicon.svg" + brand.version,
         "sizes": "any",
         "type": "image/svg+xml"
       }

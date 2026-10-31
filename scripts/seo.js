@@ -12,6 +12,7 @@
  *   - output is HTML-escaped unless a helper explicitly says otherwise.
  */
 const site = require('../site.config.js');
+const brand = require('./brand.js');
 
 const SITE_URL = site.SITE_URL;
 const SITE_NAME = site.SITE_NAME;
@@ -241,13 +242,7 @@ function headMeta({ title, description, canonicalUrl, imageAlt, noindex, schema 
   <meta name="robots" content="${robotsContent(noindex)}">
   <meta name="author" content="${esc(PARENT_BRAND)}">
 ${socialMeta({ title, description, canonicalUrl, imageAlt })}
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+${brand.iconLinks()}
   <link rel="stylesheet" href="/styles.css">
   <link rel="canonical" href="${esc(canonicalUrl)}">
 ${discoveryLinks()}${schema ? `\n  <script type="application/ld+json" id="schema">${jsonLd(schema)}</script>` : ''}`;

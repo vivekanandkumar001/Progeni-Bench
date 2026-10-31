@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Bench logo">
-  <rect width="128" height="128" rx="30" fill="#1f68dd"/>
-  <g fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M44 34v60"/>
-    <path d="M44 34h21a15 15 0 0 1 0 30H44"/>
-    <path d="M44 64h25a15 15 0 0 1 0 30H44"/>
-  </g>
-</svg>
