@@ -2630,11 +2630,11 @@ footer{
   width:100%;
   background:linear-gradient(180deg,var(--surface) 0%,var(--card) 100%);
   border-top:1px solid var(--line);
-  padding:clamp(30px,4vw,52px) max(var(--container-pad),calc((100vw - var(--container))/2));
+  padding:clamp(18px,2.5vw,32px) max(var(--container-pad),calc((100vw - var(--container))/2));
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
-  gap:20px 32px;
+  gap:14px 24px;
   font-size:var(--font-sm);
   color:var(--muted);
 }
