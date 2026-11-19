@@ -318,7 +318,7 @@ function layout({ tool, body }) {
       ${faqList.length > 0 ? `
       <h2>Frequently asked questions</h2>
       <div class="faq-list">
-        ${faqList.map(f => `<div class="faq-item" style="margin: 14px 0;"><strong>${esc(f.q)}</strong><p style="margin: 4px 0 0 0; color: var(--muted);">${esc(f.a)}</p></div>`).join("")}
+        ${faqList.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(f.a)}</p></div>`).join("")}
       </div>
       ` : ""}
 

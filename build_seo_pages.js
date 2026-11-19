@@ -520,7 +520,7 @@ ${siteHeader({ active: 'home' })}
     ${faq.length > 0 ? `
     <h2>Frequently asked questions</h2>
     <div class="faq-list">
-      ${faq.map(f => `<div class="faq-item" style="margin: 14px 0;"><strong>${f.q}</strong><p style="margin: 4px 0 0 0; color: var(--muted);">${f.a}</p></div>`).join('\n      ')}
+      ${faq.map(f => `<div class="faq-item"><strong>${f.q}</strong><p>${f.a}</p></div>`).join('\n      ')}
     </div>
     ` : ''}
 
@@ -529,16 +529,14 @@ ${siteHeader({ active: 'home' })}
 
     <h2>Related ${tool.cat} tools</h2>
     <div class="tool-links">
-      <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        ${related.map(r => `<li><a href="/tools/${r.id}/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a></li>`).join('\n        ')}
-      </ul>
-    </div>
+      <div class="tool-links">
+        ${related.map(r => `<a href="/tools/${r.id}/">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a>`).join('\n        ')}
+      </div>
 
     <h2>Browse all ${tool.cat} tools</h2>
-    <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
-      ${TOOLS.filter(t => t.cat === tool.cat && t.id !== tool.id).map(t => `<a href="/tools/${t.id}/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
-${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
+    <p class="browse-all-intro">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
+    <div class="browse-all">
+      ${TOOLS.filter(t => t.cat === tool.cat && t.id !== tool.id).map(t => `<a href="/tools/${t.id}/">${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
     </div>
     </div>
   </details>
