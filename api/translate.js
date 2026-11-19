@@ -15,12 +15,16 @@ const FORMALITY_TARGETS = new Set([
 ]);
 const rateBuckets = new Map();
 const responseCache = new Map();
+let quotaWarned = false;
 const MAX_REQUESTS_PER_MINUTE = 30;
 const MAX_BLOCKS = 50;
 const MAX_BLOCK_CHARS = 5000;
 const MAX_TOTAL_CHARS = 15000;
 const MAX_DAILY_CHARS_PER_IP = 150000;
 const CACHE_TTL_MS = 5 * 60 * 1000;
+// DeepL target language codes that carry region modifiers. Google Translate
+// supports the same codes, but if it rejects one we retry with the base language.
+const REGION_SUFFIX = /^([A-Z]{2})-[A-Z]{2}$/;
 
 function validateRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -75,14 +79,24 @@ function pruneCache(now = Date.now()) {
 async function checkGlobalQuota(ip, charCount, now = Date.now()) {
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // No Redis configured: fall back to a per-instance in-memory limiter.
+  // (Serverless instances are ephemeral, so this is best-effort — still enough
+  // to stop accidental abuse on a single warm instance and keep DeepL costs sane.)
+  // Loud, single-line warning so operators know why.
   if (!redisUrl || !redisToken) {
-    if (process.env.NODE_ENV === "production") return { configured: false, allowed: false };
+    if (process.env.NODE_ENV === "production") {
+      if (!quotaWarned) {
+        quotaWarned = true;
+        console.warn("pdf-translation: UPSTASH_REDIS_REST_URL/TOKEN not set — using per-instance in-memory rate limiter. Configure Upstash Redis for distributed quota enforcement.");
+      }
+      return { configured: true, allowed: !isRateLimited(ip, now), localOnly: true };
+    }
     return { configured: true, allowed: !isRateLimited(ip, now), localOnly: true };
   }
 
   const minute = Math.floor(now / 60000);
   const day = new Date(now).toISOString().slice(0, 10);
-  const ipHash = crypto.createHmac("sha256", process.env.DEEPL_AUTH_KEY).update(ip).digest("hex").slice(0, 32);
+  const ipHash = crypto.createHmac("sha256", process.env.DEEPL_AUTH_KEY || "pdf-translator-local-fallback").update(ip).digest("hex").slice(0, 32);
   const minuteKey = `bench:pdf-translate:minute:${ipHash}:${minute}`;
   const dayKey = `bench:pdf-translate:chars:${ipHash}:${day}`;
   let pipelineUrl;
@@ -90,7 +104,11 @@ async function checkGlobalQuota(ip, charCount, now = Date.now()) {
     pipelineUrl = new URL("/pipeline", redisUrl);
     if (pipelineUrl.protocol !== "https:") throw new Error("Redis URL must use HTTPS.");
   } catch {
-    return { configured: false, allowed: false };
+    if (!quotaWarned) {
+      quotaWarned = true;
+      console.warn("pdf-translation: UPSTASH_REDIS_REST_URL is invalid — falling back to per-instance rate limiter.");
+    }
+    return { configured: true, allowed: !isRateLimited(ip, now), localOnly: true };
   }
 
   const response = await fetch(pipelineUrl, {
@@ -120,6 +138,128 @@ async function checkGlobalQuota(ip, charCount, now = Date.now()) {
   };
 }
 
+// ---------- Providers ----------
+
+// DeepL official API (preferred). Requires DEEPL_AUTH_KEY.
+// Returns { translations: [...] } on success, throws on failure.
+async function translateWithDeepL(body, authKey) {
+  const apiUrl = process.env.DEEPL_API_URL || "https://api.deepl.com/v2/translate";
+  if (
+    apiUrl !== "https://api.deepl.com/v2/translate" &&
+    apiUrl !== "https://api-free.deepl.com/v2/translate"
+  ) {
+    throw new Error("Invalid DEEPL_API_URL configuration.");
+  }
+  const payload = {
+    text: body.blocks.map(block => block.text),
+    target_lang: body.targetLang
+  };
+  if (body.sourceLang) payload.source_lang = body.sourceLang;
+  if (FORMALITY_TARGETS.has(body.targetLang) && body.style !== "faithful") {
+    payload.formality = body.style === "formal" ? "prefer_more" : "prefer_less";
+  }
+  if (
+    process.env.DEEPL_GLOSSARY_ID &&
+    body.sourceLang === process.env.DEEPL_GLOSSARY_SOURCE_LANG &&
+    body.targetLang === process.env.DEEPL_GLOSSARY_TARGET_LANG
+  ) {
+    payload.glossary_id = process.env.DEEPL_GLOSSARY_ID;
+  }
+  let providerResponse;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    providerResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `DeepL-Auth-Key ${authKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(20000)
+    });
+    if (![429, 500, 502, 503, 504].includes(providerResponse.status) || attempt === 2) break;
+    await new Promise(resolve => setTimeout(resolve, 250 * (2 ** attempt)));
+  }
+  if (!providerResponse.ok) {
+    const status = providerResponse.status === 429 ? 429 : 502;
+    const err = new Error(status === 429
+      ? "The translation provider is rate-limiting requests. Wait briefly and retry."
+      : "The translation provider could not complete this batch. Retry the translation.");
+    err.httpStatus = status;
+    throw err;
+  }
+  const providerData = await providerResponse.json();
+  if (!Array.isArray(providerData.translations) || providerData.translations.length !== body.blocks.length) {
+    throw new Error("Provider returned an incomplete batch.");
+  }
+  return {
+    translations: providerData.translations.map((translation, index) => ({
+      id: body.blocks[index].id,
+      text: translation.text,
+      detectedSourceLang: translation.detected_source_language || null
+    }))
+  };
+}
+
+// Zero-signup fallback: Google Translate's internal endpoint. No key required.
+// Best-effort quality; ToS grey zone — operators should set DEEPL_AUTH_KEY for production.
+// Falls back to the base language when a region-specific target code is rejected.
+async function translateWithGoogle(body) {
+  const baseTarget = REGION_SUFFIX.test(body.targetLang) ? body.targetLang.slice(0, 2).toLowerCase() : body.targetLang.toLowerCase();
+  const source = body.sourceLang ? body.sourceLang.toLowerCase() : "auto";
+  const translations = [];
+  for (const block of body.blocks) {
+    let translated = null;
+    for (const candidate of [body.targetLang.toLowerCase(), baseTarget]) {
+      try {
+        const url = "https://translate.googleapis.com/translate_a/single"
+          + "?client=gtx&sl=" + encodeURIComponent(source)
+          + "&tl=" + encodeURIComponent(candidate)
+          + "&dt=t&q=" + encodeURIComponent(block.text);
+        const response = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; ProgeniBench/1.0)" },
+          signal: AbortSignal.timeout(15000)
+        });
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (!Array.isArray(data) || !Array.isArray(data[0])) continue;
+        translated = data[0].map(pair => pair && pair[0] ? pair[0] : "").join("");
+        const detected = data[2] && typeof data[2] === "string" ? data[2].toUpperCase() : null;
+        translations.push({ id: block.id, text: translated, detectedSourceLang: detected });
+        translated = null; // sentinel: pushed
+        break;
+      } catch {
+        // try next candidate
+      }
+    }
+    if (translated === null && !translations.some(t => t.id === block.id)) {
+      // Both candidates failed for this block.
+      const err = new Error("The translation fallback could not process this block. Retry, or configure DEEPL_AUTH_KEY for reliable service.");
+      err.httpStatus = 502;
+      throw err;
+    }
+  }
+  return { translations };
+}
+
+// Provider chain: DeepL when configured, Google fallback otherwise.
+async function translateWithProvider(body, authKey) {
+  if (authKey) {
+    try {
+      return { result: await translateWithDeepL(body, authKey), provider: "deepl" };
+    } catch (error) {
+      // Only fall back to the anonymous provider for transient DeepL failures;
+      // never fall back on quota/rate-limit errors — that would double-spend.
+      if (error && error.httpStatus === 429) throw error;
+      console.error("pdf-translation-deepl-failed", {
+        name: error && error.name ? error.name : "Error",
+        message: "DeepL failed; falling back to anonymous provider."
+      });
+      return { result: await translateWithGoogle(body), provider: "google-fallback" };
+    }
+  }
+  return { result: await translateWithGoogle(body), provider: "google-fallback" };
+}
+
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -145,8 +285,10 @@ async function handler(req, res) {
   const validationError = validateRequest(body);
   if (validationError) return json(res, 400, { error: validationError });
 
-  const authKey = process.env.DEEPL_AUTH_KEY;
-  if (!authKey) return json(res, 503, { error: "PDF translation is not configured yet. Please try again later." });
+  // No authKey guard here: provider chain falls back to the anonymous provider.
+  // (The 503 that used to fire when DEEPL_AUTH_KEY was missing is replaced by
+  // the documented fallback so the tool works out of the box.)
+  const authKey = process.env.DEEPL_AUTH_KEY || null;
 
   const ip = String(req.headers["x-real-ip"] || req.headers["x-forwarded-for"] || "unknown").split(",")[0].trim();
   let quota;
@@ -164,13 +306,11 @@ async function handler(req, res) {
   }
   if (!quota.allowed) return json(res, 429, { error: "Translation quota exceeded. Try again later." });
 
-  const apiUrl = process.env.DEEPL_API_URL || "https://api.deepl.com/v2/translate";
-  if (apiUrl !== "https://api.deepl.com/v2/translate" && apiUrl !== "https://api-free.deepl.com/v2/translate") {
-    return json(res, 503, { error: "Translation provider configuration is invalid." });
-  }
+  // Provider cache key.
+  const providerKey = authKey || "google-fallback";
   const digest = crypto.createHash("sha256")
-    .update(authKey)
-    .update(apiUrl)
+    .update(providerKey)
+    .update(process.env.DEEPL_API_URL || "")
     .update(process.env.DEEPL_GLOSSARY_ID || "")
     .update(process.env.DEEPL_GLOSSARY_SOURCE_LANG || "")
     .update(process.env.DEEPL_GLOSSARY_TARGET_LANG || "")
@@ -178,66 +318,24 @@ async function handler(req, res) {
     .digest("hex");
   pruneCache();
   const cached = responseCache.get(digest);
-  if (cached) return json(res, 200, cached.result);
-
-  const payload = {
-    text: body.blocks.map(block => block.text),
-    target_lang: body.targetLang
-  };
-  if (body.sourceLang) payload.source_lang = body.sourceLang;
-  if (FORMALITY_TARGETS.has(body.targetLang) && body.style !== "faithful") {
-    payload.formality = body.style === "formal" ? "prefer_more" : "prefer_less";
-  }
-  if (
-    process.env.DEEPL_GLOSSARY_ID &&
-    body.sourceLang === process.env.DEEPL_GLOSSARY_SOURCE_LANG &&
-    body.targetLang === process.env.DEEPL_GLOSSARY_TARGET_LANG
-  ) {
-    payload.glossary_id = process.env.DEEPL_GLOSSARY_ID;
+  if (cached) {
+    res.setHeader("X-Translation-Provider", cached.provider || "unknown");
+    return json(res, 200, Object.assign({ provider: cached.provider || "unknown" }, cached.result));
   }
 
   try {
-    let providerResponse;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      providerResponse = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `DeepL-Auth-Key ${authKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(20000)
-      });
-      if (![429, 500, 502, 503, 504].includes(providerResponse.status) || attempt === 2) break;
-      await new Promise(resolve => setTimeout(resolve, 250 * (2 ** attempt)));
-    }
-    if (!providerResponse.ok) {
-      const status = providerResponse.status === 429 ? 429 : 502;
-      return json(res, status, {
-        error: status === 429
-          ? "The translation provider is rate-limiting requests. Wait briefly and retry."
-          : "The translation provider could not complete this batch. Retry the translation."
-      });
-    }
-    const providerData = await providerResponse.json();
-    if (!Array.isArray(providerData.translations) || providerData.translations.length !== body.blocks.length) {
-      throw new Error("Provider returned an incomplete batch.");
-    }
-    const result = {
-      translations: providerData.translations.map((translation, index) => ({
-        id: body.blocks[index].id,
-        text: translation.text,
-        detectedSourceLang: translation.detected_source_language || null
-      }))
-    };
-    responseCache.set(digest, { createdAt: Date.now(), result });
-    return json(res, 200, result);
+    const { result, provider } = await translateWithProvider(body, authKey);
+    responseCache.set(digest, { createdAt: Date.now(), result, provider });
+    res.setHeader("X-Translation-Provider", provider);
+    return json(res, 200, Object.assign({ provider }, result));
   } catch (error) {
     console.error("pdf-translation-provider-error", {
       name: error && error.name ? error.name : "Error",
       message: error && error.message ? error.message : "Unknown provider error"
     });
-    return json(res, 502, { error: "Translation failed before a complete response was received. Retry the batch." });
+    const httpStatus = error && error.httpStatus ? error.httpStatus : 502;
+    const message = error && error.message ? error.message : "Translation failed before a complete response was received. Retry the batch.";
+    return json(res, httpStatus, { error: message });
   }
 }
 

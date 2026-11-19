@@ -35,15 +35,20 @@ client-side code.
 
 1. Create a DeepL API key. The default endpoint is the paid API. For a DeepL
    Free API key, set `DEEPL_API_URL` to
-   `https://api-free.deepl.com/v2/translate`.
-2. Provision an Upstash Redis database with its REST API enabled.
+   `https://api-free.deepl.com/v2/translate`. (Optional — without it, the
+   tool falls back to an anonymous Google Translate endpoint, though quality
+   and reliability are lower and the ToS of that endpoint is grey-zone.)
+2. Provision an Upstash Redis database with its REST API enabled. (Optional —
+   without it, each Function instance keeps its own in-memory rate limiter;
+   this is best-effort on serverless because instances are ephemeral, but it
+   is enough to stop accidental bursts on a warm instance.)
 3. Set these variables for the Vercel environments that will serve the tool:
 
    | Variable | Required | Purpose |
    | --- | --- | --- |
-   | `DEEPL_AUTH_KEY` | Yes | Server-only DeepL authentication key |
-   | `UPSTASH_REDIS_REST_URL` | Yes in production | HTTPS REST URL used for global quotas |
-   | `UPSTASH_REDIS_REST_TOKEN` | Yes in production | Upstash REST bearer token |
+   | `DEEPL_AUTH_KEY` | No | Server-only DeepL authentication key. When unset, an anonymous Google Translate endpoint is used as a fallback provider |
+   | `UPSTASH_REDIS_REST_URL` | No | HTTPS REST URL used for global quotas. When unset, a per-instance in-memory limiter is used instead |
+   | `UPSTASH_REDIS_REST_TOKEN` | No | Upstash REST bearer token |
    | `DEEPL_API_URL` | No | Paid or Free DeepL translation endpoint |
    | `DEEPL_GLOSSARY_ID` | No | DeepL glossary ID |
    | `DEEPL_GLOSSARY_SOURCE_LANG` | No | Source language for that glossary |
@@ -52,6 +57,15 @@ client-side code.
    A glossary is applied only when the request's explicit source and target
    match the configured glossary language pair. Auto-detected source language
    requests do not use a glossary.
+
+   Provider selection order: DeepL (if `DEEPL_AUTH_KEY` is set) → anonymous
+   Google Translate fallback. The `X-Translation-Provider` response header
+   reports which one served the request (`deepl` or `google-fallback`).
+   The DeepL provider is retried up to 3 times on transient 429/5xx errors;
+   if DeepL fails for a non-quota reason, the request falls back to the
+   anonymous provider automatically. Quota/rate-limit failures (HTTP 429)
+   never fall back to the anonymous provider so costs stay predictable.
+
 4. Deploy the project from the `bench` directory with the repository's
    `vercel.json`. It sets `dist` as the static output and gives
    `api/translate.js` a 60-second maximum duration.
@@ -113,6 +127,10 @@ limiter when Upstash is not configured; this is not suitable for production.
 - Tesseract language data is downloaded from
   `https://tessdata.projectnaptha.com`; page images and recognized text remain
   in the browser until the translation request is made.
+- Text is sent to the configured provider. When `DEEPL_AUTH_KEY` is set, it is
+  sent to DeepL; otherwise it is sent to Google Translate's internal endpoint
+  (the anonymous fallback provider). Both providers handle request metadata and
+  text under their own terms and retention policies.
 - The DeepL key and Upstash token must only be configured as server-side
   environment variables. The endpoint validates input, restricts allowed
   provider URLs, checks browser origins when present, and does not enable
