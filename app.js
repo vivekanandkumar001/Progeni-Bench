@@ -1274,6 +1274,12 @@ function installHeaderSearch() {
       else if (input.value) { input.value = ""; refresh(); }
     }
   });
+  // Activating a suggestion hides the panel immediately — never rely on the
+  // navigation that follows to clear it (same-page target, slow load, or a
+  // same-URL navigation where the document never reloads).
+  panel.addEventListener("click", event => {
+    if (event.target.closest(".search-suggestion")) close();
+  });
   document.addEventListener("click", event => {
     if (!wrap.contains(event.target)) close();
   });
