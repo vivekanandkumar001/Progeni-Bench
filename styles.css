@@ -4379,3 +4379,42 @@ html{scroll-padding-top:76px}
 .browse-all a:hover{border-color:var(--brand);background:var(--brand-tint);transform:translateY(-1px)}
 .browse-all a > svg{width:15px;height:15px;flex:none}
 .browse-all-intro{color:var(--muted);font-size:14px;margin:0 0 12px}
+
+/* =========================================================
+   Responsive hardening â€” small viewports, overflow guards,
+   sticky offsets, reduced motion
+   ========================================================= */
+/* Keep the sticky rail clear of the sticky topbar on desktop. */
+@media (min-width: 901px){
+  .quick-answer--rail{top:calc(var(--topbar-h, 62px) + 14px)}
+}
+/* Match scroll-padding to the real sticky header height. */
+html{scroll-padding-top:calc(var(--topbar-h, 62px) + 12px)}
+@media (max-width: 768px){
+  html{scroll-padding-top:calc(var(--topbar-h, 108px) + 10px)}
+}
+/* Grid children may not blow out their columns with long text. */
+.tool-shell > *,
+.toolbox,
+.pdf-field,
+.pdf-file-info,
+.browse-all a,
+.tool-links a{min-width:0}
+img, svg, video, canvas{max-width:100%}
+.eyebrow{overflow-wrap:anywhere}
+.tool-head h1, .tool-head p{overflow-wrap:anywhere;text-wrap:balance}
+/* Short landscape phones: keep the dropzone from eating the viewport. */
+@media (max-height: 620px) and (orientation: landscape){
+  .pdf-drop{padding:16px 16px;gap:4px}
+  .pdf-drop-icon{display:none}
+}
+/* Honor reduced-motion preferences strictly. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
