@@ -216,19 +216,32 @@ async function translateWithGoogle(body) {
           + "&tl=" + encodeURIComponent(candidate)
           + "&dt=t&q=" + encodeURIComponent(block.text);
         const response = await fetch(url, {
-          headers: { "User-Agent": "Mozilla/5.0 (compatible; ProgeniBench/1.0)" },
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "*/*"
+          },
           signal: AbortSignal.timeout(15000)
         });
-        if (!response.ok) continue;
-        const data = await response.json();
-        if (!Array.isArray(data) || !Array.isArray(data[0])) continue;
-        translated = data[0].map(pair => pair && pair[0] ? pair[0] : "").join("");
-        const detected = data[2] && typeof data[2] === "string" ? data[2].toUpperCase() : null;
-        translations.push({ id: block.id, text: translated, detectedSourceLang: detected });
-        translated = null; // sentinel: pushed
-        break;
-      } catch {
-        // try next candidate
+        if (response.ok) {
+          const data = await response.json();
+          if (!Array.isArray(data) || !Array.isArray(data[0])) {
+            console.warn("pdf-translation: google fallback malformed payload", { candidate, blockIndex: body.blocks.indexOf(block) });
+            continue;
+          }
+          translated = data[0].map(pair => pair && pair[0] ? pair[0] : "").join("");
+          const detected = data[2] && typeof data[2] === "string" ? data[2].toUpperCase() : null;
+          translations.push({ id: block.id, text: translated, detectedSourceLang: detected });
+          translated = null; // sentinel: pushed
+          console.log("pdf-translation: google fallback succeeded", { candidate, chars: block.text.length });
+          break;
+        }
+        const statusBody = await response.text().catch(() => "");
+        console.warn("pdf-translation: google fallback status", { candidate, status: response.status, body: statusBody.slice(0, 200) });
+      } catch (fetchError) {
+        console.warn("pdf-translation: google fallback fetch error", {
+          candidate,
+          message: fetchError && fetchError.message ? String(fetchError.message).slice(0, 200) : "unknown"
+        });
       }
     }
     if (translated === null && !translations.some(t => t.id === block.id)) {
