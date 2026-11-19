@@ -110,6 +110,7 @@
   function updateProgress(percent, label) {
     const progress = el("pdf-progress");
     const status = el("pdf-status");
+    progress.hidden = false;
     progress.value = percent;
     status.textContent = label;
   }
@@ -120,6 +121,19 @@
     box.textContent = message || "";
     const button = el("pdf-run");
     if (button && !button.disabled) button.textContent = message ? "Retry translation" : "Translate PDF";
+    if (message) {
+      // Move focus to the offending field when the error is target-language specific,
+      // otherwise focus the alert box so screen readers announce it.
+      const targetSelect = el("pdf-target-language");
+      if (/target language/i.test(message) && targetSelect) {
+        targetSelect.setAttribute("aria-invalid", "true");
+        targetSelect.focus({ preventScroll: true });
+        targetSelect.scrollIntoView({ block: "center", behavior: "smooth" });
+      } else {
+        box.focus({ preventScroll: true });
+        box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
   }
 
   function setBusy(busy) {
@@ -914,6 +928,8 @@
     // Clear any stale error and restore the button label when the user changes the target language.
     el("pdf-target-language").addEventListener("change", () => {
       syncHinglishNote();
+      // Clear the invalid state as soon as the user picks a valid target language.
+      el("pdf-target-language").removeAttribute("aria-invalid");
       if (!el("pdf-error").hidden && /target language/i.test(el("pdf-error").textContent || "")) setError("");
     });
     el("pdf-hinglish-note").hidden = el("pdf-target-language").value.trim().toLowerCase() !== "hinglish";

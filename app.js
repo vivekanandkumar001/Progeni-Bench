@@ -1639,14 +1639,18 @@ function toolPage(id) {
   if (id === "pdf-translator") {
     const body = `
       <div class="pdf-translator" id="pdf-controls" aria-busy="false">
-        <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0">
+        <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0" aria-label="Drop a PDF here or choose a file from your device">
+          <svg class="pdf-drop-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M20 16.5a4.5 4.5 0 0 0-3.5-4.4A6 6 0 0 0 6.6 9.2 4.5 4.5 0 0 0 4 13.5V16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.5z" opacity="0.9"/></svg>
           <strong>Drop a PDF here</strong>
           <span>or choose a file from your device · maximum 15 MB and 120,000 extracted characters</span>
-          <input id="pdf-file" type="file" accept=".pdf,application/pdf" hidden>
+          <input id="pdf-file" type="file" accept=".pdf,application/pdf" hidden tabindex="-1">
         </div>
         <div id="pdf-file-info" class="pdf-file-info" hidden>
-          <strong id="pdf-file-name"></strong>
-          <span class="pdf-file-meta"><span id="pdf-file-size"></span> · <span id="pdf-page-count">Checking pages…</span></span>
+          <svg class="pdf-file-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+          <span class="pdf-file-body">
+            <strong id="pdf-file-name"></strong>
+            <span class="pdf-file-meta"><span id="pdf-file-size"></span> · <span id="pdf-page-count">Checking pages…</span></span>
+          </span>
         </div>
         <div class="pdf-settings">
           <div class="pdf-field">
@@ -1697,10 +1701,10 @@ function toolPage(id) {
           <button class="btn secondary" id="pdf-cancel" type="button" hidden>Cancel</button>
         </div>
         <div class="pdf-progress-wrap">
-          <progress id="pdf-progress" max="100" value="0" aria-label="Translation progress"></progress>
+          <progress id="pdf-progress" max="100" value="0" aria-label="Translation progress" hidden></progress>
           <p id="pdf-status" role="status" aria-live="polite">Select a PDF to validate it in your browser.</p>
         </div>
-        <div class="error pdf-error" id="pdf-error" role="alert" hidden></div>
+        <div class="error pdf-error" id="pdf-error" role="alert" tabindex="-1" hidden></div>
         <div class="error pdf-error" id="pdf-runtime-error" role="alert" hidden></div>
         <section class="pdf-preview" id="pdf-preview" aria-labelledby="pdf-preview-heading" hidden>
           <h2 id="pdf-preview-heading">Translation preview</h2>
