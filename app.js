@@ -1198,6 +1198,29 @@ function installHeaderSearch() {
   const onHome = () => !!document.getElementById("grid");
   let active = -1;
 
+  // Non-home pages have no catalog DOM, so the full suggestion list is matched
+  // against a static index fetched once, lazily, on first use.
+  let globalIndex = null;
+  let globalIndexLoading = false;
+  const loadGlobalIndex = () => {
+    if (globalIndex || globalIndexLoading) return;
+    globalIndexLoading = true;
+    fetch("/search-index.json")
+      .then(response => (response.ok ? response.json() : []))
+      .then(list => {
+        globalIndex = (Array.isArray(list) ? list : []).map(item => ({
+          href: item.href,
+          name: item.name,
+          category: item.category,
+          text: benchNormalize(`${item.text || ""} ${item.name || ""}`),
+          icon: (benchIcons && item.href ? benchIcons.iconFromHref(item.href) : "") || ""
+        })).filter(item => item.name);
+        if (input.value.trim()) refresh();
+      })
+      .catch(() => { /* keep the "Search all tools" hint as a fallback */ })
+      .finally(() => { globalIndexLoading = false; });
+  };
+
   const close = () => {
     panel.hidden = true;
     input.setAttribute("aria-expanded", "false");
@@ -1251,7 +1274,14 @@ function installHeaderSearch() {
       paint(benchSearchMatches(benchSearchIndex(), value, 7));
       if (benchCatalogRender) benchCatalogRender();
     } else if (value) {
-      paintAllToolsHint(value);
+      if (globalIndex) {
+        const matches = benchSearchMatches(globalIndex, value, 7);
+        if (matches.length) paint(matches);
+        else paintAllToolsHint(value);
+      } else {
+        paintAllToolsHint(value);
+        loadGlobalIndex();
+      }
     } else {
       close();
     }
@@ -1729,7 +1759,7 @@ function toolPage(id) {
           <ul id="pdf-quality"></ul>
           <a class="btn" id="pdf-download" href="#" download>Download translated PDF</a>
         </section>
-        <p class="pdf-privacy-note">Privacy: the PDF itself is never uploaded. Extracted text blocks are processed by DeepL; do not use this tool for confidential documents. Successful translation responses may remain in volatile function memory for up to five minutes to avoid duplicate charges. OCR language data is fetched from the Tesseract data host without sending your pages.</p>
+        <p class="pdf-privacy-note">Privacy: the PDF itself is never uploaded. In Chrome 138+, translation happens entirely on your device using the built-in Translator — nothing, not even the extracted text, leaves your computer. On other browsers or older Chrome versions, extracted text may be processed by DeepL through a server endpoint.</p>
       </div>
     `;
     layout({ tool, body });

@@ -1189,6 +1189,40 @@ fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt, 'utf8');
 const llmsFullText = llmsFull.writeLlmsFull(baseDir);
 console.log(`Generated llms-full.txt (${llmsFullText.length} characters).`);
 
+// 7c. Search index powering the header suggestions on non-home pages. The
+// home page builds its index from the catalog DOM; every other page fetches
+// this file lazily on first keystroke.
+function buildSearchIndex() {
+  const entries = [];
+  const slugOf = t => t.slug || t.id;
+  const textOf = t => [
+    t.id, t.slug, t.name, t.keyword, t.cat, t.category,
+    t.summary, t.desc, t.description, t.seoDesc,
+    ...(t.keywords || []), ...(t.inputs || []), ...(t.outputs || []), ...(t.tags || [])
+  ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 260);
+  for (const tool of TOOLS) {
+    entries.push({ name: tool.name, href: `/tools/${slugOf(tool)}/`, category: tool.cat || "Tools", text: `${textOf(tool)} core tools` });
+  }
+  for (const cat of imageConfig.CATEGORIES) {
+    for (const tool of imageConfig.TOOLS) {
+      if ((tool.status === 'implemented' || tool.status === 'experimental') && tool.category === cat.id) {
+        entries.push({ name: tool.name, href: `/image/${slugOf(tool)}/`, category: cat.name || "Image", text: `${textOf(tool)} image toolkit photo picture` });
+      }
+    }
+  }
+  for (const cat of audioConfig.CATEGORIES) {
+    for (const tool of audioConfig.TOOLS) {
+      if ((tool.status === 'implemented' || tool.status === 'experimental') && tool.category === cat.id) {
+        entries.push({ name: tool.name, href: `/audio/${slugOf(tool)}/`, category: cat.name || "Audio", text: `${textOf(tool)} audio video sound` });
+      }
+    }
+  }
+  return entries;
+}
+const searchIndexEntries = buildSearchIndex();
+fs.writeFileSync(path.join(distDir, 'search-index.json'), JSON.stringify(searchIndexEntries), 'utf8');
+console.log(`Generated search-index.json (${searchIndexEntries.length} tools).`);
+
 // 8. Copy static files to dist/
 const filesToCopy = [
   'site.config.js', 'icons.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt'

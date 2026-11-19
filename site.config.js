@@ -1155,16 +1155,16 @@
     "name": "PDF Translator",
     "keyword": "PDF Translator",
     "desc": "Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF.",
-    "seoDesc": "Translate native-text PDFs with OCR for scanned pages, page selection, language and style controls, plus PDF download. Translation uses DeepL.",
-    "whatItDoes": "Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages.",
+    "seoDesc": "Translate native-text PDFs with OCR for scanned pages, page selection, language and style controls, plus PDF download. Translation runs on your device when available.",
+    "whatItDoes": "Extracts text in your browser, translates it entirely on your device on Chrome 138+ (built-in on-device Translator) or via a server endpoint as fallback, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages.",
     "howToUse": [
       "Choose a PDF under 15 MB and review its page count.",
       "Select a target language, translation style and output layout; optionally set a source language and page range.",
       "Enable local OCR for scanned pages. OCR requires downloading language data to your browser, but page images stay on your device.",
       "Translate and review the text preview and page-quality report before downloading the generated PDF."
     ],
-    "limits": "Maximum 15 MB and 120,000 extracted characters per job. Complex tables, embedded image text, handwriting, unusual fonts and expanded translations can affect layout. Original-layout reconstruction is best-effort, links are not preserved as interactive links, and output pages are rasterized. Hinglish is DeepL Hindi translated then romanized; the mix of Hindi and English is not guaranteed. The translation provider processes extracted text.",
-    "privacy": "The PDF itself is parsed, rendered, OCR-processed and rebuilt locally in your browser. Extracted text blocks are sent to the configured DeepL API through the Bench server endpoint for translation; API credentials stay server-side. OCR language data is downloaded from the Tesseract data host, but document images are not sent there.",
+    "limits": "Maximum 15 MB and 120,000 extracted characters per job. Complex tables, embedded image text, handwriting, unusual fonts and expanded translations can affect layout. Original-layout reconstruction is best-effort, links are not preserved as interactive links, and output pages are rasterized. Hinglish is Hindi translated then romanized; the mix of Hindi and English is not guaranteed. The on-device translator processes text locally; otherwise text goes to a server translation endpoint.",
+    "privacy": "The PDF itself is parsed, rendered, OCR-processed and rebuilt locally in your browser. On Chrome 138+, translation runs entirely on your device — no text is sent anywhere. Otherwise extracted text is translated through a provider configured server-side (DeepL when set, or an anonymous fallback). OCR language data is downloaded from the Tesseract data host, but document images are not sent there.",
     "useCases": [
       "Translate text-based reports, guides and study materials while retaining their page structure where practical.",
       "Convert Hindi translations to Roman script for a best-effort Hinglish reading copy.",
@@ -1173,7 +1173,7 @@
     "faq": [
       {
         "q": "Is my PDF uploaded to Bench?",
-        "a": "No. PDF pages stay in your browser. Extracted text is sent to DeepL through a server endpoint, so the translation provider processes that text."
+        "a": "No. PDF pages stay in your browser. On Chrome 138+, even extracted text never leaves your device — it is translated entirely on your device using the built-in on-device Translator."
       },
       {
         "q": "Does Hinglish use Roman script?",

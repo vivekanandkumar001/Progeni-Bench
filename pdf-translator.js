@@ -60,6 +60,8 @@
   let activeController = null;
   let runToken = 0;
   let outputUrl = null;
+  // On-device translation cache: reuse the same Translator instance while translating one document.
+  let onDeviceCache = { key: null, translator: null };
 
   function el(id) {
     return document.getElementById(id);
@@ -414,8 +416,67 @@
     return items.map((item, index) => ({ ...item, id: `p${pageNumber}-ocr-${index + 1}`, layoutScale: viewport.scale }));
   }
 
+  // Zero-config, 100% free, fully private path: Chrome's built-in on-device
+  // Translator API. Returns an array of {id, text} or null when unavailable.
+  async function translateBatchOnDevice(blocks, options, controller) {
+    if (typeof self === "undefined" || !self.Translator) return null;
+    const target = String(options.targetLang || "").split("-")[0].toLowerCase();
+    if (!target) return null;
+    let source = String(options.sourceLang || "").trim().toLowerCase().split("-")[0];
+    if (!source) {
+      try {
+        const detector = self.LanguageDetector ? await self.LanguageDetector.create() : null;
+        if (detector) {
+          const [guess] = await detector.detect(blocks.map(b => b.text).join("\n").slice(0, 1000));
+          source = guess && guess.detectedLanguage ? guess.detectedLanguage.toLowerCase() : "en";
+        } else {
+          source = "en";
+        }
+      } catch {
+        source = "en";
+      }
+    }
+    const key = `${source}>${target}`;
+    let translator = onDeviceCache.key === key ? onDeviceCache.translator : null;
+    // Cache is invalid for this source/target combination: probe availability, then create.
+    if (!translator) {
+      try {
+        const opts = { sourceLanguage: source, targetLanguage: target };
+        if (typeof self.Translator.availability === "function") {
+          const availability = await self.Translator.availability(opts);
+          if (availability === "unavailable") return null; // signal: use server path
+        }
+        translator = await self.Translator.create(opts);
+        onDeviceCache = { key, translator };
+      } catch (error) {
+        console.warn("on-device translator setup failed; will use the server fallback instead", error);
+        return null;
+      }
+    }
+    const translated = [];
+    for (const block of blocks) {
+      if (controller && controller.signal && controller.signal.aborted) {
+        throw new DOMException("Translation cancelled.", "AbortError");
+      }
+      try {
+        translated.push({ id: block.id, text: await translator.translate(block.text) });
+      } catch (error) {
+        console.warn("on-device translation failed for block; will use server fallback", error);
+        return null;
+      }
+    }
+    return translated;
+  }
+
   async function translateBatch(blocks, options, controller) {
-    const response = await fetch("/api/translate", {
+    const onDevice = await translateBatchOnDevice(blocks, options, controller)
+      .catch(error => {
+        if (error && error.name === "AbortError") throw error;
+        console.warn("on-device translation failed; using server endpoint instead", error);
+        return null;
+      });
+    if (onDevice) return onDevice;
+    const response = await fetch("/api/translate/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
