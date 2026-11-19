@@ -425,12 +425,7 @@ function generateToolPageHtml(tool) {
     ['Works on', 'Modern desktop, tablet and mobile browsers']
   ];
   if (useCases.length) quickFacts.push(['Best for', useCases[0]]);
-  const quickAnswer = seo.quickAnswerHtml({
-    answerHtml: `<strong>${seo.esc(tool.name)}</strong> is a free ${seo.esc(tool.cat.toLowerCase())} tool that runs in your browser. ${seo.esc(seo.firstSentence(tool.whatItDoes))}`,
-    facts: seo.keyFacts(quickFacts)
-  });
-
-  const graph = [
+const graph = [
     seo.organizationNode(),
     seo.websiteNode(),
     seo.webPageNode({
@@ -474,15 +469,21 @@ ${siteHeader({ active: 'home' })}
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${tool.cat}</span><span aria-hidden="true">/</span><span aria-current="page">${tool.name}</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-    <h1><span class="tool-head-icon" data-icon="${icons.iconName('core', tool.id, tool.icon)}">${icons.toolIcon('core', tool.id, tool.icon)}</span>${tool.keyword}</h1>
-    <p>${tool.desc} ${isPdfTranslator
-      ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
-      : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
+      <h1><span class="tool-head-icon" data-icon="${icons.iconName('core', tool.id, tool.icon)}">${icons.toolIcon('core', tool.id, tool.icon)}</span>${tool.keyword}</h1>
+      <p>${tool.desc} ${isPdfTranslator
+        ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+        : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
+    </section>
 
-  ${quickAnswer}
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>${seo.esc(tool.name)}</strong> is a free ${seo.esc(tool.cat.toLowerCase())} tool that runs in your browser. ${seo.esc(seo.firstSentence(tool.whatItDoes))}</p>
+      <dl class="key-facts">${seo.keyFacts(quickFacts)}</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -493,9 +494,13 @@ ${siteHeader({ active: 'home' })}
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>${tool.whatItDoes}</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>${tool.whatItDoes}</p>
 
     ${useCases.length > 0 ? `
     <h2>Common use cases</h2>
@@ -509,33 +514,34 @@ ${siteHeader({ active: 'home' })}
       ${tool.howToUse.map(step => `<li>${step}</li>`).join('\n      ')}
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>${tool.limits}</p>
 
     ${faq.length > 0 ? `
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       ${faq.map(f => `<div class="faq-item" style="margin: 14px 0;"><strong>${f.q}</strong><p style="margin: 4px 0 0 0; color: var(--muted);">${f.a}</p></div>`).join('\n      ')}
     </div>
     ` : ''}
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>${tool.privacy}</p>
 
-    <h2>Related ${tool.cat} Tools</h2>
+    <h2>Related ${tool.cat} tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         ${related.map(r => `<li><a href="/tools/${r.id}/" style="color: var(--brand); font-weight: 600; text-decoration: underline;">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a></li>`).join('\n        ')}
       </ul>
     </div>
 
-    <h2>Browse All ${tool.cat} Tools</h2>
+    <h2>Browse all ${tool.cat} tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       ${TOOLS.filter(t => t.cat === tool.cat && t.id !== tool.id).map(t => `<a href="/tools/${t.id}/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 ${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 ${siteFooter({ links: LEGAL_LINKS })}

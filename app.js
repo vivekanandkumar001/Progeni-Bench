@@ -272,43 +272,47 @@ function layout({ tool, body }) {
     <nav class="tool-breadcrumb" aria-label="Breadcrumb">
       <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${esc(tool.cat)}</span><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
     </nav>
-    <section class="tool-head">
-      <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-      <h1><span class="tool-head-icon" data-icon="${esc(benchIcons ? benchIcons.iconName("core", tool.id, tool.icon) : "")}" aria-hidden="true">${benchToolIcon("core", tool.id, tool.icon)}</span>${esc(tool.keyword || tool.name)}</h1>
-      <p>${esc(tool.desc)} ${hasTranslationBackend
-        ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
-        : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
-    </section>
+    <div class="tool-shell">
+      <section class="tool-head">
+        <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
+        <h1><span class="tool-head-icon" data-icon="${esc(benchIcons ? benchIcons.iconName("core", tool.id, tool.icon) : "")}" aria-hidden="true">${benchToolIcon("core", tool.id, tool.icon)}</span>${esc(tool.keyword || tool.name)}</h1>
+        <p>${esc(tool.desc)} ${hasTranslationBackend
+          ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+          : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
+      </section>
 
-    <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-      <h2 id="quick-answer-title">Quick answer</h2>
-      <p class="answer-text"><strong>${esc(tool.name)}</strong> is a free ${esc(String(tool.cat).toLowerCase())} tool that runs in your browser. ${esc(answerSentence)}</p>
-      <dl class="key-facts">
-        ${quickFacts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
-      </dl>
-    </aside>
-
+      <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+        <h2 id="quick-answer-title">At a glance</h2>
+        <p class="answer-text"><strong>${esc(tool.name)}</strong> is a free ${esc(String(tool.cat).toLowerCase())} tool that runs in your browser. ${esc(answerSentence)}</p>
+        <dl class="key-facts">
+          ${quickFacts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
+        </dl>
+      </aside>
+    </div>
 
     <section class="toolbox">${body}</section>
 
-    <!-- Rich SEO & User Guide Section -->
-    <section class="seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-      <h2>What it does</h2>
-      <p>${esc(tool.whatItDoes || tool.desc)}</p>
+    <details class="tool-details" id="tool-details">
+      <summary>About this tool — how it works, limits &amp; FAQ
+        <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </summary>
+      <div class="tool-details-body">
+        <h2>What it does</h2>
+        <p>${esc(tool.whatItDoes || tool.desc)}</p>
 
-      ${useCasesList.length > 0 ? `
-      <h2>Common use cases</h2>
-      <ul>
-        ${useCasesList.map(u => `<li>${esc(u)}</li>`).join("")}
-      </ul>
-      ` : ""}
+        ${useCasesList.length > 0 ? `
+        <h2>Common use cases</h2>
+        <ul>
+          ${useCasesList.map(u => `<li>${esc(u)}</li>`).join("")}
+        </ul>
+        ` : ""}
 
-      <h2>How to use</h2>
-      <ol>
-        ${(tool.howToUse || []).map(step => `<li>${esc(step)}</li>`).join("")}
-      </ol>
+        <h2>How to use</h2>
+        <ol>
+          ${(tool.howToUse || []).map(step => `<li>${esc(step)}</li>`).join("")}
+        </ol>
 
-      <h2>Limits & Considerations</h2>
+      <h2>Limits &amp; considerations</h2>
       <p>${esc(tool.limits || "Processes standard files client-side.")}</p>
 
       ${faqList.length > 0 ? `
@@ -318,14 +322,15 @@ function layout({ tool, body }) {
       </div>
       ` : ""}
 
-      <h2>Privacy & Security</h2>
+      <h2>Privacy &amp; security</h2>
       <p>${esc(tool.privacy || "Processed locally in your browser.")}</p>
 
-      <h2>Related ${esc(tool.cat)} Tools</h2>
+      <h2>Related ${esc(tool.cat)} tools</h2>
       <div class="tool-links">
         ${related.map(t => `<a href="/tools/${t.id}/">${benchToolIcon("core", t.id, t.icon)} ${esc(t.name)}</a>`).join("")}
       </div>
-    </section>
+      </div>
+    </details>
   `;
 }
 

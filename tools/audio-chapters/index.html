@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Audio & Video</span><span aria-hidden="true">/</span><span aria-current="page">Chapter Timestamp Formatter</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="headphones"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg></span>Chapter Timestamp Formatter</h1>
-    <p>Format YouTube & podcast chapter timestamps with clean text export. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="headphones"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg></span>Chapter Timestamp Formatter</h1>
+      <p>Format YouTube & podcast chapter timestamps with clean text export. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>Chapter Timestamp Formatter</strong> is a free audio &amp; video tool that runs in your browser. Validates, cleans, and standardizes podcast and YouTube video chapter markers.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>YouTube Video Chapter Timestamps: Format raw cue points into YouTube description syntax (e.g., 00:00 Introduction) for automatic video progress bar chapters.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>Chapter Timestamp Formatter</strong> is a free audio &amp; video tool that runs in your browser. Validates, cleans, and standardizes podcast and YouTube video chapter markers.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Validates, cleans, and standardizes podcast and YouTube video chapter markers. Ensures timestamps are sorted chronologically, correctly padded (MM:SS or HH:MM:SS), separated by valid delimiters, and compliant with platform chapter guidelines.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Validates, cleans, and standardizes podcast and YouTube video chapter markers. Ensures timestamps are sorted chronologically, correctly padded (MM:SS or HH:MM:SS), separated by valid delimiters, and compliant with platform chapter guidelines.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Paste the cleaned output directly into your YouTube description, Spotify show notes, or podcast RSS feed.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Formats and validates plain text timecode strings. Does not embed ID3v2 chapter frames directly into binary MP3 or M4A audio containers.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>What is the mandatory starting requirement for YouTube video chapters?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">YouTube requires the very first chapter timestamp to begin at exactly 00:00, have at least three chapters, and maintain a minimum of 10 seconds per chapter.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Can I paste raw seconds or decimal timestamps to convert them?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. The parser recognizes raw second counts, MM:SS, and HH:MM:SS formats, converting them into standard chapter formatting.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Text formatting is executed in local browser JavaScript. Your unreleased episode titles and show notes remain 100% private on your device.</p>
 
-    <h2>Related Audio & Video Tools</h2>
+    <h2>Related Audio & Video tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/video-safe-zone/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></g></svg> Video Safe-Zone Checker</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Audio & Video Tools</h2>
+    <h2>Browse all Audio & Video tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of audio & video tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/video-safe-zone/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -153,7 +153,8 @@
       <a href="/tools/silence-map/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298zm5.5 9.798l5-5m-5 0l5 5"/></svg> Podcast Silence Map</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

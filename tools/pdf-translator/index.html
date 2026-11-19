@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Files & Data</span><span aria-hidden="true">/</span><span aria-current="page">PDF Translator</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Files & Data · Local PDF processing · provider-backed translation</span>
-    <h1><span class="tool-head-icon" data-icon="languages"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 8l6 6m-7 0l6-6l2-3M2 5h12M7 2h1m14 20l-5-10l-5 10m2-4h6"/></svg></span>PDF Translator</h1>
-    <p>Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF. <strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Files & Data · Local PDF processing · provider-backed translation</span>
+      <h1><span class="tool-head-icon" data-icon="languages"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 8l6 6m-7 0l6-6l2-3M2 5h12M7 2h1m14 20l-5-10l-5 10m2-4h6"/></svg></span>PDF Translator</h1>
+      <p>Translate text PDFs into other languages, including best-effort Romanized Hindi, and download a readable PDF. <strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>PDF Translator</strong> is a free files &amp; data tool that runs in your browser. Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>PDF pages local, extracted text translated by DeepL</dd></div>
-    <div><dt>Uploads</dt><dd>PDF pages stay local; extracted text is sent to DeepL</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Translate text-based reports, guides and study materials while retaining their page structure where practical.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>PDF Translator</strong> is a free files &amp; data tool that runs in your browser. Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Extracts text in your browser, sends only selected text blocks to DeepL through a private server endpoint, and assembles a downloadable PDF locally. It supports best-effort layout reconstruction, clean readable pages, bilingual source-and-translation pages, page ranges, and local OCR for image-only pages.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Translate and review the text preview and page-quality report before downloading the generated PDF.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Maximum 15 MB and 120,000 extracted characters per job. Complex tables, embedded image text, handwriting, unusual fonts and expanded translations can affect layout. Original-layout reconstruction is best-effort, links are not preserved as interactive links, and output pages are rasterized. Hinglish is DeepL Hindi translated then romanized; the mix of Hindi and English is not guaranteed. The translation provider processes extracted text.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>Is my PDF uploaded to Bench?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">No. PDF pages stay in your browser. Extracted text is sent to DeepL through a server endpoint, so the translation provider processes that text.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Does Hinglish use Roman script?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. The tool translates to Hindi and romanizes that output. This is best-effort Romanized Hindi, not guaranteed natural Hindi-English mixing.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>The PDF itself is parsed, rendered, OCR-processed and rebuilt locally in your browser. Extracted text blocks are sent to the configured DeepL API through the Bench server endpoint for translation; API credentials stay server-side. OCR language data is downloaded from the Tesseract data host, but document images are not sent there.</p>
 
-    <h2>Related Files & Data Tools</h2>
+    <h2>Related Files & Data tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/pdf-page-manager/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g></svg> PDF Page Manager</a></li>
@@ -143,13 +143,14 @@
       </ul>
     </div>
 
-    <h2>Browse All Files & Data Tools</h2>
+    <h2>Browse all Files & Data tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of files & data tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/pdf-page-manager/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g></svg> PDF Page Manager</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

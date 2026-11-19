@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Audio & Video</span><span aria-hidden="true">/</span><span aria-current="page">Video Thumbnail Contact Sheet</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="film"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18m0-13.5h4m-4 9h4"/></g></svg></span>Video Thumbnail Contact Sheet</h1>
-    <p>Extract 4Ã¢â‚¬â€œ48 timestamped frames into a configurable PNG/JPEG contact sheet. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="film"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18m0-13.5h4m-4 9h4"/></g></svg></span>Video Thumbnail Contact Sheet</h1>
+      <p>Extract 4Ã¢â‚¬â€œ48 timestamped frames into a configurable PNG/JPEG contact sheet. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>Video Thumbnail Contact Sheet</strong> is a free audio &amp; video tool that runs in your browser. Scans a local video file and extracts between 4 and 48 evenly spaced frames into a contact sheet whose grid columns, per-thumbnail resolution, padding and background colour you control.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Video Scene Indexing: Extract evenly spaced thumbnail sequences from video footage to create visual contact sheets and scene indexes.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>Video Thumbnail Contact Sheet</strong> is a free audio &amp; video tool that runs in your browser. Scans a local video file and extracts between 4 and 48 evenly spaced frames into a contact sheet whose grid columns, per-thumbnail resolution, padding and background colour you control.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Scans a local video file and extracts between 4 and 48 evenly spaced frames into a contact sheet whose grid columns, per-thumbnail resolution, padding and background colour you control. Every frame is stamped with a burned-in MM:SS.mmm timestamp and frame index so scenes can be located precisely, and each seek is raced against a timeout with an automatic previous-frame fallback, so an unresponsive codec never hangs the sheet. Export the sheet as PNG or JPEG (with quality control) and download a CSV of the sampled timestamps.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Scans a local video file and extracts between 4 and 48 evenly spaced frames into a contact sheet whose grid columns, per-thumbnail resolution, padding and background colour you control. Every frame is stamped with a burned-in MM:SS.mmm timestamp and frame index so scenes can be located precisely, and each seek is raced against a timeout with an automatic previous-frame fallback, so an unresponsive codec never hangs the sheet. Export the sheet as PNG or JPEG (with quality control) and download a CSV of the sampled timestamps.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Download the sheet as PNG or JPEG, or grab the CSV of sampled timestamps for editing notes.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Requires browser-supported codecs (H.264, VP8, VP9, AV1). High-bitrate ProRes, DNxHD, raw AVI, HEVC-in-MKV and DRM-protected files cannot be decoded. Seeks that time out after 8 seconds fall back to the previous frame and are reported as warnings.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>What video formats can be processed in the browser?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Any video codec supported natively by your browser (including MP4 with H.264, WebM with VP8/VP9, and modern AV1 files) can be indexed.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Can I control how many thumbnail frames are captured?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. You can specify capture intervals or total frame count across the duration of the video.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Video decoding, seeking and frame rendering occur entirely through local browser hardware acceleration. Zero bytes of your video footage are sent to any server.</p>
 
-    <h2>Related Audio & Video Tools</h2>
+    <h2>Related Audio & Video tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/video-safe-zone/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></g></svg> Video Safe-Zone Checker</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Audio & Video Tools</h2>
+    <h2>Browse all Audio & Video tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of audio & video tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/video-safe-zone/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -153,7 +153,8 @@
       <a href="/tools/silence-map/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298zm5.5 9.798l5-5m-5 0l5 5"/></svg> Podcast Silence Map</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

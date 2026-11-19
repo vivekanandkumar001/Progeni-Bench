@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Images</span><span aria-hidden="true">/</span><span aria-current="page">Photo Timeline Builder</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Images · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="clock"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g></svg></span>Photo Timeline Builder</h1>
-    <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Images · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="clock"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g></svg></span>Photo Timeline Builder</h1>
+      <p>Build a chronological photo album with EXIF dates and embedded thumbnails in one HTML file. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>Photo Timeline Builder</strong> is a free images tool that runs in your browser. Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts…</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Chronological Vacation Photo Sorting: Organize hundreds of trip snapshots into calendar-sorted day and month albums.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>Photo Timeline Builder</strong> is a free images tool that runs in your browser. Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts…</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts (automatically switching to month or year groups for large sets). You get a click-to-open full-resolution lightbox, a per-file date-correction field with an EXIF / file / manual confidence badge, a total output-size report, and a single self-contained photo-timeline.html with lazy-loaded images and the original filenames as captions.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Reads EXIF DateTimeOriginal (falling back to the file date), downscales every photo to an embedded data-URL thumbnail (default 400 px longest side), and groups the set by day with sticky headings and per-group counts (automatically switching to month or year groups for large sets). You get a click-to-open full-resolution lightbox, a per-file date-correction field with an EXIF / file / manual confidence badge, a total output-size report, and a single self-contained photo-timeline.html with lazy-loaded images and the original filenames as captions.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Check the embedded album-size report, add an album title, and download the standalone photo-timeline.html photo diary.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Photo dating prefers EXIF DateTimeOriginal then the file date; EXIF GPS, lens model and facial tags are not read. Thumbnails are re-encoded client-side as JPEG data URLs, so very large sets produce a large single file.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>How does the tool determine when a photograph was taken?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">It extracts the authentic EXIF DateTimeOriginal tag from the JPEG header, falling back to file modification dates if EXIF is absent.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Can I manually override dates for scanned photographs?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. You can edit dates for individual photos or batch-assign calendar dates to archival family photo scans.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Album generation runs entirely in client-side JavaScript. Your personal photo libraries and event memories remain completely confidential.</p>
 
-    <h2>Related Images Tools</h2>
+    <h2>Related Images tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/wallpaper/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></g></svg> Wallpaper Photo Cropper</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Images Tools</h2>
+    <h2>Browse all Images tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of images tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/wallpaper/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -157,7 +157,8 @@
       <a href="/tools/family-organizer/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Zm0 11a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1ZM3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/></g></svg> Family Photo Date Organizer</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

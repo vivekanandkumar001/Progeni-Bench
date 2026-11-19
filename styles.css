@@ -1062,7 +1062,7 @@ body{
   border-color:var(--danger);
   outline:3px solid rgba(220,38,38,.14);
 }
-.pdf-field :is(input,select):disabled{opacity:.55;cursor:not-allowed;background:var(--surface-2)}
+.pdf-field :is(input,select):disabled{opacity:.55;cursor:not-allowed;background-color:var(--surface-2)}
 .pdf-field-wide{grid-column:1/-1}
 .pdf-ocr-field{max-width:280px}
 .pdf-help{display:block;margin:0;font-size:12.5px;line-height:1.5;color:var(--muted)}
@@ -4259,4 +4259,114 @@ html{scroll-padding-top:76px}
   vertical-align:-3px;
 }
 .footer-brand img{border-radius:8px}
+
+
+/* =========================================================
+   Tool page v2 â€” app-first layout (Hero + At-a-glance rail +
+   About-this-tool accordion + custom select chevrons)
+   ========================================================= */
+.tool-shell{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);
+  gap:clamp(18px,2.4vw,28px);
+  align-items:start;
+  margin-bottom:var(--space-5);
+}
+@media (max-width: 900px){
+  .tool-shell{grid-template-columns:1fr}
+}
+.tool-shell .tool-head{margin-bottom:0;max-width:none}
+.tool-shell .tool-head p{max-width:62ch}
+
+/* Compact right-rail answer card */
+.quick-answer--rail{
+  margin:0;
+  border-left-width:3px;
+  border-radius:16px;
+  background:#ffffff;
+  box-shadow:var(--shadow-xs);
+}
+@media (max-width: 900px){
+  .quick-answer--rail{position:static}
+}
+.quick-answer--rail .answer-text{font-size:14px;line-height:1.6;color:#2a3242}
+.quick-answer--rail .key-facts{
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+  margin:10px 0 0;
+  padding:0;
+  border-top:1px solid var(--line);
+}
+.quick-answer--rail .key-facts > div{
+  display:grid;
+  grid-template-columns:86px 1fr;
+  gap:4px 14px;
+  align-items:baseline;
+  padding:9px 0;
+  border-bottom:1px dashed var(--line);
+}
+.quick-answer--rail .key-facts > div:last-child{border-bottom:none;padding-bottom:2px}
+.quick-answer--rail .key-facts dt{font-size:10px;white-space:normal}
+.quick-answer--rail .key-facts dd{font-size:13px;font-weight:600;color:var(--text)}
+
+/* Collapsible About-this-tool block (SEO content stays in the DOM) */
+.tool-details{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card);
+  box-shadow:var(--shadow-xs);
+  margin-bottom:var(--space-7);
+  overflow:clip;
+}
+.tool-details > summary{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  cursor:pointer;
+  list-style:none;
+  padding:15px 20px;
+  background:var(--surface);
+  font-weight:700;
+  font-size:var(--font-sm);
+  letter-spacing:.02em;
+  color:var(--text);
+  user-select:none;
+  transition:background-color .15s;
+}
+.tool-details > summary::-webkit-details-marker{display:none}
+.tool-details > summary:hover{background:#eef1f7}
+.tool-details > summary:focus-visible{outline:3px solid rgba(29,78,216,.28);outline-offset:-3px}
+.tool-details-chev{margin-left:auto;flex:none;color:var(--muted);transition:transform .25s ease}
+.tool-details[open] .tool-details-chev{transform:rotate(90deg);color:var(--brand)}
+.tool-details-body{padding:4px clamp(18px,2.6vw,28px) 22px;line-height:1.72}
+.tool-details-body h2{font-size:18px;margin:22px 0 9px;letter-spacing:-.01em;color:var(--text)}
+.tool-details-body h2:first-child{margin-top:14px}
+.tool-details-body p,.tool-details-body li{color:var(--body-fg)}
+.tool-details-body p{margin:0 0 10px;max-width:84ch}
+.tool-details-body ul,.tool-details-body ol{margin:0 0 12px;padding-left:22px}
+.tool-details-body li{margin:4px 0}
+.tool-details-body strong{color:var(--text)}
+.tool-details-body a{color:var(--brand);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.tool-details-body .faq-list{display:grid;gap:6px}
+.tool-details-body .faq-item{padding:10px 0;border-top:1px solid var(--line)}
+.tool-details-body .faq-item:first-child{border-top:none;padding-top:4px}
+.tool-details-body .faq-item strong{color:var(--text)}
+.tool-details-body .faq-item p{margin:3px 0 0;color:var(--muted)}
+
+/* Custom chevron for every native select inside the tool widget */
+.toolbox select{
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6472' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 11px center;
+  background-size:17px;
+  padding-right:40px;
+  cursor:pointer;
+}
+.toolbox select:disabled{
+  cursor:not-allowed;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a7b0bf' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
 

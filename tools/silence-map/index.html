@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Audio & Video</span><span aria-hidden="true">/</span><span aria-current="page">Podcast Silence Map</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="volume-x"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298zm5.5 9.798l5-5m-5 0l5 5"/></svg></span>Podcast Silence Map</h1>
-    <p>Detect dead air with a dBFS threshold slider, waveform view and CSV/TXT gap export. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Audio & Video · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="volume-x"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298zm5.5 9.798l5-5m-5 0l5 5"/></svg></span>Podcast Silence Map</h1>
+      <p>Detect dead air with a dBFS threshold slider, waveform view and CSV/TXT gap export. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>Podcast Silence Map</strong> is a free audio &amp; video tool that runs in your browser. Decodes an audio track locally and scans its energy window-by-window to map every silence gap longer than a length you choose.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Podcast Editing Audits: Locate long pauses, dead air, and unedited speaker gaps in raw audio tracks before manual editing.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>Podcast Silence Map</strong> is a free audio &amp; video tool that runs in your browser. Decodes an audio track locally and scans its energy window-by-window to map every silence gap longer than a length you choose.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Decodes an audio track locally and scans its energy window-by-window to map every silence gap longer than a length you choose. Set the silence threshold as a dBFS slider (converted to amplitude), the analysis window size, the minimum gap length and the channel mode (left, right, mono mix or max-of-channels). The peak-envelope waveform shades each detected gap, and clicking a gap preview-plays just that stretch through an embedded player. Reports file duration, total silence, percentage silence and gap count, listing every gap as HH:MM:SS.mmm Ã¢â‚¬â€ including recordings longer than an hour.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Decodes an audio track locally and scans its energy window-by-window to map every silence gap longer than a length you choose. Set the silence threshold as a dBFS slider (converted to amplitude), the analysis window size, the minimum gap length and the channel mode (left, right, mono mix or max-of-channels). The peak-envelope waveform shades each detected gap, and clicking a gap preview-plays just that stretch through an embedded player. Reports file duration, total silence, percentage silence and gap count, listing every gap as HH:MM:SS.mmm Ã¢â‚¬â€ including recordings longer than an hour.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Download the gaps as CSV (Start, End, Duration) or a plain-text list, or copy the list to the clipboard.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Decodes audio into browser RAM; extremely large audio files (>200 MB) may hit memory limits on constrained devices. Undecodable codecs (for example DRM-protected M4A, unsupported FLAC builds or raw AC-3) show codec guidance instead of results Ã¢â‚¬â€ convert to WAV or standard MP3 and retry.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>How is audio decoded without uploading large sound files?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Your browser's built-in Web Audio API decodes the audio waveform directly in RAM, calculating Root Mean Square (RMS) decibel levels locally.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Can I adjust the silence threshold sensitivity?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. You can customize the decibel cutoff (e.g. -40 dB or -50 dB) and minimum silence duration to distinguish natural breathing from dead air.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Audio decoding, waveform inspection, and silence mapping execute entirely on your local CPU. Unreleased audio files never leave your computer.</p>
 
-    <h2>Related Audio & Video Tools</h2>
+    <h2>Related Audio & Video tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/video-safe-zone/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></g></svg> Video Safe-Zone Checker</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Audio & Video Tools</h2>
+    <h2>Browse all Audio & Video tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of audio & video tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/video-safe-zone/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -153,7 +153,8 @@
       <a href="/tools/audio-chapters/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg> Chapter Timestamp Formatter</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

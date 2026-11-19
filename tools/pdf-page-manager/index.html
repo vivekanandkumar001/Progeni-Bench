@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Files & Data</span><span aria-hidden="true">/</span><span aria-current="page">PDF Page Manager</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Files & Data · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="layers"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g></svg></span>PDF Page Manager</h1>
-    <p>Reorder, remove, duplicate, insert and merge PDF pages privately in your browser. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Files & Data · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="layers"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></g></svg></span>PDF Page Manager</h1>
+      <p>Reorder, remove, duplicate, insert and merge PDF pages privately in your browser. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>PDF Page Manager</strong> is a free files &amp; data tool that runs in your browser. Builds a new PDF from the pages you choose, in the exact order shown in the editor.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Reorder or remove pages from reports, scanned documents and study materials.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>PDF Page Manager</strong> is a free files &amp; data tool that runs in your browser. Builds a new PDF from the pages you choose, in the exact order shown in the editor.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Builds a new PDF from the pages you choose, in the exact order shown in the editor. PDF.js reads documents and renders on-demand thumbnails; pdf-lib copies source pages, inserts blank pages and images, and writes the finished PDF entirely in browser memory. Original files are never modified or uploaded.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Builds a new PDF from the pages you choose, in the exact order shown in the editor. PDF.js reads documents and renders on-demand thumbnails; pdf-lib copies source pages, inserts blank pages and images, and writes the finished PDF entirely in browser memory. Original files are never modified or uploaded.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Export the edited document, review the output page count, and download the validated PDF.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Accepts unencrypted PDFs up to 50 MB and 150 pages per source; output is limited to 250 pages. A second PDF is limited to 30 MB. Image insertion supports PNG and JPEG. Digital signatures are invalidated by any edit; links, annotations, bookmarks, form fields, metadata and other advanced PDF features may not be preserved. Always compare exported files when those features matter.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>Are my documents uploaded?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">No. Reading, thumbnail rendering, page editing and PDF export happen locally in browser memory. The tool makes no document-processing network requests.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Can I edit an encrypted PDF?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Password-protected PDFs are not supported. The tool reports that restriction without attempting to bypass document protection.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>PDF and image bytes are read and processed only in your browser. The editor does not call a PDF-processing API, send document contents to analytics, or persist files in localStorage or IndexedDB. Temporary thumbnails and output URLs are released when replaced or when you leave the page.</p>
 
-    <h2>Related Files & Data Tools</h2>
+    <h2>Related Files & Data tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/pdf-translator/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 8l6 6m-7 0l6-6l2-3M2 5h12M7 2h1m14 20l-5-10l-5 10m2-4h6"/></svg> PDF Translator</a></li>
@@ -143,13 +143,14 @@
       </ul>
     </div>
 
-    <h2>Browse All Files & Data Tools</h2>
+    <h2>Browse all Files & Data tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of files & data tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/pdf-translator/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 8l6 6m-7 0l6-6l2-3M2 5h12M7 2h1m14 20l-5-10l-5 10m2-4h6"/></svg> PDF Translator</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

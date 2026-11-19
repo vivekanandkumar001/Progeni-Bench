@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Data</span><span aria-hidden="true">/</span><span aria-current="page">vCard (VCF) Split & Merge</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Data · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="contact"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 2v2M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M8 2v2"/><circle cx="12" cy="10" r="3"/><rect width="18" height="18" x="3" y="3" rx="2"/></g></svg></span>vCard VCF Split and Merge</h1>
-    <p>Merge multiple .vcf contact cards or inspect contact files privately. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Data · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="contact"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 2v2M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M8 2v2"/><circle cx="12" cy="10" r="3"/><rect width="18" height="18" x="3" y="3" rx="2"/></g></svg></span>vCard VCF Split and Merge</h1>
+      <p>Merge multiple .vcf contact cards or inspect contact files privately. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>vCard (VCF) Split &amp; Merge</strong> is a free data tool that runs in your browser. Parses RFC 6350 vCard files, handles multi-line folded fields, and enables users to inspect individual contact cards or combine multiple .vcf files into one master archive.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Bulk vCard Splitting: Break down single multi-contact .vcf export files into individual .vcf cards for compatibility with legacy systems.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>vCard (VCF) Split &amp; Merge</strong> is a free data tool that runs in your browser. Parses RFC 6350 vCard files, handles multi-line folded fields, and enables users to inspect individual contact cards or combine multiple .vcf files into one master archive.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Parses RFC 6350 vCard files, handles multi-line folded fields, and enables users to inspect individual contact cards or combine multiple .vcf files into one master archive. Facilitates seamless contact migration across Android, Apple iOS, Microsoft Outlook, and Google Contacts.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Parses RFC 6350 vCard files, handles multi-line folded fields, and enables users to inspect individual contact cards or combine multiple .vcf files into one master archive. Facilitates seamless contact migration across Android, Apple iOS, Microsoft Outlook, and Google Contacts.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Import the resulting clean contact file into Apple Contacts, Outlook, or Google Contacts.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Supports vCard versions 2.1, 3.0, and 4.0 text structures. Embedded base64 contact photos are preserved but not previewed as visual thumbnails.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>Does the vCard tool support RFC 6350 line folding?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. The parser correctly unwraps folded lines and escaped characters commonly generated by Apple Contacts and Google Contacts.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Which vCard specification versions are supported?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">The engine parses both vCard 3.0 and vCard 4.0 specifications, preserving names, phone numbers, email addresses, and notes.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Your private address book and personal contact cards remain strictly on your machine. Client-side parsing ensures total privacy.</p>
 
-    <h2>Related Data Tools</h2>
+    <h2>Related Data tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/contact-dedupe/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></g></svg> Contact CSV Deduplicator</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Data Tools</h2>
+    <h2>Browse all Data tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of data tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/contact-dedupe/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -153,7 +153,8 @@
       <a href="/tools/csv-date/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v3m8-3v3"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></g></svg> CSV Date Normalizer</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Productivity</span><span aria-hidden="true">/</span><span aria-current="page">iCal Calendar Deduplicator</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Productivity · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="calendar-check"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v3m8-3v3"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 15l2 2l4-4"/></g></svg></span>iCal Calendar Deduplicator</h1>
-    <p>Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Productivity · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="calendar-check"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v3m8-3v3"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 15l2 2l4-4"/></g></svg></span>iCal Calendar Deduplicator</h1>
+      <p>Scan .ics calendar exports for duplicate VEVENT entries and export clean calendars. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>iCal Calendar Deduplicator</strong> is a free productivity tool that runs in your browser. Parses iCalendar (.ics) export files, detects duplicate VEVENT calendar blocks sharing identical summary, timestamp, and recurrence properties, and exports a streamlined calendar file.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Duplicate Calendar Event Purging: Remove duplicate meeting invites and repeated appointments from exported .ics calendar backups.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>iCal Calendar Deduplicator</strong> is a free productivity tool that runs in your browser. Parses iCalendar (.ics) export files, detects duplicate VEVENT calendar blocks sharing identical summary, timestamp, and recurrence properties, and exports a streamlined calendar file.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Parses iCalendar (.ics) export files, detects duplicate VEVENT calendar blocks sharing identical summary, timestamp, and recurrence properties, and exports a streamlined calendar file. Eliminates annoying duplicated calendar alerts across desktop and mobile devices.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Parses iCalendar (.ics) export files, detects duplicate VEVENT calendar blocks sharing identical summary, timestamp, and recurrence properties, and exports a streamlined calendar file. Eliminates annoying duplicated calendar alerts across desktop and mobile devices.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Download the cleaned .ics file and re-import it into your calendar application.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Deduplicates based on normalized VEVENT string properties. Does not automatically resolve conflicting event time modifications or update remote CalDAV servers.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>What calendar file formats are supported?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">The cleaner processes standard iCalendar (.ics) files generated by Google Calendar, Apple Calendar, Microsoft Outlook, and Nextcloud.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>How does the tool identify duplicate events?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Events are matched based on identical start times, end times, event summaries (titles), and unique identifier (UID) fields.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Your personal and professional appointment schedules are kept strictly private on your computer. Zero calendar data is transmitted across the internet.</p>
 
-    <h2>Related Productivity Tools</h2>
+    <h2>Related Productivity tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/timetable-calendar/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M16 2v3M3 9h18M8 2v3m9 8h-6m2 4H7m0-4h.01M17 17h.01"/></g></svg> Timetable Ã¢â€ â€™ Calendar (.ics)</a></li>
@@ -143,13 +143,14 @@
       </ul>
     </div>
 
-    <h2>Browse All Productivity Tools</h2>
+    <h2>Browse all Productivity tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of productivity tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/timetable-calendar/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M16 2v3M3 9h18M8 2v3m9 8h-6m2 4H7m0-4h.01M17 17h.01"/></g></svg> Timetable Ã¢â€ â€™ Calendar (.ics)</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Data</span><span aria-hidden="true">/</span><span aria-current="page">CSV Date Normalizer</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Data · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="calendar-days"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v3m8-3v3"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></g></svg></span>CSV Date Normalizer</h1>
-    <p>Standardize mixed dates into US (MM/DD/YYYY), ISO (YYYY-MM-DD), or European formats. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Data · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="calendar-days"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v3m8-3v3"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></g></svg></span>CSV Date Normalizer</h1>
+      <p>Standardize mixed dates into US (MM/DD/YYYY), ISO (YYYY-MM-DD), or European formats. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>CSV Date Normalizer</strong> is a free data tool that runs in your browser. Scans mixed-format date columns across spreadsheet rows and converts every value into a uniform target convention: ISO (YYYY-MM-DD), US (MM/DD/YYYY), or European (DD/MM/YYYY).</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Database Migration Date Normalization: Convert heterogeneous date formats (e.g. 05/12/2023, Dec 5 2023) into ISO 8601 (YYYY-MM-DD).</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>CSV Date Normalizer</strong> is a free data tool that runs in your browser. Scans mixed-format date columns across spreadsheet rows and converts every value into a uniform target convention: ISO (YYYY-MM-DD), US (MM/DD/YYYY), or European (DD/MM/YYYY).</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Scans mixed-format date columns across spreadsheet rows and converts every value into a uniform target convention: ISO (YYYY-MM-DD), US (MM/DD/YYYY), or European (DD/MM/YYYY). Fixes inconsistent formatting resulting from disparate database exports or international data collection.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Scans mixed-format date columns across spreadsheet rows and converts every value into a uniform target convention: ISO (YYYY-MM-DD), US (MM/DD/YYYY), or European (DD/MM/YYYY). Fixes inconsistent formatting resulting from disparate database exports or international data collection.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Click Normalize Dates and download your standardized, clean CSV spreadsheet.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Parses ISO, US, and European formatted date strings. Ambiguous numeric dates (such as 02/03/2024) are parsed adhering to standard convention rules.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>How does the tool handle ambiguous day/month combinations?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">When dates like 02/03/2024 can represent either Feb 3 or March 2, the tool flags the ambiguity and lets you specify the primary regional convention.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>What is the default normalized date output format?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Dates standardize to the universal ISO 8601 YYYY-MM-DD standard, which is natively supported by SQL databases, Excel, and analytics tools.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Data transformation happens strictly inside your local browser instance. No database records or customer logs are uploaded.</p>
 
-    <h2>Related Data Tools</h2>
+    <h2>Related Data tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/contact-dedupe/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></g></svg> Contact CSV Deduplicator</a></li>
@@ -143,7 +143,7 @@
       </ul>
     </div>
 
-    <h2>Browse All Data Tools</h2>
+    <h2>Browse all Data tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of data tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/contact-dedupe/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
@@ -153,7 +153,8 @@
       <a href="/tools/vcard/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 2v2M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M8 2v2"/><circle cx="12" cy="10" r="3"/><rect width="18" height="18" x="3" y="3" rx="2"/></g></svg> vCard (VCF) Split & Merge</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">

@@ -69,23 +69,19 @@
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">Text & Subtitles</span><span aria-hidden="true">/</span><span aria-current="page">Subtitle Reading-Speed Checker</span>
   </nav>
-  <section class="tool-head">
-    <span class="eyebrow">Text & Subtitles · 100% Private Client-Side</span>
-    <h1><span class="tool-head-icon" data-icon="captions"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4m4 0h2M7 11h2m4 0h4"/></g></svg></span>Subtitle Reading-Speed Checker</h1>
-    <p>Audit SRT subtitles for reading speed (CPS), duration, line length and overlaps against Netflix, BBC or custom limits. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
-  </section>
+  <div class="tool-shell">
+    <section class="tool-head">
+      <span class="eyebrow">Text & Subtitles · 100% Private Client-Side</span>
+      <h1><span class="tool-head-icon" data-icon="captions"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4m4 0h2M7 11h2m4 0h4"/></g></svg></span>Subtitle Reading-Speed Checker</h1>
+      <p>Audit SRT subtitles for reading speed (CPS), duration, line length and overlaps against Netflix, BBC or custom limits. <strong>Zero server uploads</strong> — all processing happens directly in your browser.</p>
+    </section>
 
-  <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
-  <h2 id="quick-answer-title">Quick answer</h2>
-  <p class="answer-text"><strong>Subtitle Reading-Speed Checker</strong> is a free text &amp; subtitles tool that runs in your browser. Audits SubRip (.srt) subtitle files against broadcast reading-speed standards.</p>
-  <dl class="key-facts">
-    <div><dt>Cost</dt><dd>Free · no account needed</dd></div>
-    <div><dt>Runs</dt><dd>Entirely in your browser</dd></div>
-    <div><dt>Uploads</dt><dd>No file uploads</dd></div>
-    <div><dt>Works on</dt><dd>Modern desktop, tablet and mobile browsers</dd></div>
-    <div><dt>Best for</dt><dd>Streaming Accessibility Compliance: Audit SRT subtitle files against industry reading speed standards such as Netflix&#39;s 20 CPS or BBC&#39;s 17 CPS rules.</dd></div>
-  </dl>
-</aside>
+    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+      <h2 id="quick-answer-title">At a glance</h2>
+      <p class="answer-text"><strong>Subtitle Reading-Speed Checker</strong> is a free text &amp; subtitles tool that runs in your browser. Audits SubRip (.srt) subtitle files against broadcast reading-speed standards.</p>
+      <dl class="key-facts">[object Object],[object Object],[object Object],[object Object],[object Object]</dl>
+    </aside>
+  </div>
 
   <!-- Pre-rendered Noscript / Crawler Fallback -->
   <noscript>
@@ -96,9 +92,13 @@
     </section>
   </noscript>
 
-  <article class="tool-content seo-section" style="margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; line-height: 1.8;">
-    <h2>What it does</h2>
-    <p>Audits SubRip (.srt) subtitle files against broadcast reading-speed standards. Choose the Netflix profile (21 CPS, 1s minimum, 42 characters), the BBC profile (about 180 words per minute, 16-20 CPS), or a custom profile with your own CPS, minimum-duration and line-length limits. The engine strips styling tags before measuring, reports raw and clean character counts, and flags excessive CPS, short or zero-duration cues, overlong lines and overlapping timecodes (naming the neighbouring cue and the clashing range). It shows totals, flagged counts, an average CPS and the longest cue, and exports a CSV report or an annotated .issues.srt review copy.</p>
+  <details class="tool-details" id="tool-details">
+    <summary>About this tool — how it works, limits &amp; FAQ
+      <svg class="tool-details-chev" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <div class="tool-details-body">
+      <h2>What it does</h2>
+      <p>Audits SubRip (.srt) subtitle files against broadcast reading-speed standards. Choose the Netflix profile (21 CPS, 1s minimum, 42 characters), the BBC profile (about 180 words per minute, 16-20 CPS), or a custom profile with your own CPS, minimum-duration and line-length limits. The engine strips styling tags before measuring, reports raw and clean character counts, and flags excessive CPS, short or zero-duration cues, overlong lines and overlapping timecodes (naming the neighbouring cue and the clashing range). It shows totals, flagged counts, an average CPS and the longest cue, and exports a CSV report or an annotated .issues.srt review copy.</p>
 
     
     <h2>Common use cases</h2>
@@ -117,11 +117,11 @@
       <li>Download the CSV report for a spreadsheet, the annotated .issues.srt for review, or click Fix line breaks to send the text straight to the line-break fixer.</li>
     </ol>
 
-    <h2>Limits & Considerations</h2>
+    <h2>Limits &amp; considerations</h2>
     <p>Audits SubRip SRT subtitle files. Does not directly extract proprietary binary subtitle streams embedded in container formats like MKV or MP4.</p>
 
     
-    <h2>Frequently Asked Questions</h2>
+    <h2>Frequently asked questions</h2>
     <div class="faq-list">
       <div class="faq-item" style="margin: 14px 0;"><strong>What is Characters Per Second (CPS) and why is it important?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">CPS measures how quickly a viewer must read on-screen text. Rates exceeding 20-25 CPS often result in missed dialogue or viewer fatigue.</p></div>
       <div class="faq-item" style="margin: 14px 0;"><strong>Does the checker report overlapping subtitle cues?</strong><p style="margin: 4px 0 0 0; color: var(--muted);">Yes. The audit detects cue timecode collisions, highlighting cues where the start time precedes the previous cue's end time.</p></div>
@@ -129,10 +129,10 @@
     </div>
     
 
-    <h2>Privacy & Security</h2>
+    <h2>Privacy &amp; security</h2>
     <p>Subtitle files are parsed purely within client-side memory. Confidential movie scripts, documentary translations, and transcripts remain strictly private.</p>
 
-    <h2>Related Text & Subtitles Tools</h2>
+    <h2>Related Text & Subtitles tools</h2>
     <div class="tool-links">
       <ul class="related-links" style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
         <li><a href="/tools/subtitle-linefix/" style="color: var(--brand); font-weight: 600; text-decoration: underline;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g></svg> Subtitle Line-Break Fixer</a></li>
@@ -143,13 +143,14 @@
       </ul>
     </div>
 
-    <h2>Browse All Text & Subtitles Tools</h2>
+    <h2>Browse all Text & Subtitles tools</h2>
     <p style="color: var(--muted); font-size: 14px; margin: 8px 0 16px 0;">Explore the full range of text & subtitles tools:</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 8px;">
       <a href="/tools/subtitle-linefix/" style="display: block; padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; color: var(--brand); font-size: 13px; text-decoration: none; transition: background 0.2s;">
 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g></svg> Subtitle Line-Break Fixer</a>
     </div>
-  </article>
+    </div>
+  </details>
 </main>
 
 <footer role="contentinfo">
