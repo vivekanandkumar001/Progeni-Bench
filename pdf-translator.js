@@ -37,6 +37,7 @@
   const ROMAN = {
     "अ": "a", "आ": "aa", "इ": "i", "ई": "ee", "उ": "u", "ऊ": "oo",
     "ऋ": "ri", "ए": "e", "ऐ": "ai", "ओ": "o", "औ": "au",
+    "ॲ": "e", "ऑ": "o", "ऒ": "o", "ॠ": "ri",
     "क": "k", "ख": "kh", "ग": "g", "घ": "gh", "ङ": "ng",
     "च": "ch", "छ": "chh", "ज": "j", "झ": "jh", "ञ": "ny",
     "ट": "t", "ठ": "th", "ड": "d", "ढ": "dh", "ण": "n",
@@ -45,11 +46,12 @@
     "य": "y", "र": "r", "ल": "l", "व": "v", "श": "sh",
     "ष": "sh", "स": "s", "ह": "h", "ळ": "l", "क्ष": "ksh",
     "ज्ञ": "gy", "क़": "q", "ख़": "kh", "ग़": "gh", "ज़": "z",
-    "ड़": "r", "ढ़": "rh", "फ़": "f", "य़": "y"
+    "ड़": "r", "ढ़": "rh", "फ़": "f", "य़": "y", "ॐ": "om"
   };
   const MATRA = {
     "ा": "aa", "ि": "i", "ी": "ee", "ु": "u", "ू": "oo", "ृ": "ri",
-    "े": "e", "ै": "ai", "ो": "o", "ौ": "au", "ॅ": "e", "ॉ": "o"
+    "े": "e", "ै": "ai", "ो": "o", "ौ": "au", "ॅ": "e", "ॉ": "o",
+    "ं": "n", "ँ": "n", "ः": "h"
   };
 
   let file = null;
@@ -102,11 +104,12 @@
         continue;
       }
       if (MATRA[current]) out += MATRA[current];
-      else if (current === "ं" || current === "ँ") out += "n";
-      else if (current === "ः") out += "h";
+      else if (current === "।" || current === "॥") out += ". ";
+      else if (current === "ऽ") out += "'";
       else out += current;
     }
-    return out;
+    // Collapse runs of spaces and stray punctuation artifacts left by the provider.
+    return out.replace(/\s{2,}/g, " ").replace(/\s+([.,;:!?)])/g, "$1").replace(/\s+\./g, ".").trim();
   }
 
   function updateProgress(percent, label) {
@@ -501,8 +504,13 @@
     const segments = [];
     for (const block of blocks) {
       const tokenMap = new Map();
+      // Protect: URLs, emails, numbers, code spans — and multi-word English
+      // technical / proper-name phrases (e.g. "Observational Learning",
+      // "Bobo Doll Experiment", "Social Constructivism"). Hindi engines tend to
+      // transliterate those into unintelligible Devanagari; real Hinglish keeps
+      // them in English, so they pass through untouched.
       const protectedText = block.text.replace(
-        /`[^`\n]*`|https?:\/\/[^\s<>()]+|[\w.+-]+@[\w.-]+\.[A-Z]{2,}|\b\d[\d,]*(?:\.\d+)?(?:%|[A-Za-z]{1,3})?/gi,
+        /`[^`\n]*`|https?:\/\/[^\s<>()]+|[\w.+-]+@[\w.-]+\.[A-Z]{2,}|\b\d[\d,]*(?:\.\d+)?(?:%|[A-Za-z]{1,3})?|\b[A-Z][A-Za-z0-9'’-]+(?:[ \t]+(?:(?:–|-|—|&|,|:|;)[ \t]+|[ \t]+)[A-Z][A-Za-z0-9'’-]+){1,5}/g,
         token => {
           const placeholder = `PGTOKENX${tokenIndex++}END`;
           tokenMap.set(placeholder, token);
@@ -561,7 +569,7 @@
       for (const [placeholder, original] of tokenMaps.get(id) || []) {
         const placeholderPattern = new RegExp(placeholder, "gi");
         if (!output.toLowerCase().includes(placeholder.toLowerCase())) {
-          warnings.push(`${id}: a protected number, URL, email or code token could not be restored.`);
+          warnings.push(`${id}: a protected technical term or token could not be restored.`);
         } else {
           output = output.replace(placeholderPattern, original);
         }
