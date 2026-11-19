@@ -60,6 +60,9 @@ const STUDIO_SCRIPTS = {
 const loadedScripts = new Map();
 let pdfRouteToken = 0;
 let pdfManagerRouteToken = 0;
+// Bump this cache tag whenever pdf-translator.js or pdf-page-manager.js changes —
+// it prevents stale heuristic browser caches serving old builds after a redeploy.
+const PDF_CACHE_TAG = "20261119a";
 
 function loadScript(src) {
   if (loadedScripts.has(src)) return loadedScripts.get(src);
@@ -1658,7 +1661,7 @@ function toolPage(id) {
     const routeToken = ++pdfManagerRouteToken;
     loadScript("/vendor/pdfjs/pdf.min.js")
       .then(() => loadScript("/vendor/pdf-lib/pdf-lib.min.js"))
-      .then(() => loadScript("/pdf-page-manager.js"))
+      .then(() => loadScript(`/pdf-page-manager.js?v=${PDF_CACHE_TAG}`))
       .then(() => {
         if (routeToken !== pdfManagerRouteToken || !$("#pdfpm")) return;
         if (!window.PdfPageManager || !window.pdfjsLib || !window.PDFLib) {
@@ -1768,7 +1771,7 @@ function toolPage(id) {
     loadScript("/vendor/pdfjs/pdf.min.js")
       .then(() => loadScript("/vendor/pdf-lib/pdf-lib.min.js"))
       .then(() => loadScript("/vendor/tesseract/tesseract.min.js"))
-      .then(() => loadScript("/pdf-translator.js"))
+      .then(() => loadScript(`/pdf-translator.js?v=${PDF_CACHE_TAG}`))
       .then(() => {
         if (routeToken !== pdfRouteToken || !$("#pdf-controls")) return;
         if (!window.PdfTranslator || !window.pdfjsLib || !window.PDFLib) {

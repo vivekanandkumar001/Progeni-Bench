@@ -54,6 +54,28 @@
     "ं": "n", "ँ": "n", "ः": "h"
   };
 
+  // Map formal/Sanskritised Hindi words (which Google Translate / on-device models
+  // produce for academic English text) to the colloquial equivalents Hindi
+  // speakers actually use — the register people speak in rather than write.
+  const SPOKEN_MAP = [
+    ["एवं", "और"], ["तथा", "और"],
+    ["अतः", "इसलिए"], ["अतएव", "इसलिए"],
+    ["परंतु", "लेकिन"], ["किंतु", "लेकिन"], ["अपितु", "लेकिन"], ["अलबत्ता", "लेकिन"],
+    ["यद्यपि", "हालांकि"], ["तथापि", "फिर भी"],
+    ["अन्यथा", "वरना"], ["अकूत", "बेशुमार"],
+    ["प्रायः", "अकसर"], ["विशेषतः", "खास करके"], ["विशेषतः", "खास करके"],
+    ["अर्थात्", "यानी"], ["उदाहरणार्थ", "उदाहरण के तौर पर"], ["उपर्युक्त", "ऊपर वाला"],
+    ["निहितार्थ", "मतलब"], ["निहितार्थतः", "मतलब"],
+    ["प्राथमिक", "पहली"], ["प्रथमतः", "सबसे पहले"], ["द्वितीयतः", "दूसरी बात"],
+    ["तृतीयतः", "तीसरी बात"], ["अंतिमतः", "आखिरी बात"],
+    ["निदान", "निदान"], ["आत्मनिरीक्षण", "खुद को देखना"]
+  ];
+  function toSpokenHindi(text) {
+    if (!text) return text;
+    let out = text;
+    for (const [from, to] of SPOKEN_MAP) out = out.split(from).join(to);
+    return out;
+  }
   let file = null;
   let pdfDocument = null;
   let activeLoadingTask = null;
@@ -557,7 +579,9 @@
         const segment = segments.find(candidate => candidate.id === item.id);
         if (!segment) throw new Error(`The translation service returned an unknown block identifier: ${item.id}.`);
         if (item.detectedSourceLang) detectedLanguages.add(item.detectedSourceLang);
-        const value = options.hinglish ? romanizeHindi(item.text) : item.text;
+        const rawValue = item.text;
+        const spoken = options.targetLang === "HI" ? toSpokenHindi(rawValue) : rawValue;
+        const value = options.hinglish ? romanizeHindi(spoken) : spoken;
         if (!translations.has(segment.parentId)) translations.set(segment.parentId, []);
         translations.get(segment.parentId).push(value);
       }
@@ -767,9 +791,24 @@
         renderedCanvas = null;
       }
       if (!blocks.length) {
-        pageIssues.push("No extractable text found; page omitted.");
+        // Image-only / scanned page: keep the page in the output instead of
+        // dropping it silently — rasterise and embed as an image page so
+        // diagrams and figures are never lost.
+        const imageViewport = page.getViewport({ scale: Math.min(2.2, Math.sqrt(MAX_PAGE_PIXELS / (page.view[2] * page.view[3]))) || 1.5 });
+        reserveRenderPixels(renderBudget, imageViewport.width, imageViewport.height);
+        const imageCanvas = document.createElement("canvas");
+        imageCanvas.width = Math.ceil(imageViewport.width);
+        imageCanvas.height = Math.ceil(imageViewport.height);
+        const imageCtx = imageCanvas.getContext("2d", { alpha: false });
+        imageCtx.fillStyle = "#fff";
+        imageCtx.fillRect(0, 0, imageCanvas.width, imageCanvas.height);
+        await page.render({ canvasContext: imageCtx, viewport: imageViewport }).promise;
+        const pageSize = page.getViewport({ scale: 1 });
+        await embedCanvasPage(pdf, imageCanvas, { width: pageSize.width, height: pageSize.height });
+        imageCanvas.width = imageCanvas.height = 0;
+        pageIssues.push("No extractable text; page kept as an image (enable OCR to translate).");
         quality.push(`Page ${pageNumber}: ${pageIssues[pageIssues.length - 1]}`);
-        pageQuality.push({ page: pageNumber, status: "failed", issues: pageIssues });
+        pageQuality.push({ page: pageNumber, status: "warning", issues: pageIssues });
         page.cleanup();
         continue;
       }
