@@ -2,11 +2,13 @@
   "use strict";
 
   const MAX_FILE_BYTES = 15 * 1024 * 1024;
-  const MAX_PAGES = 30;
+  // No page-count limit: documents are bounded only by file size (15 MB),
+  // extracted text (120k chars, DeepL quota) and the render budget below.
+  // MAX_OUTPUT_PAGES stays as a runaway guard; continuation pages rarely triple the source count.
   const MAX_TEXT_CHARS = 120000;
   const MAX_PAGE_PIXELS = 4000000;
-  const MAX_TOTAL_RENDER_PIXELS = 80000000;
-  const MAX_OUTPUT_PAGES = 100;
+  const MAX_TOTAL_RENDER_PIXELS = 500000000;
+  const MAX_OUTPUT_PAGES = 300;
   const OCR_LANG_PATH = "https://tessdata.projectnaptha.com/4.0.0";
   const TARGETS = [
     ["AR", "Arabic"], ["BG", "Bulgarian"], ["CS", "Czech"], ["DA", "Danish"],
@@ -216,12 +218,6 @@
       }
       activeLoadingTask = null;
       pdfDocument = loadedDocument;
-      if (pdfDocument.numPages > MAX_PAGES) {
-        const pageCount = pdfDocument.numPages;
-        await pdfDocument.destroy();
-        pdfDocument = null;
-        throw new Error(`This PDF has ${pageCount} pages. The current maximum is ${MAX_PAGES}.`);
-      }
       pdfReady = true;
       el("pdf-page-count").textContent = `${pdfDocument.numPages} page${pdfDocument.numPages === 1 ? "" : "s"}`;
       updateProgress(5, "PDF structure validated locally. Choose options and translate.");
@@ -785,12 +781,14 @@
     updateProgress(12, "Preparing selected pages for translation…");
     try {
       const selectedPages = parsePageRange(el("pdf-page-range").value, pdfDocument.numPages);
-      if (selectedPages.length > MAX_PAGES) throw new Error(`Select no more than ${MAX_PAGES} pages.`);
       updateProgress(12, `Validated ${selectedPages.length} selected page(s). Preparing translation…`);
       const rawTarget = el("pdf-target-language").value.trim();
       const hinglish = rawTarget.toLowerCase() === "hinglish";
-      const target = TARGETS.find(([code, name]) => code.toLowerCase() === rawTarget.toLowerCase() || name.toLowerCase() === rawTarget.toLowerCase());
-      if (!target && !hinglish) throw new Error("Choose a target language from the searchable list.");
+      const TARGET_ALIASES = { en: "EN-US", english: "EN-US", pt: "PT-BR", portuguese: "PT-BR" };
+      const aliasCode = TARGET_ALIASES[rawTarget.toLowerCase()];
+      const target = TARGETS.find(([code, name]) => code.toLowerCase() === rawTarget.toLowerCase() || name.toLowerCase() === rawTarget.toLowerCase())
+        || (aliasCode ? TARGETS.find(([code]) => code === aliasCode) : null);
+      if (!target && !hinglish) throw new Error("Choose a target language from the list.");
       const sourceLang = el("pdf-source-language").value || "";
       const mode = el("pdf-output-mode").value;
       if (target && target[0] === "HI" || sourceLang === "HI" || el("pdf-ocr-language").value === "hin" || mode === "bilingual") {
@@ -910,10 +908,21 @@
       updateProgress(0, "Translation cancelled.");
       setError("Translation cancelled.");
     });
-    el("pdf-target-language").addEventListener("input", () => {
+    const syncHinglishNote = () => {
       el("pdf-hinglish-note").hidden = el("pdf-target-language").value.trim().toLowerCase() !== "hinglish";
+    };
+    // Clear any stale error and restore the button label when the user changes the target language.
+    el("pdf-target-language").addEventListener("change", () => {
+      syncHinglishNote();
+      if (!el("pdf-error").hidden && /target language/i.test(el("pdf-error").textContent || "")) setError("");
     });
     el("pdf-hinglish-note").hidden = el("pdf-target-language").value.trim().toLowerCase() !== "hinglish";
+    // OCR language only matters when OCR is enabled.
+    const ocrCheckbox = el("pdf-use-ocr");
+    const ocrLangSelect = el("pdf-ocr-language");
+    const syncOcrLanguage = () => { ocrLangSelect.disabled = !ocrCheckbox.checked; };
+    ocrCheckbox.addEventListener("change", syncOcrLanguage);
+    syncOcrLanguage();
     if (root.pdfjsLib && root.pdfjsLib.GlobalWorkerOptions) {
       root.pdfjsLib.GlobalWorkerOptions.workerSrc = "/vendor/pdfjs/pdf.worker.min.js";
     }

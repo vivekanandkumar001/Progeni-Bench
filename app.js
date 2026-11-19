@@ -1641,52 +1641,57 @@ function toolPage(id) {
       <div class="pdf-translator" id="pdf-controls" aria-busy="false">
         <div class="pdf-drop" id="pdf-drop" role="button" tabindex="0">
           <strong>Drop a PDF here</strong>
-          <span>or choose a file from your device · maximum 15 MB and 30 pages</span>
+          <span>or choose a file from your device · maximum 15 MB and 120,000 extracted characters</span>
           <input id="pdf-file" type="file" accept=".pdf,application/pdf" hidden>
         </div>
         <div id="pdf-file-info" class="pdf-file-info" hidden>
           <strong id="pdf-file-name"></strong>
-          <span><span id="pdf-file-size"></span> · <span id="pdf-page-count">Checking pages…</span></span>
+          <span class="pdf-file-meta"><span id="pdf-file-size"></span> · <span id="pdf-page-count">Checking pages…</span></span>
         </div>
         <div class="pdf-settings">
-          <label>Source language
+          <div class="pdf-field">
+            <label for="pdf-source-language">Source language</label>
             <select id="pdf-source-language" aria-describedby="pdf-source-help"></select>
-            <span id="pdf-source-help" class="pdf-help">Auto-detect is recommended unless you know the document language.</span>
-          </label>
-          <label>Target language
-            <input id="pdf-target-language" list="pdf-target-options" value="Hinglish" autocomplete="off" aria-describedby="pdf-hinglish-note">
-            <datalist id="pdf-target-options"></datalist>
-            <span id="pdf-hinglish-note" class="pdf-help">Hinglish is Hindi translated by DeepL and then romanized; natural English-Hindi mixing is not guaranteed.</span>
-          </label>
-          <label>Translation style
+            <span class="pdf-help" id="pdf-source-help">Auto-detect is recommended unless you know the document language.</span>
+          </div>
+          <div class="pdf-field">
+            <label for="pdf-target-language">Target language</label>
+            <select id="pdf-target-language" aria-describedby="pdf-hinglish-note"></select>
+            <span class="pdf-help" id="pdf-hinglish-note" hidden>Hinglish is Hindi translated by DeepL and then romanized; natural English-Hindi mixing is not guaranteed.</span>
+          </div>
+          <div class="pdf-field">
+            <label for="pdf-translation-style">Translation style</label>
             <select id="pdf-translation-style">
               <option value="faithful">Faithful</option>
               <option value="formal">Formal (where supported)</option>
               <option value="conversational">Conversational (where supported)</option>
             </select>
-          </label>
-          <label>Output layout
+          </div>
+          <div class="pdf-field">
+            <label for="pdf-output-mode">Output layout</label>
             <select id="pdf-output-mode">
               <option value="preserve">Preserve original layout (best effort)</option>
               <option value="readable">Clean readable layout</option>
               <option value="bilingual">Bilingual source + translation</option>
             </select>
-          </label>
-          <label>Pages to include
-            <input id="pdf-page-range" type="text" inputmode="text" placeholder="All pages (or e.g. 1-3, 6)">
-            <span class="pdf-help">Only selected pages are included in the output PDF.</span>
-          </label>
+          </div>
+          <div class="pdf-field pdf-field-wide">
+            <label for="pdf-page-range">Pages to include</label>
+            <input id="pdf-page-range" type="text" inputmode="text" placeholder="All pages (or e.g. 1-3, 6)" autocomplete="off" spellcheck="false" aria-describedby="pdf-page-range-help">
+            <span class="pdf-help" id="pdf-page-range-help">Only selected pages are included in the output PDF.</span>
+          </div>
         </div>
-        <label class="pdf-check">
+        <label class="pdf-check" for="pdf-use-ocr">
           <input id="pdf-use-ocr" type="checkbox">
           <span><strong>Use local OCR on scanned pages</strong><small>English or Hindi OCR data downloads as needed. Page images stay on your device.</small></span>
         </label>
-        <label class="pdf-ocr-language">OCR language
-          <select id="pdf-ocr-language">
+        <div class="pdf-field pdf-ocr-field">
+          <label for="pdf-ocr-language">OCR language</label>
+          <select id="pdf-ocr-language" disabled>
             <option value="eng">English</option>
             <option value="hin">Hindi</option>
           </select>
-        </label>
+        </div>
         <div class="pdf-actions">
           <button class="btn" id="pdf-run" type="button" disabled>Translate PDF</button>
           <button class="btn secondary" id="pdf-cancel" type="button" hidden>Cancel</button>
@@ -1728,9 +1733,10 @@ function toolPage(id) {
         $("#pdf-source-language").innerHTML = languages.sources.map(([code, name]) =>
           `<option value="${esc(code)}">${esc(name)}</option>`
         ).join("");
-        $("#pdf-target-options").innerHTML = languages.targets.map(([code, name]) =>
-          `<option value="${esc(name)}" label="${esc(code)}"></option>`
-        ).join("") + '<option value="Hinglish"></option>';
+        $("#pdf-target-language").innerHTML = languages.targets.map(([code, name]) =>
+          `<option value="${esc(code)}">${esc(name)} (${esc(code)})</option>`
+        ).join("") + '<option value="Hinglish">Hinglish (HI · Roman Hindi)</option>';
+        $("#pdf-target-language").value = "Hinglish";
         const fontPath = "/vendor/fonts/noto-sans-devanagari/400.css";
         if (!document.querySelector(`link[href="${fontPath}"]`)) {
           const fontCss = document.createElement("link");

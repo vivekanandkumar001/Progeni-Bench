@@ -131,16 +131,8 @@ ${chrome.siteHeader({ active: 'audio' })}
 ${body}
 </main>
 
-<footer role="contentinfo">
-  <div><strong>${esc(SITE_NAME)}</strong> — <a href="${esc(site.PARENT_URL)}" target="_blank" rel="noopener">A Progeni project</a> · ${esc(TAGLINE)}</div>
-  <div class="footer-links">
-    <a href="/image/">Image toolkit</a>
-    <a href="/audio/">Audio toolkit</a>
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/about/">About</a>
-    <a href="/contact/">Contact</a>
-  </div>
+${chrome.siteFooter({
+    directory: `
   <details class="footer-directory">
     <summary class="footer-directory-title">Audio tools by category</summary>
     <div class="category-blocks">
@@ -150,8 +142,8 @@ ${body}
         return `<div class="category-block"><h3>${esc(cat.name)}</h3><ul>${tools.map(t => `<li><a href="/audio/${esc(t.slug)}/">${icons.toolIcon('audio', t.slug, t.icon)} ${esc(t.name)}</a></li>`).join('')}</ul></div>`;
       }).join('')}
     </div>
-  </details>
-</footer>
+  </details>`
+  })}
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>

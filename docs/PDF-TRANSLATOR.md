@@ -72,24 +72,24 @@ limiter when Upstash is not configured; this is not suitable for production.
 
 ## Limits and output behavior
 
-- Input PDF: at most 15 MB and 30 source pages.
+- Input PDF: at most 15 MB. There is no source page-count limit; note that the upstream DeepL daily quota (below) is the effective ceiling for very large documents.
 - Extracted text: at most 120,000 characters for a job.
 - Translation requests: at most 50 blocks, 5,000 characters per block, and
   15,000 characters total.
-- Output: at most 100 pages and 80 MB. Rendering is capped at 4 million pixels
-  per rasterized page and 80 million pixels per job.
+- Output: at most 300 pages and 80 MB. Rendering is capped at 4 million pixels
+  per rasterized page and 500 million pixels per job.
 - Upstash quotas: 30 translation requests per minute and 150,000 input
   characters per UTC day per hashed client IP.
 - The endpoint retries transient DeepL responses up to three times. Successful
   responses can be kept in volatile Function memory for up to five minutes to
   deduplicate retries within a warm instance.
 - DeepL formality controls are available only for language pairs that DeepL
-  supports. “Faithful” does not add custom instructions to DeepL.
+  supports. â€œFaithfulâ€ does not add custom instructions to DeepL.
 - Hinglish is implemented as best-effort Romanization of a Hindi translation.
   It is not a natural-language Hinglish model and can produce awkward
   transliteration. A DeepL glossary may help preserve domain-specific words.
 - Clean and bilingual layouts rebuild content as rasterized pages.
-  “Preserve layout” renders the source page and paints translations over
+  â€œPreserve layoutâ€ renders the source page and paints translations over
   extracted text areas; it cannot reliably retain typography or original
   layout. Links, selectable text, form fields, signatures, annotations, and
   document metadata are not preserved. Review the generated PDF and its

@@ -3,7 +3,7 @@
  * search box and navigation never drift between the core, image and audio
  * builders again.
  */
-const { SITE_NAME, TOOLS } = require('../site.config.js');
+const { SITE_NAME, TOOLS, PARENT_URL, TAGLINE } = require('../site.config.js');
 const imageConfig = require('../image-tools.config.js');
 const audioConfig = require('../audio-tools.config.js');
 const brand = require('./brand.js');
@@ -100,16 +100,49 @@ function siteHeader(options) {
 
 const FOOTER_LINKS = [
   { href: '/', label: 'All tools' },
-  { href: '/image/', label: 'Image' },
-  { href: '/audio/', label: 'Audio' },
+  { href: '/image/', label: 'Images' },
+  { href: '/audio/', label: 'Audio & Video' },
   { href: '/about/', label: 'About' },
   { href: '/privacy/', label: 'Privacy' },
   { href: '/terms/', label: 'Terms' },
   { href: '/contact/', label: 'Contact' }
 ];
 
-function footerLinksHtml() {
-  return FOOTER_LINKS.map(link => `<a href="${link.href}">${esc(link.label)}</a>`).join('\n    ');
+/* Legal / trust pages. Tool pages already surface related tools in their body,
+   so they keep just these four links in the footer. */
+const LEGAL_LINKS = [
+  { href: '/privacy/', label: 'Privacy' },
+  { href: '/terms/', label: 'Terms' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' }
+];
+
+function footerLinksHtml(links) {
+  const items = links || FOOTER_LINKS;
+  return items.map(link => `<a href="${link.href}">${esc(link.label)}</a>`).join('\n    ');
 }
 
-module.exports = { esc, siteHeader, searchHtml, footerLinksHtml, toolCounts };
+/**
+ * Canonical site footer — one markup shape for every generated page so the
+ * bottom of the page never drifts between hubs, tool pages and legal pages.
+ *
+ * Layout contract (kept compact on purpose):
+ *   - one row on desktop: brand + tagline on the left, links on the right;
+ *   - the optional category directory wraps onto its own full-width row and
+ *     only renders its content when opened, so a closed footer stays a single
+ *     short bar instead of reserving a tall block.
+ *
+ * @param {{directory?: string, links?: Array}} [options]
+ */
+function siteFooter({ directory = null, links = FOOTER_LINKS } = {}) {
+  const brandMark = `<div class="footer-brand"><img src="${brand.logo}" alt="" width="32" height="32"><span><strong>${esc(SITE_NAME)}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${esc(TAGLINE)}</span></div>`;
+  return `<footer role="contentinfo">
+  ${brandMark}
+  <div class="footer-links">
+    ${footerLinksHtml(links)}
+  </div>
+  ${directory || ''}
+</footer>`;
+}
+
+module.exports = { esc, siteHeader, searchHtml, footerLinksHtml, siteFooter, toolCounts, FOOTER_LINKS, LEGAL_LINKS };

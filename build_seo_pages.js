@@ -8,7 +8,7 @@ const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
 const audioConfig = require('./audio-tools.config.js');
 const audioPages = require('./audio-pages.js');
-const { siteHeader } = require('./scripts/site-chrome.js');
+const { siteHeader, siteFooter, LEGAL_LINKS } = require('./scripts/site-chrome.js');
 const brand = require('./scripts/brand.js');
 const icons = require('./icons.js');
 const publicTools = tools => tools.filter(tool => tool.status === 'implemented' || tool.status === 'experimental');
@@ -538,16 +538,7 @@ ${icons.toolIcon('core', t.id, t.icon)} ${t.name}</a>`).join('\n      ')}
   </article>
 </main>
 
-<footer role="contentinfo">
-  <div class="footer-brand"><img src="${brand.logo}" alt="" width="32" height="32"><span><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</span></div>
-  <div class="footer-links">
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/about/">About</a>
-    <a href="/contact/">Contact</a>
-  </div>
-  
-</footer>
+${siteFooter({ links: LEGAL_LINKS })}
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>
@@ -875,16 +866,7 @@ ${siteHeader({ active: 'home' })}
   </section>
 </main>
 
-<footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
-  <div class="footer-links">
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/about/">About</a>
-    <a href="/contact/">Contact</a>
-  </div>
-  
-</footer>
+${siteFooter()}
 
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
@@ -935,15 +917,7 @@ ${siteHeader({ active: '' })}
   </section>
 </main>
 
-<footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
-  <div class="footer-links">
-    <a href="/privacy/">Privacy</a>
-    <a href="/terms/">Terms</a>
-    <a href="/about/">About</a>
-    <a href="/contact/">Contact</a>
-  </div>
-</footer>
+${siteFooter()}
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>
@@ -977,10 +951,7 @@ ${brand.iconLinks()}
   <br>
   <a href="/" class="btn">Return to ${SITE_NAME} Homepage</a>
 </main>
-<footer role="contentinfo">
-  <div><strong>${SITE_NAME}</strong> — <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> · ${TAGLINE}</div>
-  <div class="footer-links"><a href="/privacy/">Privacy</a><a href="/about/">About</a></div>
-</footer>
+${siteFooter()}
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>
