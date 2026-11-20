@@ -4468,3 +4468,14 @@ img, svg, video, canvas{max-width:100%}
   .ambiguity-actions select{flex:1 1 100%}
 }
 
+/* Remaining compact catalogue controls were still 32-42px tall on phones.
+   Keep them fingertip-sized without changing the dense desktop layout. */
+@media (max-width: 768px), (pointer: coarse){
+  .search-box-input{min-height:44px}
+  .hamburger{width:44px;height:44px;min-height:44px}
+  .toolkit-tab{min-height:44px;padding:8px 13px}
+  .catalog-toolbar .catalog-clear{min-height:44px;padding:8px 12px}
+  .recent-clear{min-height:44px;padding:0 8px}
+  .recent-item{min-height:44px;padding:8px 11px}
+}
+

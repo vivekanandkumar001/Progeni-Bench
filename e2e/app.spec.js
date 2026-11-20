@@ -47,9 +47,13 @@ test('CSV date normalizer honours the European ambiguity choice', async ({ page 
 test('phone touch targets are at least 44px tall', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  const heights = await page.locator('.hero-tasks a, .toolkit-band-links a').evaluateAll(
-    links => links.map(link => Math.round(link.getBoundingClientRect().height))
-  );
-  expect(heights.length).toBeGreaterThan(0);
-  expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+  const sizes = await page.locator(
+    '.hero-tasks a, .toolkit-band-links a, .tool-breadcrumb a, .footer-links a, ' +
+    '.search-box-input, .hamburger, .toolkit-tab, .catalog-clear, .recent-clear, .recent-item'
+  ).evaluateAll(els => els.map(el => {
+    const r = el.getBoundingClientRect();
+    return { w: Math.round(r.width), h: Math.round(r.height) };
+  }).filter(r => r.w > 0 && r.h > 0));
+  expect(sizes.length).toBeGreaterThan(0);
+  expect(sizes.filter(r => r.h < 44 || r.w < 44)).toEqual([]);
 });
