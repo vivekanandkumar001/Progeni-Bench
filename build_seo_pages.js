@@ -1259,10 +1259,18 @@ if (fs.existsSync(vendorDir)) {
       const src = path.join(from, f);
       const dest = path.join(to, f);
       if (fs.statSync(src).isDirectory()) copyTree(src, dest);
+      else if (f === 'ffmpeg-core.wasm') {
+        // Exclude 30.7 MB ffmpeg-core.wasm: Cloudflare Pages enforces a 25 MiB single-file limit.
+        // Handled at runtime by Cloudflare Pages Function functions/vendor/ffmpeg/ffmpeg-core.wasm.js
+      }
       else fs.copyFileSync(src, dest);
     });
   };
   copyTree(vendorDir, distVendorDir);
+  const cfExcludedWasm = path.join(distVendorDir, 'ffmpeg', 'ffmpeg-core.wasm');
+  if (fs.existsSync(cfExcludedWasm)) {
+    fs.unlinkSync(cfExcludedWasm);
+  }
   const copyResolved = (source, destination) => {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(source, destination);

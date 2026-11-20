@@ -118,3 +118,4 @@ const fs = require('fs');
     console.log('Browser closed cleanly.');
   }
 })();
+
