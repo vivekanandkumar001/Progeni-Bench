@@ -57,3 +57,22 @@ test('phone touch targets are at least 44px tall', async ({ page }) => {
   expect(sizes.length).toBeGreaterThan(0);
   expect(sizes.filter(r => r.h < 44 || r.w < 44)).toEqual([]);
 });
+
+test('image toolkit keeps generated SEO copy after mounting', async ({ page }) => {
+  await page.goto('/image/application-photo/');
+  await expect(page.locator('#itk-form')).toBeAttached();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /target KB limit\. No upload\.$/);
+  await expect(page.locator('.itk-seo h2', { hasText: 'Tool-specific detail' })).toBeVisible();
+  const text = await page.locator('body').innerText();
+  expect(text).not.toContain('[object Object]');
+  expect(text).not.toMatch(/[ÃÂ]/);
+});
+
+test('audio toolkit keeps generated SEO copy after mounting', async ({ page }) => {
+  await page.goto('/audio/convert/');
+  await expect(page.locator('#atk-form')).toBeAttached();
+  await expect(page.locator('.itk-seo h2', { hasText: 'Tool-specific detail' })).toBeVisible();
+  const text = await page.locator('body').innerText();
+  expect(text).not.toContain('[object Object]');
+  expect(text).not.toMatch(/[ÃÂ]/);
+});

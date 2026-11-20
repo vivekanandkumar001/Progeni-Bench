@@ -1239,6 +1239,12 @@ filesToCopy.forEach(f => {
     fs.copyFileSync(src, path.join(distDir, f));
   }
 });
+// Browser copy helper must load before the toolkits mount or they would
+// overwrite the generated meta description and SEO body with registry defaults.
+const seoCopySource = path.join(baseDir, 'scripts', 'seo-copy.js');
+if (fs.existsSync(seoCopySource)) {
+  fs.copyFileSync(seoCopySource, path.join(distDir, 'seo-copy.js'));
+}
 
 // Copy assets
 if (fs.existsSync(assetsDir)) {

@@ -37,6 +37,11 @@
     const icons = benchIcons();
     return icons ? icons.iconName("audio", tool.slug, tool.icon) : "";
   }
+  function seoCopyFor(tool, kind) {
+    const lib = (typeof window !== "undefined" && window.SeoCopy) ||
+      (typeof globalThis !== "undefined" && globalThis.SeoCopy) || null;
+    return lib && typeof lib.forTool === "function" ? lib.forTool(tool, kind) : null;
+  }
 
   function cfg() {
     if (typeof window !== "undefined" && window.AudioToolConfig) return window.AudioToolConfig;
@@ -1943,8 +1948,10 @@
   }
 
   function toolQuickAnswer(tool) {
+    const copy = seoCopyFor(tool, "audio");
     return quickAnswerHtml(
-      "<strong>" + esc(tool.name) + "</strong> processes audio locally in your browser. " + esc(tool.summary || ""),
+      "<strong>" + esc(tool.name) + "</strong> " +
+        esc(copy ? copy.quickAnswer : "processes audio locally in your browser. " + (tool.summary || "")),
       [
         ["Cost", "Free \u00b7 no account needed"],
         ["Uploads", "No audio is uploaded"],
@@ -1985,31 +1992,37 @@
   }
 
   function seoHtml(tool) {
+    const copy = seoCopyFor(tool, "audio");
     const config = cfg();
     const related = (config.TOOLS || []).filter(function (t) {
       return t.id !== tool.id && t.category === tool.category && (t.status === "implemented" || t.status === "experimental");
     }).slice(0, 6);
     const faq = (tool.faq || []).filter(function (f) { return f && f.q && f.a; });
     const useCases = tool.useCases || [];
-    const howTo = tool.howTo || [];
+    const howTo = copy ? copy.howTo(tool.howTo) : (tool.howTo || []);
+    const limitations = tool.limitations || tool.reason || "No additional limitations are documented.";
+    const engineNote = copy ? copy.processNote(engineShort(tool)) : "Processing runs locally in your browser; nothing is uploaded.";
     return '<section class="seo-section itk-seo">' +
-      "<h2>What it does</h2><p>" + esc(tool.description || tool.summary) + "</p>" +
+      "<h2>What it does</h2><p>" + esc(copy ? copy.description : (tool.description || tool.summary || "")) + "</p>" +
+      "<h2>Tool-specific detail</h2><p>" + esc(copy ? copy.detail : (tool.summary || "")) + "</p>" +
       "<h2>How to use</h2><ol>" + howTo.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>" +
       (useCases.length ? "<h2>Common use cases</h2><ul>" + useCases.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>" : "") +
-      "<h2>Limits &amp; considerations</h2><p>" + esc(tool.limitations || tool.reason || "No additional limitations are documented.") + "</p>" +
-      "<h2>Privacy &amp; security</h2><p>" + esc(tool.privacy || "Processing runs locally in your browser. Nothing is uploaded.") + "</p>" +
-      (faq.length ? '<h2>Frequently asked questions</h2><div class="faq-list">' + faq.map(function (f) { return '<div class="faq-item"><strong>' + esc(f.q) + "</strong><p>" + esc(f.a) + "</p></div>"; }).join("") + "</div>" : "") +
+      "<h2>Limits &amp; considerations</h2><p>" + esc(limitations) + "</p>" +
+      "<h2>How your audio is processed</h2><p>" + esc(engineNote) + "</p>" +
+      "<h2>Privacy &amp; security</h2><p>" + esc(copy ? copy.privacyNote : (tool.privacy || "Processing runs locally in your browser. Nothing is uploaded.")) + "</p>" +
+      (faq.length ? '<h2>Frequently asked questions</h2><div class="faq-list">' + faq.map(function (f) { return '<div class="faq-item"><strong>' + esc(f.q) + "</strong><p>" + esc(copy ? copy.faqAnswer(f.q, f.a) : f.a) + "</p></div>"; }).join("") + "</div>" : "") +
       (related.length ? '<h2>Related audio tools</h2><div class="tool-links">' + related.map(function (t) { return '<a href="/audio/' + esc(t.slug) + '/">' + iconSvg(t) + " " + esc(t.name) + "</a>"; }).join("") + "</div>" : "") +
       "</section>";
   }
 
   function setMeta(tool) {
     const config = cfg();
+    const copy = seoCopyFor(tool, "audio");
     document.title = tool.seoTitle || tool.name;
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/audio/" + tool.slug + "/";
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute("content", tool.seoDescription || tool.summary || "");
+    if (desc) desc.setAttribute("content", copy ? copy.seoDescription : (tool.seoDescription || tool.summary || ""));
   }
 
   const AUDIO_ACCEPT = "audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.oga,.opus,.aiff,.aif,.amr,.wma,.webm,.wv,.ape,.ac3";

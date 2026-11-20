@@ -1240,6 +1240,44 @@ if (c52Vercel && c52Edge) {
   addResult('C52', 'FAIL', `vercel redirects=${c52Vercel}, edge redirects=${c52Edge}`);
 }
 
+// C53: The browser runtimes must reuse the generated copy instead of restoring
+// the registries' older shared descriptions after mount.
+const runtimeCopyIssues = [];
+const seoRuntimePath = path.join(ROOT, 'dist', 'seo-copy.js');
+if (!fs.existsSync(seoRuntimePath)) {
+  runtimeCopyIssues.push('dist/seo-copy.js missing');
+} else {
+  const helper = fs.readFileSync(seoRuntimePath, 'utf8');
+  if (!helper.includes('root.SeoCopy') || !helper.includes('forTool')) runtimeCopyIssues.push('dist helper is not browser-ready');
+}
+for (const runtimeFile of ['image-toolkit.js', 'audio-toolkit.js']) {
+  const source = fs.readFileSync(path.join(ROOT, runtimeFile), 'utf8');
+  if (!source.includes('SeoCopy') || !source.includes('copy.seoDescription')) {
+    runtimeCopyIssues.push(`${runtimeFile} does not consume SeoCopy`);
+  }
+  if (!source.includes('Tool-specific detail')) runtimeCopyIssues.push(`${runtimeFile} omits Tool-specific detail`);
+}
+const toolPageKeys = new Set(copyTargets.map(({ tool, kind }) => `${kind}/${tool.slug}`));
+for (const kind of ['image', 'audio']) {
+  const dirPath = path.join(ROOT, 'dist', kind);
+  if (!fs.existsSync(dirPath)) continue;
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const page = path.join(dirPath, entry.name, 'index.html');
+    if (!fs.existsSync(page)) continue;
+    const html = fs.readFileSync(page, 'utf8');
+    if (!html.includes('<script src="/seo-copy.js"></script>')) runtimeCopyIssues.push(`${kind}/${entry.name}: missing seo-copy script`);
+    if (toolPageKeys.has(`${kind}/${entry.name}`) && !html.includes('<h2>Tool-specific detail</h2>')) {
+      runtimeCopyIssues.push(`${kind}/${entry.name}: missing detail heading`);
+    }
+  }
+}
+if (runtimeCopyIssues.length === 0) {
+  addResult('C53', 'PASS', 'runtime SEO copy is loaded and mirrored on generated image/audio pages');
+} else {
+  addResult('C53', 'FAIL', runtimeCopyIssues.slice(0, 4).join('; '));
+}
+
 // SUMMARY
 const passCount = results.filter(r => r.status === 'PASS').length;
 const failCount = results.filter(r => r.status === 'FAIL').length;

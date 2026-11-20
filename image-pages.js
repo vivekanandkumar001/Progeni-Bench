@@ -152,6 +152,7 @@ ${chrome.siteFooter({
   </details>`
   })}
 <script src="/site.config.js"></script>
+<script src="/seo-copy.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>
 <script src="/app.js"></script>
