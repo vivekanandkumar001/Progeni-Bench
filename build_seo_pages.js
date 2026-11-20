@@ -8,7 +8,7 @@ const imageConfig = require('./image-tools.config.js');
 const imagePages = require('./image-pages.js');
 const audioConfig = require('./audio-tools.config.js');
 const audioPages = require('./audio-pages.js');
-const { siteHeader, siteFooter, LEGAL_LINKS } = require('./scripts/site-chrome.js');
+const { siteHeader, siteFooter } = require('./scripts/site-chrome.js');
 const brand = require('./scripts/brand.js');
 const icons = require('./icons.js');
 const publicTools = tools => tools.filter(tool => tool.status === 'implemented' || tool.status === 'experimental');
@@ -481,7 +481,9 @@ ${siteHeader({ active: 'home' })}
     <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
       <h2 id="quick-answer-title">At a glance</h2>
       <p class="answer-text"><strong>${seo.esc(tool.name)}</strong> is a free ${seo.esc(tool.cat.toLowerCase())} tool that runs in your browser. ${seo.esc(seo.firstSentence(tool.whatItDoes))}</p>
-      <dl class="key-facts">${seo.keyFacts(quickFacts)}</dl>
+      <dl class="key-facts">
+${seo.keyFactsHtml(quickFacts)}
+      </dl>
     </aside>
   </div>
 
@@ -542,7 +544,7 @@ ${siteHeader({ active: 'home' })}
   </details>
 </main>
 
-${siteFooter({ links: LEGAL_LINKS })}
+${siteFooter()}
 <script src="/site.config.js"></script>
 <script src="/utils.js"></script>
 <script src="/icons.js"></script>

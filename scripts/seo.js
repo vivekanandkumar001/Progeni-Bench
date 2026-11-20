@@ -253,6 +253,20 @@ ${discoveryLinks()}${schema ? `\n  <script type="application/ld+json" id="schema
  * escaped registry data; `facts` is a list of { label, value } pairs rendered
  * as a definition list that answer engines can quote directly.
  */
+function keyFacts(pairs) {
+  return (pairs || []).filter(pair => pair && pair[0] && pair[1]).map(([label, value]) => ({ label, value }));
+}
+
+/* Shared renderer for { label, value } fact pairs. Every builder uses this so
+ * a definition list never degrades into "[object Object],[object Object]". */
+function keyFactsHtml(pairs) {
+  return (pairs || [])
+    .map(pair => Array.isArray(pair) ? { label: pair[0], value: pair[1] } : pair)
+    .filter(fact => fact && fact.label && fact.value)
+    .map(fact => `    <div><dt>${esc(fact.label)}</dt><dd>${esc(fact.value)}</dd></div>`)
+    .join('\n');
+}
+
 function quickAnswerHtml({ id, title, answerHtml, facts, className }) {
   const blockId = id || 'quick-answer';
   const list = (facts || []).filter(fact => fact && fact.label && fact.value);
@@ -260,13 +274,9 @@ function quickAnswerHtml({ id, title, answerHtml, facts, className }) {
   <h2 id="${esc(blockId)}-title">${esc(title || 'Quick answer')}</h2>
   <p class="answer-text">${answerHtml}</p>
 ${list.length ? `  <dl class="key-facts">
-${list.map(fact => `    <div><dt>${esc(fact.label)}</dt><dd>${esc(fact.value)}</dd></div>`).join('\n')}
+${keyFactsHtml(list)}
   </dl>
 ` : ''}</aside>`;
-}
-
-function keyFacts(pairs) {
-  return pairs.filter(pair => pair && pair[0] && pair[1]).map(([label, value]) => ({ label, value }));
 }
 
 const OUTPUT_LABELS = {
@@ -316,5 +326,6 @@ module.exports = {
   headMeta,
   quickAnswerHtml,
   keyFacts,
+  keyFactsHtml,
   formatOutputs
 };

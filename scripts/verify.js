@@ -597,6 +597,11 @@ for (const file of allDistHtml) {
   const h1Matches = content.match(/<h1[^>]*>[\s\S]*?<\/h1>/gi) || [];
   if (h1Matches.length !== 1) c35Offending.push(`${rel} (h1 count ${h1Matches.length})`);
 
+  // Guard against template values that were never rendered into HTML and
+  // against double-encoded UTF-8 text leaking into the visible UI.
+  if (content.includes('[object Object]')) c35Offending.push(`${rel} (unrendered object in HTML)`);
+  if (/Ã.|â€|Â°/.test(content)) c35Offending.push(`${rel} (mojibake in HTML)`);
+
   const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
   if (!canonicalMatch) c35Offending.push(`${rel} (missing canonical)`);
 
@@ -1025,6 +1030,10 @@ for (const file of c47Targets) {
   if (!/class=["'][^"']*\bquick-answer\b/.test(content)) c47Issues.push(`${rel} missing quick-answer block`);
   if (!/class=["'][^"']*\banswer-text\b/.test(content)) c47Issues.push(`${rel} missing answer-text`);
   if (!/class=["'][^"']*\bkey-facts\b/.test(content)) c47Issues.push(`${rel} missing key-facts`);
+  const factsBlock = content.match(/<dl class=["'][^"']*key-facts[^"']*["'][\s\S]*?<\/dl>/i);
+  if (!factsBlock || !/<dt>[\s\S]*?<\/dt>/.test(factsBlock[0]) || !/<dd>[\s\S]*?<\/dd>/.test(factsBlock[0])) {
+    c47Issues.push(`${rel} key-facts has no rendered dt/dd rows`);
+  }
   const blocks = [];
   const scriptRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   let match;

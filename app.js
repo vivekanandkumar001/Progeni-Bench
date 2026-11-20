@@ -60,6 +60,9 @@ const STUDIO_SCRIPTS = {
 const loadedScripts = new Map();
 let pdfRouteToken = 0;
 let pdfManagerRouteToken = 0;
+// Search index is derived from 122 pre-rendered cards. Reading their DOM text
+// on every keystroke was the main source of input lag on the home page.
+let catalogIndexCache = null;
 // Bump this cache tag whenever pdf-translator.js or pdf-page-manager.js changes —
 // it prevents stale heuristic browser caches serving old builds after a redeploy.
 const PDF_CACHE_TAG = "20261119a";
@@ -809,7 +812,11 @@ function csvTool(id, t, rs) {
       // First pass: identify ambiguous dates (where day and month both <= 12)
       const ambiguous = [];
       const rowIsAmbiguous = new Map();
-      rows.slice(1).forEach((r, i) => {
+      // Keep indices aligned with `rows` (header is row 0). The preview and
+      // buildOut both use these indices, so an off-by-one would swap the wrong
+      // data row when the visitor chooses the European interpretation.
+      rows.forEach((r, i) => {
+        if (!i) return;
         const v = r[c] || "";
         const m = String(v).match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
         if (m) {
@@ -848,26 +855,27 @@ function csvTool(id, t, rs) {
 
       // Preview + explicit choice for ambiguous dates
       const previewHtml = `
-        <div id="ambiguous-preview" style="margin: 16px 0; padding: 12px; background: #fffbeb; border: 1px solid #f6e05e; border-radius: 8px; margin-bottom: 12px;">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Date Ambiguity Preview</div>
-          <p style="font-size:13px;margin-bottom:8px;">${ambiguous.length} date(s) could be parsed as either US (MM/DD/YYYY) or European (DD/MM/YYYY) format. These have day and month both ≤ 12:</p>
-          <div style="max-height:200px;overflow-y:auto;font-size:13px;background:#fff;padding:8px;border:1px solid #f6e05e;border-radius:4px;">
+        <div id="ambiguous-preview" class="ambiguity-preview">
+          <div class="ambiguity-title">Date ambiguity preview</div>
+          <p>${ambiguous.length} date(s) could be parsed as either US (MM/DD/YYYY) or European (DD/MM/YYYY) format. These have day and month both ≤ 12:</p>
+          <div class="ambiguity-list">
             ${ambiguous.map(a => `
-              <div style="margin: 6px 0; padding: 4px; border-bottom: 1px solid #fee678;">
-                <div style="font-weight:600;margin-bottom:2px;">Row ${a.rowIndex + 1}: <code>${esc(a.original)}</code></div>
-                <div style="font-size:11px;color:#64748b;">
-                  <span style="margin-right:6px;">Parsed as US (MM/DD/YYYY): <strong>${a.val1}/${a.val2}/${a.year}</strong></span>
-                  <span style="margin-right:6px;">Parsed as European (DD/MM/YYYY): <strong>${a.val2}/${a.val1}/${a.year}</strong></span>
+              <div class="ambiguity-row">
+                <div class="ambiguity-row-label">Row ${a.rowIndex + 1}: <code>${esc(a.original)}</code></div>
+                <div class="ambiguity-row-meta">
+                  <span>Parsed as US (MM/DD/YYYY): <strong>${a.val1}/${a.val2}/${a.year}</strong></span>
+                  <span>Parsed as European (DD/MM/YYYY): <strong>${a.val2}/${a.val1}/${a.year}</strong></span>
                 </div>
               </div>
             `).join("")}
           </div>
-          <div style="margin-top:8px;">
-            <select id="resolveAmbiguous" style="padding:4px 8px;font-size:12px;margin-right:8px;">
+          <div class="ambiguity-actions">
+            <label class="sr-only" for="resolveAmbiguous">How to read ambiguous dates</label>
+            <select id="resolveAmbiguous">
               <option value="us">Apply US format (MM/DD/YYYY) to all ambiguous</option>
               <option value="eu">Apply European format (DD/MM/YYYY) to all ambiguous</option>
             </select>
-            <button class="btn tiny" id="confirmAmbiguous" style="font-size:11px;">Continue</button>
+            <button class="btn tiny" id="confirmAmbiguous" type="button">Continue</button>
           </div>
         </div>
       `;
@@ -1158,8 +1166,9 @@ function benchRenderRecent() {
 }
 
 function benchSearchIndex() {
-  return [...document.querySelectorAll("#grid .tool-card")].map(card => {
-    const title = card.querySelector("h3");
+  if (catalogIndexCache) return catalogIndexCache;
+  catalogIndexCache = [...document.querySelectorAll("#grid .tool-card")].map(card => {
+    const title = card.querySelector("h3") || card.querySelector("h2");
     return {
       href: card.getAttribute("href") || "/",
       name: title ? title.textContent.trim() : "",
@@ -1168,6 +1177,7 @@ function benchSearchIndex() {
       text: benchNormalize(`${card.dataset.search || ""} ${card.textContent}`)
     };
   }).filter(item => item.name);
+  return catalogIndexCache;
 }
 
 function benchSearchMatches(index, query, limit) {
@@ -1233,6 +1243,20 @@ function installHeaderSearch() {
 
   const visibleItems = () => [...panel.querySelectorAll(".search-suggestion")];
 
+  // Hiding/showing 122 cards is layout work. Coalesce rapid keystrokes into one
+  // animation frame so typing stays responsive on phones.
+  let catalogRenderQueued = false;
+  const queueCatalogRender = () => {
+    if (!benchCatalogRender) return;
+    if (typeof requestAnimationFrame !== "function") { benchCatalogRender(); return; }
+    if (catalogRenderQueued) return;
+    catalogRenderQueued = true;
+    requestAnimationFrame(() => {
+      catalogRenderQueued = false;
+      benchCatalogRender();
+    });
+  };
+
   const setActive = index => {
     const items = visibleItems();
     if (!items.length) return;
@@ -1275,7 +1299,7 @@ function installHeaderSearch() {
     const value = input.value.trim();
     if (onHome()) {
       paint(benchSearchMatches(benchSearchIndex(), value, 7));
-      if (benchCatalogRender) benchCatalogRender();
+      queueCatalogRender();
     } else if (value) {
       if (globalIndex) {
         const matches = benchSearchMatches(globalIndex, value, 7);
@@ -1566,6 +1590,8 @@ function home() {
     </div>
   `).join("");
 
+  // The pre-rendered catalog was rebuilt — discard the derived search index.
+  catalogIndexCache = null;
   $("#grid").innerHTML = TOOLS.map(t => `
     <a class="tool-card" href="/tools/${t.id}/" data-toolkit="core" data-category="${esc(`core:${t.cat}`)}" data-icon="${esc(benchIcons ? benchIcons.iconName("core", t.id, t.icon) : "")}" data-search="${esc(`${t.id} ${t.keyword || ""} ${t.desc}`)}">
       <span class="go" aria-hidden="true">&rarr;</span>
