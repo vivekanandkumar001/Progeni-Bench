@@ -22,6 +22,9 @@
   // Date the public content was last reviewed. Used for schema dateModified,
   // sitemap lastmod and llms.txt so builds stay deterministic.
   const LAST_UPDATED = "2026-10-25";
+  // Toolkits rewritten with distinct page copy get their own deterministic
+  // lastmod so genuinely updated pages are not hidden behind one global date.
+  const TOOLKIT_UPDATED = { image: "2026-11-20", audio: "2026-11-20" };
   // All tools are free, so the offer currency is only a schema formality.
   const PRICE_CURRENCY = "USD";
 
@@ -1234,6 +1237,7 @@
     TAGLINE,
     LOCALE,
     LAST_UPDATED,
+    TOOLKIT_UPDATED,
     PRICE_CURRENCY,
     TOOLS
   };

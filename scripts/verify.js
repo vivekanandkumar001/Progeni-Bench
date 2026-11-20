@@ -2,7 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
-const { TOOLS } = require('../site.config.js');
+const { TOOLS, LAST_UPDATED, TOOLKIT_UPDATED } = require('../site.config.js');
+const seoCopy = require('./seo-copy.js');
+const seo = require('./seo.js');
+const imageConfig = require('../image-tools.config.js');
+const audioConfig = require('../audio-tools.config.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const results = [];
@@ -742,51 +746,57 @@ if (sitemapDiff.length === 0 && lastmodValid && sitemapSet.size === canonicalSet
   addResult('C38', 'FAIL', `sitemap count=${sitemapSet.size}, indexable canonical count=${canonicalSet.size}, diff=${sitemapDiff.join(', ') || 'none'}, lastmodValid=${lastmodValid}`);
 }
 
-// C39: Every tool page body text >= 120 unique words (strip tags, nav, footer); print the 3 lowest word counts
-const toolWordCounts = [];
-const toolsDistDir = path.join(ROOT, 'dist', 'tools');
-if (fs.existsSync(toolsDistDir)) {
-  const toolFolders = fs.readdirSync(toolsDistDir, { withFileTypes: true }).filter(d => d.isDirectory());
-  for (const dir of toolFolders) {
-    const indexPath = path.join(toolsDistDir, dir.name, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      let html = fs.readFileSync(indexPath, 'utf8');
-      html = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-                 .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-                 .replace(/<header[\s\S]*?<\/header>/gi, ' ')
-                 .replace(/<footer[\s\S]*?<\/footer>/gi, ' ')
-                 .replace(/<nav[\s\S]*?<\/nav>/gi, ' ')
-                 .replace(/<[^>]+>/g, ' ');
-      const words = html.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
-      const uniqueWords = new Set(words);
-      toolWordCounts.push({ tool: dir.name, count: uniqueWords.size });
-    }
+// C39/C40: quality guardrails across every indexable tool page (core, image, audio).
+// Earlier versions only scanned dist/tools, which missed the 90 generated
+// image/audio pages where template reuse was most likely.
+const seoPageFiles = [];
+for (const group of ['tools', 'image', 'audio']) {
+  const groupDir = path.join(ROOT, 'dist', group);
+  if (!fs.existsSync(groupDir)) continue;
+  for (const entry of fs.readdirSync(groupDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const indexPath = path.join(groupDir, entry.name, 'index.html');
+    if (!fs.existsSync(indexPath)) continue;
+    const html = fs.readFileSync(indexPath, 'utf8');
+    if (/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(html)) continue;
+    seoPageFiles.push({ tool: `${group}/${entry.name}`, html });
   }
+}
+
+// C39: Every indexable tool page body text >= 120 unique words; print the 3 lowest.
+const toolWordCounts = [];
+for (const page of seoPageFiles) {
+  let html = page.html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+                      .replace(/<header[\s\S]*?<\/header>/gi, ' ')
+                      .replace(/<footer[\s\S]*?<\/footer>/gi, ' ')
+                      .replace(/<nav[\s\S]*?<\/nav>/gi, ' ')
+                      .replace(/<[^>]+>/g, ' ');
+  const words = html.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+  toolWordCounts.push({ tool: page.tool, count: new Set(words).size });
 }
 toolWordCounts.sort((a, b) => a.count - b.count);
 const lowest3 = toolWordCounts.slice(0, 3).map(t => `${t.tool}=${t.count}`).join(', ');
 const c39Failed = toolWordCounts.filter(t => t.count < 120);
-if (c39Failed.length === 0 && toolWordCounts.length === tConfig.length) {
-  addResult('C39', 'PASS', `all ${toolWordCounts.length} tools >= 120 unique words; lowest: ${lowest3}`);
+const expectedSeoPageCount = TOOLS.length +
+  imageConfig.TOOLS.filter(t => t.status === 'implemented').length +
+  audioConfig.TOOLS.filter(t => t.status === 'implemented').length + 1;
+if (c39Failed.length === 0 && toolWordCounts.length === expectedSeoPageCount) {
+  addResult('C39', 'PASS', `all ${toolWordCounts.length} indexable tool pages >= 120 unique words; lowest: ${lowest3}`);
 } else {
-  addResult('C39', 'FAIL', `below 120: ${c39Failed.map(t => `${t.tool}=${t.count}`).join(', ')}`);
+  addResult('C39', 'FAIL', `pages checked=${toolWordCounts.length}, expected=${expectedSeoPageCount}, below 120: ${c39Failed.map(t => `${t.tool}=${t.count}`).join(', ') || 'none'}`);
 }
 
-// C40: Pairwise sentence overlap between tool pages <= 40% (print the highest pair)
+// C40: Pairwise sentence overlap between indexable tool pages <= 40%.
 const toolSentenceSets = [];
-if (fs.existsSync(toolsDistDir)) {
-  const toolFolders = fs.readdirSync(toolsDistDir, { withFileTypes: true }).filter(d => d.isDirectory());
-  for (const dir of toolFolders) {
-    const indexPath = path.join(toolsDistDir, dir.name, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      let html = fs.readFileSync(indexPath, 'utf8');
-      const seoMatch = html.match(/<section class="seo-section">([\s\S]*?)<\/section>/i);
-      const bodyHtml = seoMatch ? seoMatch[1] : html;
-      const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-      const sentences = text.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.length > 15);
-      toolSentenceSets.push({ tool: dir.name, sentences: new Set(sentences) });
-    }
-  }
+for (const page of seoPageFiles) {
+  const cleanHtml = page.html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                             .replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  const seoMatch = cleanHtml.match(/<section class="seo-section[^"]*">([\s\S]*?)<\/section>/i);
+  const bodyHtml = seoMatch ? seoMatch[1] : cleanHtml;
+  const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const sentences = text.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.length > 15);
+  toolSentenceSets.push({ tool: page.tool, sentences: new Set(sentences) });
 }
 let highestOverlap = 0;
 let highestPair = 'none';
@@ -807,7 +817,7 @@ for (let i = 0; i < toolSentenceSets.length; i++) {
   }
 }
 if (highestOverlap <= 0.40) {
-  addResult('C40', 'PASS', `max pairwise overlap ${(highestOverlap * 100).toFixed(1)}% (${highestPair})`);
+  addResult('C40', 'PASS', `max pairwise overlap across ${toolSentenceSets.length} pages ${(highestOverlap * 100).toFixed(1)}% (${highestPair})`);
 } else {
   addResult('C40', 'FAIL', `overlap exceeded: ${highestPair}`);
 }
@@ -1159,6 +1169,75 @@ if (c49Issues.length === 0) {
   addResult('C49', 'PASS', 'social cards complete; no unsupported rating or guarantee claims');
 } else {
   addResult('C49', 'FAIL', c49Issues.slice(0, 4).join('; '));
+}
+
+// C50: Generated image/audio copy must be distinct from summary and from each other.
+const copyTargets = [
+  ...imageConfig.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental').map(t => ({ tool: t, kind: 'image' })),
+  ...audioConfig.TOOLS.filter(t => t.status === 'implemented' || t.status === 'experimental').map(t => ({ tool: t, kind: 'audio' }))
+];
+const c50Issues = [];
+const seenSeoDescriptions = new Set();
+for (const { tool, kind } of copyTargets) {
+  const copy = seoCopy.forTool(tool, kind);
+  if (copy.seoDescription === copy.summary) c50Issues.push(`${kind}/${tool.slug}: seoDescription equals summary`);
+  if (copy.description === copy.summary || copy.description === copy.seoDescription) c50Issues.push(`${kind}/${tool.slug}: description is reused`);
+  const escapedDescLength = seo.esc(copy.seoDescription).length;
+  if (escapedDescLength < 120 || escapedDescLength > 155) c50Issues.push(`${kind}/${tool.slug}: escaped seoDescription length ${escapedDescLength}`);
+  if (copy.detail.length < 60) c50Issues.push(`${kind}/${tool.slug}: detail too short`);
+  if (seenSeoDescriptions.has(copy.seoDescription)) c50Issues.push(`${kind}/${tool.slug}: duplicate seoDescription`);
+  seenSeoDescriptions.add(copy.seoDescription);
+}
+if (c50Issues.length === 0) {
+  addResult('C50', 'PASS', `${copyTargets.length} public image/audio tools have distinct meta and body copy`);
+} else {
+  addResult('C50', 'FAIL', c50Issues.slice(0, 4).join('; '));
+}
+
+// C51: Sitemap lastmod values are meaningful per toolkit, not one uniform date.
+const sitemapForC51 = fs.existsSync(sitemapPath) ? fs.readFileSync(sitemapPath, 'utf8') : '';
+const sitemapEntries = [...sitemapForC51.matchAll(/<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/g)]
+  .map(m => ({ loc: m[1], lastmod: m[2] }));
+const c51Issues = [];
+for (const entry of sitemapEntries) {
+  const expected = entry.loc.startsWith(`${siteConfig.SITE_URL}/image/`)
+    ? TOOLKIT_UPDATED.image
+    : entry.loc.startsWith(`${siteConfig.SITE_URL}/audio/`)
+      ? TOOLKIT_UPDATED.audio
+      : LAST_UPDATED;
+  if (entry.lastmod !== expected) c51Issues.push(`${entry.loc} has ${entry.lastmod}, expected ${expected}`);
+}
+const lastmodDates = new Set(sitemapEntries.map(e => e.lastmod));
+if (c51Issues.length === 0 && lastmodDates.size >= 2) {
+  addResult('C51', 'PASS', `sitemap lastmod split across ${lastmodDates.size} meaningful dates: ${[...lastmodDates].join(', ')}`);
+} else {
+  addResult('C51', 'FAIL', c51Issues.length ? c51Issues.slice(0, 4).join('; ') : 'all sitemap entries share one lastmod');
+}
+
+// C52: Host canonicalization redirects exist on Vercel and Netlify/Cloudflare.
+const vercelConfigPath = path.join(ROOT, 'vercel.json');
+const redirectsFilePath = path.join(ROOT, '_redirects');
+let c52Vercel = false;
+let c52Edge = false;
+try {
+  const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, 'utf8'));
+  const redirects = vercelConfig.redirects || [];
+  const isHttpsRedirect = r => (r.has || []).some(h => h.type === 'header' && h.key === 'x-forwarded-proto' && h.value === 'http');
+  const isWwwRedirect = r => (r.has || []).some(h => h.type === 'host' && /www\.bench\.progeni\.live/i.test(h.value || ''));
+  c52Vercel = redirects.some(isHttpsRedirect) && redirects.some(isWwwRedirect) &&
+    redirects.every(r => !r.destination || r.destination.startsWith('https://bench.progeni.live'));
+} catch (e) {
+  c52Vercel = false;
+}
+if (fs.existsSync(redirectsFilePath)) {
+  const edge = fs.readFileSync(redirectsFilePath, 'utf8');
+  c52Edge = /http:\/\/bench\.progeni\.live\/\*\s+https:\/\/bench\.progeni\.live\/:splat\s+301!/i.test(edge) &&
+            /https?:\/\/www\.bench\.progeni\.live\/\*\s+https:\/\/bench\.progeni\.live\/:splat\s+301!/i.test(edge);
+}
+if (c52Vercel && c52Edge) {
+  addResult('C52', 'PASS', 'http->https and www->apex 301 redirects configured for Vercel and edge');
+} else {
+  addResult('C52', 'FAIL', `vercel redirects=${c52Vercel}, edge redirects=${c52Edge}`);
 }
 
 // SUMMARY

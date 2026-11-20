@@ -20,6 +20,7 @@ const seo = require('./scripts/seo.js');
 const C = require('./image-tools.config.js');
 const chrome = require('./scripts/site-chrome.js');
 const icons = require('./icons.js');
+const seoCopy = require('./scripts/seo-copy.js');
 
 const SITE_URL = C.SITE_URL || site.SITE_URL;
 const SITE_NAME = C.SITE_NAME || site.SITE_NAME;
@@ -279,15 +280,16 @@ function relatedTools(tool) {
 
 function toolBody(tool) {
   const related = relatedTools(tool);
+  const copy = seoCopy.forTool(tool, 'image');
   const faq = (tool.faq || []).filter(f => f && f.q && f.a);
   const useCases = tool.useCases || [];
-  const howTo = tool.howTo || [];
+  const howTo = copy.howTo(tool.howTo);
   const limitations = tool.limitations || tool.reason || 'No additional limitations are documented for this build.';
   const experimental = tool.status === 'experimental';
 
   const fallback = `<section class="toolbox itk-fallback">
     <h2>How this tool works without JavaScript</h2>
-    <p>${esc(tool.description || tool.summary)}</p>
+    <p>${esc(copy.description)}</p>
     <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
   </section>`;
 
@@ -300,7 +302,7 @@ function toolBody(tool) {
     ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB per file · ${(C.LIMITS.maxPixels / 1e6).toFixed(0)} MP`]
   ]);
   const quickAnswer = seo.quickAnswerHtml({
-    answerHtml: `<strong>${esc(tool.name)}</strong> runs locally in your browser. ${esc(tool.summary)}`,
+    answerHtml: `<strong>${esc(tool.name)}</strong> ${esc(copy.quickAnswer)}`,
     facts: quickFacts
   });
 
@@ -325,15 +327,19 @@ ${fallback}
 
 <section class="seo-section itk-seo">
   <h2>What it does</h2>
-  <p>${esc(tool.description || tool.summary)}</p>
+  <p>${esc(copy.description)}</p>
+  <h2>Tool-specific detail</h2>
+  <p>${esc(copy.detail)}</p>
   <h2>How to use</h2>
   <ol>${howTo.map(step => `<li>${esc(step)}</li>`).join('')}</ol>
   ${useCases.length ? `<h2>Common use cases</h2><ul>${useCases.map(item => `<li>${esc(item)}</li>`).join('')}</ul>` : ''}
   <h2>Limits &amp; considerations</h2>
   <p>${esc(limitations)}</p>
+  <h2>How your image is processed</h2>
+  <p>${esc(copy.processNote('Canvas in your browser'))}</p>
   <h2>Privacy &amp; security</h2>
-  <p>${esc(tool.privacy || 'Processing runs locally in your browser. Nothing is uploaded.')}</p>
-  ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(f.a)}</p></div>`).join('')}</div>` : ''}
+  <p>${esc(copy.privacyNote)}</p>
+  ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(copy.faqAnswer(f.q, f.a))}</p></div>`).join('')}</div>` : ''}
   ${related.length ? `<h2>Related image tools</h2><div class="tool-links">${related.map(t => `<a href="/image/${esc(t.slug)}/">${icons.toolIcon('image', t.slug, t.icon)} ${esc(t.name)}</a>`).join('')}</div>` : ''}
 </section>`;
 }
@@ -346,7 +352,8 @@ function hubSchema() {
       url: `${SITE_URL}/image/`,
       name: 'Bench Image Toolkit: private browser image tools',
       description: 'Private browser image tools for compression, resizing, conversion, editing, metadata and creation.',
-      type: 'CollectionPage'
+      type: 'CollectionPage',
+      dateModified: seoCopy.UPDATED.image
     }),
     {
       '@type': 'ItemList',
@@ -374,7 +381,8 @@ function studioSchema() {
     seo.webPageNode({
       url: `${SITE_URL}/image/studio/`,
       name: 'Image Studio: batch resize and convert',
-      description: 'Batch resize, convert and compress images locally in the browser.'
+      description: 'Batch resize, convert and compress images locally in the browser.',
+      dateModified: seoCopy.UPDATED.image
     }),
     seo.softwareApplicationNode({
       name: 'Image Studio',
@@ -398,24 +406,28 @@ function studioSchema() {
 }
 
 function toolSchema(tool) {
-  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
+  const copy = seoCopy.forTool(tool, 'image');
+  const faq = (tool.faq || [])
+    .filter(f => f && f.q && f.a)
+    .map(f => ({ q: f.q, a: copy.faqAnswer(f.q, f.a) }));
   return seo.graph([
     seo.organizationNode(),
     seo.websiteNode(),
     seo.webPageNode({
       url: publicUrl(tool),
       name: tool.seoTitle || tool.name,
-      description: tool.seoDescription || tool.summary
+      description: copy.seoDescription,
+      dateModified: copy.updated
     }),
     seo.softwareApplicationNode({
       name: tool.name,
       url: publicUrl(tool),
-      description: tool.seoDescription || tool.summary,
+      description: copy.seoDescription,
       category: 'MultimediaApplication',
       requirements: 'Requires a modern browser with Canvas support',
       featureList: tool.useCases
     }),
-    seo.howToNode(tool.name, tool.description || tool.summary, tool.howTo, publicUrl(tool)),
+    seo.howToNode(tool.name, copy.description, copy.howTo(tool.howTo), publicUrl(tool)),
     seo.breadcrumbList([
       { name: 'Home', url: `${SITE_URL}/` },
       { name: 'Image toolkit', url: `${SITE_URL}/image/` },
@@ -439,7 +451,7 @@ function generateStudioHtml() {
 
 function generateToolHtml(tool) {
   const title = tool.seoTitle || `${tool.name} | Bench Image Toolkit`;
-  const desc = tool.seoDescription || tool.summary;
+  const desc = seoCopy.forTool(tool, 'image').seoDescription;
   return shell(title, desc, publicUrl(tool), toolBody(tool), {
     schema: toolSchema(tool),
     noindex: tool.status === 'experimental'

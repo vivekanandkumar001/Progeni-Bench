@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, TOOLS } = require('./site.config.js');
+const { PARENT_BRAND, PARENT_URL, SITE_NAME, SITE_SHORT, SITE_URL, SUPPORT_EMAIL, TAGLINE, LOCALE, LAST_UPDATED, TOOLKIT_UPDATED, TOOLS } = require('./site.config.js');
 const seo = require('./scripts/seo.js');
 const llmsFull = require('./scripts/llms-full.js');
 const imageConfig = require('./image-tools.config.js');
@@ -968,28 +968,27 @@ ${siteFooter()}
 }
 
 function generateSitemapXml() {
-  const lastmod = seo.LAST_UPDATED;
   const urls = [
-    `${SITE_URL}/`,
-    `${SITE_URL}/about/`,
-    `${SITE_URL}/privacy/`,
-    `${SITE_URL}/terms/`,
-    `${SITE_URL}/contact/`,
-    `${SITE_URL}/image/`,
-    `${SITE_URL}/image/studio/`,
-    ...imagePages.IMPLEMENTED.map(t => `${SITE_URL}/image/${t.slug}/`),
-    `${SITE_URL}/audio/`,
-    ...audioPages.IMPLEMENTED.map(t => `${SITE_URL}/audio/${t.slug}/`),
-    ...TOOLS.map(t => `${SITE_URL}/tools/${t.id}/`)
+    { loc: `${SITE_URL}/`, lastmod: LAST_UPDATED },
+    { loc: `${SITE_URL}/about/`, lastmod: LAST_UPDATED },
+    { loc: `${SITE_URL}/privacy/`, lastmod: LAST_UPDATED },
+    { loc: `${SITE_URL}/terms/`, lastmod: LAST_UPDATED },
+    { loc: `${SITE_URL}/contact/`, lastmod: LAST_UPDATED },
+    { loc: `${SITE_URL}/image/`, lastmod: TOOLKIT_UPDATED.image },
+    { loc: `${SITE_URL}/image/studio/`, lastmod: TOOLKIT_UPDATED.image },
+    ...imagePages.IMPLEMENTED.map(t => ({ loc: `${SITE_URL}/image/${t.slug}/`, lastmod: TOOLKIT_UPDATED.image })),
+    { loc: `${SITE_URL}/audio/`, lastmod: TOOLKIT_UPDATED.audio },
+    ...audioPages.IMPLEMENTED.map(t => ({ loc: `${SITE_URL}/audio/${t.slug}/`, lastmod: TOOLKIT_UPDATED.audio })),
+    ...TOOLS.map(t => ({ loc: `${SITE_URL}/tools/${t.id}/`, lastmod: LAST_UPDATED }))
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(u => `  <url>
-    <loc>${u}</loc>
+${urls.map(({ loc, lastmod }) => `  <url>
+    <loc>${loc}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>${u === `${SITE_URL}/` ? '1.0' : (u === `${SITE_URL}/image/` || u === `${SITE_URL}/audio/`) ? '0.9' : '0.8'}</priority>
+    <priority>${loc === `${SITE_URL}/` ? '1.0' : (loc === `${SITE_URL}/image/` || loc === `${SITE_URL}/audio/`) ? '0.9' : '0.8'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 

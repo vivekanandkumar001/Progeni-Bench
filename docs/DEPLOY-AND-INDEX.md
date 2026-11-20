@@ -57,7 +57,9 @@ cannot run this for you — it requires your authentication.
 2. Follow the DNS instruction Vercel shows (usually a `CNAME` to
    `cname.vercel-dns.com` at your DNS provider, or Vercel nameservers).
 3. Wait for **Valid Configuration** (TLS is issued automatically).
-4. Optionally set `www.bench.progeni.live` → redirect to the apex.
+4. Host canonicalization is configured in `vercel.json` and `_redirects`:
+   `http → https` and `www → apex`. Cloudflare Pages ignores host-level rules
+   in `_redirects`; add the same two Redirect Rules in the Cloudflare dashboard.
 
 ### Post-deploy verification (run these once live)
 
@@ -65,12 +67,12 @@ cannot run this for you — it requires your authentication.
 curl -sI https://bench.progeni.live/ | findstr /I "HTTP content-security-policy strict-transport"
 curl -s  https://bench.progeni.live/robots.txt
 curl -s  https://bench.progeni.live/sitemap.xml | findstr /C:"<loc>" | find /C "<loc>"
-# expect 76
+# expect 122
 curl -sI https://bench.progeni.live/image/compress/
 curl -sI https://bench.progeni.live/llms.txt
 ```
 
-Expected: `200` on all, CSP + HSTS headers present, sitemap exposing 76 URLs.
+Expected: `200` on all, CSP + HSTS headers present, sitemap exposing 122 URLs.
 
 ---
 
@@ -84,11 +86,11 @@ the remaining actions need your Google account.
 
 | Check | Result |
 |---|---|
-| Sitemap URLs | 76 (35 legacy + 41 image) |
-| Pages with correct `bench.progeni.live` canonical | 76 / 76 indexable |
+| Sitemap URLs | 122 (32 core tools, 39 image tools, 43 audio tools, 5 static pages, 2 toolkit hubs, Image Studio) |
+| Pages with correct `bench.progeni.live` canonical | 122 / 122 indexable |
 | Pages missing canonical | 0 |
 | `robots.txt` | `Allow: /` + sitemap reference |
-| Intentionally `noindex` | 3 experimental pages only |
+| Intentionally `noindex` | 8 experimental pages (5 audio + 3 image), excluded from sitemap |
 | Deferred/unavailable tools | no page generated (correct) |
 | `llms.txt` in dist | yes (fixed in `256a03d`) |
 

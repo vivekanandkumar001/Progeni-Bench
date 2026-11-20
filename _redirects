@@ -1,1 +1,6 @@
+# Host canonicalization (Netlify). Cloudflare Pages ignores host-level rules in
+# _redirects; configure equivalent Redirect Rules in the Cloudflare dashboard.
+http://bench.progeni.live/*  https://bench.progeni.live/:splat  301!
+http://www.bench.progeni.live/*  https://bench.progeni.live/:splat  301!
+https://www.bench.progeni.live/*  https://bench.progeni.live/:splat  301!
 /*  /404.html  404

@@ -24,6 +24,7 @@ const seo = require('./scripts/seo.js');
 const C = require('./audio-tools.config.js');
 const chrome = require('./scripts/site-chrome.js');
 const icons = require('./icons.js');
+const seoCopy = require('./scripts/seo-copy.js');
 
 const SITE_URL = C.SITE_URL || site.SITE_URL;
 const SITE_NAME = C.SITE_NAME || site.SITE_NAME;
@@ -218,31 +219,28 @@ function relatedTools(tool) {
 
 function toolBody(tool) {
   const related = relatedTools(tool);
+  const copy = seoCopy.forTool(tool, 'audio');
   const faq = (tool.faq || []).filter(f => f && f.q && f.a);
   const useCases = tool.useCases || [];
-  const howTo = tool.howTo || [];
+  const howTo = copy.howTo(tool.howTo);
   const limitations = tool.limitations || tool.reason || 'No additional limitations are documented for this build.';
   const experimental = tool.status === 'experimental';
-
-  const engineNote = tool.engine === 'ffmpeg'
-    ? `This tool encodes with the FFmpeg engine running as WebAssembly inside your browser. The engine is downloaded once (about ${esc((C.LIMITS.ffmpegCoreBytes / (1024 * 1024)).toFixed(0))} MB) and cached; the audio is processed locally and is never uploaded.`
-    : tool.engine === 'media-recorder'
-      ? 'The microphone is opened by the browser only after you press start, and the captured audio stays in local memory. Bench never receives or stores the recording.'
-      : 'This tool uses the Web Audio API directly in your browser for decoding, analysis and export. No audio leaves your device.';
-
-  const fallback = `<section class="toolbox itk-fallback">
-    <h2>How this tool works without JavaScript</h2>
-    <p>${esc(tool.description || tool.summary)}</p>
-    <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
-  </section>`;
 
   const engineShort = tool.engine === 'ffmpeg'
     ? 'FFmpeg.wasm on your device'
     : tool.engine === 'media-recorder'
       ? 'Browser microphone capture'
       : 'Web Audio API in your browser';
+  const engineNote = copy.processNote(engineShort);
+
+  const fallback = `<section class="toolbox itk-fallback">
+    <h2>How this tool works without JavaScript</h2>
+    <p>${esc(copy.description)}</p>
+    <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
+  </section>`;
+
   const quickAnswer = seo.quickAnswerHtml({
-    answerHtml: `<strong>${esc(tool.name)}</strong> processes audio locally in your browser. ${esc(tool.summary)}`,
+    answerHtml: `<strong>${esc(tool.name)}</strong> ${esc(copy.quickAnswer)}`,
     facts: seo.keyFacts([
       ['Cost', 'Free · no account needed'],
       ['Uploads', 'No audio is uploaded'],
@@ -274,7 +272,9 @@ ${fallback}
 
 <section class="seo-section itk-seo">
   <h2>What it does</h2>
-  <p>${esc(tool.description || tool.summary)}</p>
+  <p>${esc(copy.description)}</p>
+  <h2>Tool-specific detail</h2>
+  <p>${esc(copy.detail)}</p>
   <h2>How to use</h2>
   <ol>${howTo.map(step => `<li>${esc(step)}</li>`).join('')}</ol>
   ${useCases.length ? `<h2>Common use cases</h2><ul>${useCases.map(item => `<li>${esc(item)}</li>`).join('')}</ul>` : ''}
@@ -283,8 +283,8 @@ ${fallback}
   <h2>How your audio is processed</h2>
   <p>${esc(engineNote)}</p>
   <h2>Privacy &amp; security</h2>
-  <p>${esc(tool.privacy || 'Processing runs locally in your browser. Nothing is uploaded.')}</p>
-  ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(f.a)}</p></div>`).join('')}</div>` : ''}
+  <p>${esc(copy.privacyNote)}</p>
+  ${faq.length ? `<h2>Frequently asked questions</h2><div class="faq-list">${faq.map(f => `<div class="faq-item"><strong>${esc(f.q)}</strong><p>${esc(copy.faqAnswer(f.q, f.a))}</p></div>`).join('')}</div>` : ''}
   ${related.length ? `<h2>Related audio tools</h2><div class="tool-links">${related.map(t => `<a href="/audio/${esc(t.slug)}/">${icons.toolIcon('audio', t.slug, t.icon)} ${esc(t.name)}</a>`).join('')}</div>` : ''}
 </section>`;
 }
@@ -297,7 +297,8 @@ function hubSchema() {
       url: `${SITE_URL}/audio/`,
       name: 'Bench Audio Toolkit: private browser audio tools',
       description: 'Private browser audio tools for conversion, compression, editing, cleaning, recording, analysis and metadata.',
-      type: 'CollectionPage'
+      type: 'CollectionPage',
+      dateModified: seoCopy.UPDATED.audio
     }),
     {
       '@type': 'ItemList',
@@ -319,24 +320,28 @@ function hubSchema() {
 }
 
 function toolSchema(tool) {
-  const faq = (tool.faq || []).filter(f => f && f.q && f.a);
+  const copy = seoCopy.forTool(tool, 'audio');
+  const faq = (tool.faq || [])
+    .filter(f => f && f.q && f.a)
+    .map(f => ({ q: f.q, a: copy.faqAnswer(f.q, f.a) }));
   return seo.graph([
     seo.organizationNode(),
     seo.websiteNode(),
     seo.webPageNode({
       url: publicUrl(tool),
       name: tool.seoTitle || tool.name,
-      description: tool.seoDescription || tool.summary
+      description: copy.seoDescription,
+      dateModified: copy.updated
     }),
     seo.softwareApplicationNode({
       name: tool.name,
       url: publicUrl(tool),
-      description: tool.seoDescription || tool.summary,
+      description: copy.seoDescription,
       category: 'MultimediaApplication',
       requirements: 'Requires a modern browser with Web Audio and WebAssembly support',
       featureList: tool.useCases
     }),
-    seo.howToNode(tool.name, tool.description || tool.summary, tool.howTo, publicUrl(tool)),
+    seo.howToNode(tool.name, copy.description, copy.howTo(tool.howTo), publicUrl(tool)),
     seo.breadcrumbList([
       { name: 'Home', url: `${SITE_URL}/` },
       { name: 'Audio toolkit', url: `${SITE_URL}/audio/` },
@@ -354,7 +359,7 @@ function generateHubHtml() {
 
 function generateToolHtml(tool) {
   const title = tool.seoTitle || `${tool.name} | Bench Audio Toolkit`;
-  const desc = tool.seoDescription || tool.summary;
+  const desc = seoCopy.forTool(tool, 'audio').seoDescription;
   return shell(title, desc, publicUrl(tool), toolBody(tool), {
     schema: toolSchema(tool),
     noindex: tool.status === 'experimental'
