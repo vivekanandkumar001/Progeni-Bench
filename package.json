@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node build_seo_pages.js",
     "build:vendor": "node scripts/build-vendor.js",
+    "indexnow": "node scripts/indexnow.js",
     "test": "node --test",
     "test:e2e": "playwright test",
     "verify": "node scripts/verify.js",

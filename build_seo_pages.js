@@ -1226,7 +1226,7 @@ console.log(`Generated search-index.json (${searchIndexEntries.length} tools).`)
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'icons.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt'
+  'site.config.js', 'icons.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt', 'robots.txt', 'c032a188f5724bc4935ef7a07525d886.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
