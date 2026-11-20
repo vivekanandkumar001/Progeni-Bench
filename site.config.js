@@ -27,6 +27,8 @@
   const TOOLKIT_UPDATED = { image: "2026-11-20", audio: "2026-11-20" };
   // All tools are free, so the offer currency is only a schema formality.
   const PRICE_CURRENCY = "USD";
+  const CLARITY_ID = "zgqmvac9i4";
+  const INDEXNOW_KEY = "c032a188f5724bc4935ef7a07525d886";
 
   const TOOLS = [
   {
@@ -1239,6 +1241,8 @@
     LAST_UPDATED,
     TOOLKIT_UPDATED,
     PRICE_CURRENCY,
+    CLARITY_ID,
+    INDEXNOW_KEY,
     TOOLS
   };
 });

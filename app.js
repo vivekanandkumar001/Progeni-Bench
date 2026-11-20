@@ -25,8 +25,19 @@ const {
   SUPPORT_EMAIL,
   TAGLINE,
   LOCALE,
+  CLARITY_ID,
   TOOLS
 } = (typeof window !== "undefined" && window.SiteConfig) ? window.SiteConfig : (typeof require === "function" ? require("./site.config.js") : {});
+
+// Initialize Microsoft Clarity (Heatmaps & Session Recording) if configured
+if (typeof window !== "undefined" && CLARITY_ID && !window.__clarity_loaded) {
+  window.__clarity_loaded = true;
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", CLARITY_ID);
+}
 
 // Icon set: same Lucide-derived inline SVGs the static builders use.
 const benchIcons = (typeof window !== "undefined" && window.BenchIcons)
