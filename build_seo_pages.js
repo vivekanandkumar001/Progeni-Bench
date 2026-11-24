@@ -469,32 +469,49 @@ ${siteHeader({ active: 'home' })}
   <nav class="tool-breadcrumb" aria-label="Breadcrumb">
     <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${tool.cat}</span><span aria-hidden="true">/</span><span aria-current="page">${tool.name}</span>
   </nav>
-  <div class="tool-shell">
-    <section class="tool-head">
+  <section class="tool-head tool-head--compact">
+    <div class="tool-head-top">
       <span class="eyebrow">${tool.cat} · ${isPdfTranslator ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-      <h1><span class="tool-head-icon" data-icon="${icons.iconName('core', tool.id, tool.icon)}">${icons.toolIcon('core', tool.id, tool.icon)}</span>${tool.keyword}</h1>
-      <p>${tool.desc} ${isPdfTranslator
-        ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
-        : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
-    </section>
+      <div class="tool-head-chips">
+        <span class="itk-chip">Free · no signup</span>
+        <span class="itk-chip">${isPdfTranslator ? "PDF local · text to DeepL" : "Zero uploads"}</span>
+      </div>
+    </div>
+    <h1><span class="tool-head-icon" data-icon="${icons.iconName('core', tool.id, tool.icon)}">${icons.toolIcon('core', tool.id, tool.icon)}</span>${tool.keyword}</h1>
+    <p>${tool.desc} ${isPdfTranslator
+      ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+      : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
+  </section>
 
-    <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
+  <!-- Pre-rendered workspace preview: real structure for crawlers, replaced by the live tool on load -->
+  <section class="toolbox workspace-preview" aria-label="How this tool works">
+    <div class="workspace-preview-head">
+      <span class="workspace-preview-icon" aria-hidden="true">&#8681;</span>
+      <div><strong>Interactive workspace</strong><span>Three steps, all inside your browser.</span></div>
+    </div>
+    <ol class="workspace-steps">
+      <li><span class="step-no">1</span><div><strong>Add your file</strong><small>Drop a file on this page or choose one from your device.</small></div></li>
+      <li><span class="step-no">2</span><div><strong>Set the options</strong><small>Choose the settings you need — nothing is uploaded.</small></div></li>
+      <li><span class="step-no">3</span><div><strong>Download the result</strong><small>Bench generates a real file you can save locally.</small></div></li>
+    </ol>
+    <noscript>
+      <div class="workspace-noscript">
+        <h2>About ${tool.name}</h2>
+        <p>${tool.desc}</p>
+        <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
+      </div>
+    </noscript>
+  </section>
+
+  <aside class="quick-answer quick-answer--summary" id="quick-answer" aria-labelledby="quick-answer-title">
+    <div class="quick-answer-copy">
       <h2 id="quick-answer-title">At a glance</h2>
       <p class="answer-text"><strong>${seo.esc(tool.name)}</strong> is a free ${seo.esc(tool.cat.toLowerCase())} tool that runs in your browser. ${seo.esc(seo.firstSentence(tool.whatItDoes))}</p>
-      <dl class="key-facts">
+    </div>
+    <dl class="key-facts">
 ${seo.keyFactsHtml(quickFacts)}
-      </dl>
-    </aside>
-  </div>
-
-  <!-- Pre-rendered Noscript / Crawler Fallback -->
-  <noscript>
-    <section class="toolbox">
-      <h2>About ${tool.name}</h2>
-      <p>${tool.desc}</p>
-      <p><em>Please enable JavaScript in your browser to run this client-side utility.</em></p>
-    </section>
-  </noscript>
+    </dl>
+  </aside>
 
   <details class="tool-details" id="tool-details">
     <summary>About this tool — how it works, limits &amp; FAQ
@@ -531,9 +548,8 @@ ${seo.keyFactsHtml(quickFacts)}
 
     <h2>Related ${tool.cat} tools</h2>
     <div class="tool-links">
-      <div class="tool-links">
-        ${related.map(r => `<a href="/tools/${r.id}/">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a>`).join('\n        ')}
-      </div>
+      ${related.map(r => `<a href="/tools/${r.id}/">${icons.toolIcon('core', r.id, r.icon)} ${r.name}</a>`).join('\n      ')}
+    </div>
 
     <h2>Browse all ${tool.cat} tools</h2>
     <p class="browse-all-intro">Explore the full range of ${tool.cat.toLowerCase()} tools:</p>
@@ -766,25 +782,30 @@ ${siteHeader({ active: 'home' })}
     <div class="hero-inner">
       <span class="eyebrow"><span class="dot" aria-hidden="true"></span>${totalPublicTools} tools · no upload · no signup</span>
       <h1>Every file job, done <span class="accent">privately in your browser</span>.</h1>
-      <p class="hero-lede">Compress, convert, resize, print, clean and inspect files without sending them to a server. Pick a tool and drop a file — most tools never upload anything.</p>
+      <p class="hero-lede">Compress, convert, resize, print, clean and inspect files locally on your device — no servers, accounts, or daily limits.</p>
       <div class="hero-actions">
-        <a class="hero-cta" href="#tools">Browse all ${totalPublicTools} tools</a>
-        <div class="hero-tasks" aria-label="Popular tasks">
-          <span class="hero-tasks-label">Popular:</span>
-          <a href="/image/compress/">Compress image</a>
-          <a href="/image/resize/">Resize image</a>
-          <a href="/image/convert/">Convert image</a>
-          <a href="/audio/convert/">Convert audio</a>
-          <a href="/audio/trimmer/">Trim audio</a>
-          <a href="/tools/sticker-sheet/">Sticker sheet</a>
-        </div>
+        <a class="hero-cta" href="#tools">Browse all ${totalPublicTools} tools <span aria-hidden="true">→</span></a>
+        <ul class="hero-badges">
+          <li>Files stay on device</li>
+          <li>No account needed</li>
+          <li>Free, unlimited</li>
+        </ul>
       </div>
-      <ul class="hero-badges">
-        <li>Files stay on your device</li>
-        <li>No account needed</li>
-        <li>Free, with no daily limit</li>
-      </ul>
     </div>
+    <aside class="hero-panel" aria-label="Popular tasks">
+      <div class="hero-panel-head">
+        <span class="hero-tasks-label">Popular tasks</span>
+        <span class="hero-panel-meta">Instant · 100% local</span>
+      </div>
+      <div class="hero-tasks">
+        <a href="/image/compress/"><span>Compress image</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+        <a href="/image/resize/"><span>Resize image</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+        <a href="/image/convert/"><span>Convert image</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+        <a href="/audio/convert/"><span>Convert audio</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+        <a href="/audio/trimmer/"><span>Trim audio</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+        <a href="/tools/sticker-sheet/"><span>Sticker sheet</span><span class="hero-task-go" aria-hidden="true">→</span></a>
+      </div>
+    </aside>
   </section>
 
   <section class="tools-section" id="tools" aria-label="Browser utility grid">
@@ -913,12 +934,13 @@ ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME}
 <body><a class="skip-link" href="#app">Skip to main content</a>
 ${siteHeader({ active: '' })}
 
-<main id="app" class="container" tabindex="-1">
+<main id="app" class="container prose-page" tabindex="-1">
+  <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">${h1}</span></nav>
   <section class="tool-head">
     <span class="eyebrow">${SITE_NAME}</span>
     <h1>${h1}</h1>
   </section>
-  <section class="toolbox" style="line-height: 1.8;">
+  <section class="toolbox prose-content">
     ${bodyContent}
   </section>
 </main>
@@ -947,15 +969,18 @@ function generate404Html() {
   <meta name="description" content="${desc}">
   <meta name="theme-color" content="#f4f6f9">
 ${brand.iconLinks()}
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="${brand.stylesHref}">
+  <script src="${brand.headerSrc}" defer></script>
 </head>
 <body data-page="404"><a class="skip-link" href="#app">Skip to main content</a>
-<main id="app" class="container" tabindex="-1" style="text-align: center; padding: 60px 20px;">
-  <h1>Page Not Found</h1>
-  <p>The page you are looking for does not exist on ${SITE_NAME}.</p>
-  <p>The link might be outdated or mistyped.</p>
-  <br>
-  <a href="/" class="btn">Return to ${SITE_NAME} Homepage</a>
+${siteHeader()}
+<main id="app" class="container not-found-page" tabindex="-1">
+  <section class="not-found-card">
+    <span class="not-found-code" aria-hidden="true">404</span>
+    <h1>Page Not Found</h1>
+    <p>The page you are looking for does not exist on ${SITE_NAME}. The link might be outdated or mistyped.</p>
+    <p><a href="/" class="btn">Return to ${SITE_NAME} Homepage</a></p>
+  </section>
 </main>
 ${siteFooter()}
 <script src="/site.config.js"></script>
@@ -1124,18 +1149,16 @@ fs.writeFileSync(path.join(baseDir, 'terms', 'index.html'), termsHtml, 'utf8');
 fs.writeFileSync(path.join(distDir, 'terms', 'index.html'), termsHtml, 'utf8');
 
 const contactContent = `
-  <div style="background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px; box-shadow: var(--shadow-sm); max-width: 680px;">
+  <div class="contact-card">
     <h2>Direct Email Inquiries</h2>
     <p>For general support, feedback, and inquiries regarding ${SITE_NAME}:</p>
-    <p style="font-size: 18px; font-weight: 700; color: var(--brand);">
-      📧 <a href="mailto:${SUPPORT_EMAIL}" style="color: var(--brand); text-decoration: underline;">${SUPPORT_EMAIL}</a>
-    </p>
-    <h3>Feature Suggestions & Bug Reports</h3>
+    <p class="contact-email"><span aria-hidden="true">&#9993;</span><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
+    <h3>Feature Suggestions &amp; Bug Reports</h3>
     <p>${SITE_NAME} is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
     <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
     <h3>Why there is no contact form</h3>
     <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
-    <p style="margin-top: 24px; color: var(--muted); font-size: 14px;">We usually respond to all inquiries within 24 to 48 business hours.</p>
+    <p class="contact-meta">We usually respond to all inquiries within 24 to 48 business hours.</p>
   </div>
 `;
 const contactHtml = generateStaticPageHtml('contact', `Contact Us: ${SITE_NAME} Support & Inquiries`, `Contact the ${SITE_NAME} team for support, feature suggestions, bug reports, and partnership inquiries. We respond within 24 to 48 business hours.`, `Contact Support`, contactContent);
@@ -1226,7 +1249,7 @@ console.log(`Generated search-index.json (${searchIndexEntries.length} tools).`)
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'icons.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt', 'robots.txt', 'c032a188f5724bc4935ef7a07525d886.txt'
+  'site.config.js', 'icons.js', 'header.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt', 'robots.txt', 'c032a188f5724bc4935ef7a07525d886.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {

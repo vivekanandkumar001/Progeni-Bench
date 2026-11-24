@@ -243,7 +243,8 @@ function headMeta({ title, description, canonicalUrl, imageAlt, noindex, schema 
   <meta name="author" content="${esc(PARENT_BRAND)}">
 ${socialMeta({ title, description, canonicalUrl, imageAlt })}
 ${brand.iconLinks()}
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="${brand.stylesHref}">
+  <script src="${brand.headerSrc}" defer></script>
   <link rel="canonical" href="${esc(canonicalUrl)}">
 ${discoveryLinks()}${schema ? `\n  <script type="application/ld+json" id="schema">${jsonLd(schema)}</script>` : ''}`;
 }

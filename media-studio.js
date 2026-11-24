@@ -448,6 +448,7 @@
     state.frames = [];
     state.plan = null;
     state.file = file;
+    syncThumbsState();
     showError("");
     renderWarnings();
     setProgress(true, 1, "Loading video…");
@@ -518,6 +519,7 @@
 
     setProgress(false, 100, "");
     state.running = false;
+    syncThumbsState();
     flash("Contact sheet ready — " + times.length + " frames.");
     renderWarnings();
     renderModeMeta();
@@ -596,6 +598,7 @@
   async function analyseAudio() {
     if (!state.buffer) return;
     state.running = true;
+    syncSilenceState();
     showError("");
     const buf = state.buffer;
     const sr = buf.sampleRate;
@@ -620,6 +623,7 @@
     renderGapReport();
     setProgress(false, 100, "");
     state.running = false;
+    syncSilenceState();
     renderModeMeta();
   }
 
@@ -730,12 +734,38 @@
 
   /* ------------------------------------------------------- render / controls */
 
+  function syncThumbsState() {
+    if (state.mode !== "thumbs" || !root) return;
+    const has = state.frames.length > 0 && !!state.sheetCanvas && !state.running;
+    ["#med-dl-png", "#med-dl-jpeg", "#med-csv"].forEach(function (sel) {
+      const b = $(sel); if (b) b.disabled = !has;
+    });
+    const empty = $("#med-preview-empty");
+    if (empty) empty.hidden = has;
+    const prev = $("#med-preview");
+    if (prev) prev.classList.toggle("has-sheet", !!state.sheetCanvas);
+  }
+
+  function syncSilenceState() {
+    if (state.mode !== "silence" || !root) return;
+    const has = !!state.buffer && !state.running;
+    ["#med-csv", "#med-txt", "#med-copy"].forEach(function (sel) {
+      const b = $(sel); if (b) b.disabled = !has;
+    });
+    const empty = $("#med-silence-empty");
+    if (empty) empty.hidden = has;
+    const results = $("#med-results");
+    if (results) results.classList.toggle("has-data", has);
+  }
+
   function renderModeMeta() {
     if (state.mode === "thumbs") {
+      syncThumbsState();
       if (!state.plan) { setStatus("No video loaded yet."); return; }
       setStatus(state.frames.length + " frames · " + state.plan.width + "×" + state.plan.height + " px sheet · " +
         state.plan.cols + " cols × " + state.plan.rows + " rows" + (state.warnings.length ? " · " + state.warnings.length + " warnings" : ""));
     } else {
+      syncSilenceState();
       if (!state.buffer) { setStatus("No audio loaded yet."); return; }
       const s = summarize(state.gaps, state.duration);
       setStatus(fmtTimeHMSms(state.duration) + " audio · " + s.count + " gaps · " + s.percentSilence.toFixed(1) + "% silence");
@@ -749,20 +779,30 @@
     const colOpts = [];
     for (let c = 1; c <= 8; c++) colOpts.push('<option value="' + c + '"' + (c === state.thumbs.cols ? " selected" : "") + ">" + c + "</option>");
     return '' +
-      '<div class="studio-controls med-controls">' +
-        '<label class="st-field"><span>Frame count <b id="med-count-v">' + state.thumbs.count + '</b></span>' +
-          '<input type="range" id="med-count" min="4" max="48" step="1" value="' + state.thumbs.count + '" aria-label="Frame count"></label>' +
-        '<label class="st-field"><span>Grid columns</span><select id="med-cols" aria-label="Grid columns">' + colOpts.join("") + "</select></label>" +
-        '<label class="st-field"><span>Thumbnail width</span><select id="med-width" aria-label="Thumbnail width">' + widthOpts + "</select></label>" +
-        '<label class="st-field"><span>Padding <b id="med-pad-v">' + state.thumbs.padding + ' px</b></span>' +
-          '<input type="range" id="med-pad" min="0" max="48" step="1" value="' + state.thumbs.padding + '" aria-label="Padding"></label>' +
-        '<label class="st-field"><span>Background</span><input type="color" id="med-bg" value="' + state.thumbs.bg + '" aria-label="Background colour"></label>' +
-        '<label class="st-check"><input type="checkbox" id="med-labels"' + (state.thumbs.labels ? " checked" : "") + "> Burn timestamp + frame index</label>" +
-        '<label class="st-field"><span>JPEG quality <b id="med-q-v">' + Math.round(state.thumbs.quality * 100) + '%</b></span>' +
-          '<input type="range" id="med-q" min="40" max="100" step="1" value="' + Math.round(state.thumbs.quality * 100) + '" aria-label="JPEG quality"></label>' +
+      '<div class="studio-controls med-controls med-thumb-controls">' +
+        '<div class="med-basic-grid">' +
+          '<label class="st-field"><span>Frame count <b id="med-count-v">' + state.thumbs.count + '</b></span>' +
+            '<input type="range" id="med-count" min="4" max="48" step="1" value="' + state.thumbs.count + '" aria-label="Frame count"></label>' +
+          '<label class="st-field"><span>Grid columns</span><select id="med-cols" aria-label="Grid columns">' + colOpts.join("") + "</select></label>" +
+        "</div>" +
+        '<details class="med-advanced" id="med-advanced">' +
+          '<summary><span>Layout &amp; export</span><small>Thumb size, padding, labels, quality</small></summary>' +
+          '<div class="med-advanced-grid">' +
+            '<label class="st-field"><span>Thumbnail width</span><select id="med-width" aria-label="Thumbnail width">' + widthOpts + "</select></label>" +
+            '<label class="st-field"><span>Padding <b id="med-pad-v">' + state.thumbs.padding + ' px</b></span>' +
+              '<input type="range" id="med-pad" min="0" max="48" step="1" value="' + state.thumbs.padding + '" aria-label="Padding"></label>' +
+            '<label class="st-field"><span>Background</span><input type="color" id="med-bg" value="' + state.thumbs.bg + '" aria-label="Background colour"></label>' +
+            '<label class="st-check"><input type="checkbox" id="med-labels"' + (state.thumbs.labels ? " checked" : "") + "> Burn timestamp + frame index</label>" +
+            '<label class="st-field"><span>JPEG quality <b id="med-q-v">' + Math.round(state.thumbs.quality * 100) + '%</b></span>' +
+              '<input type="range" id="med-q" min="40" max="100" step="1" value="' + Math.round(state.thumbs.quality * 100) + '" aria-label="JPEG quality"></label>' +
+          "</div>" +
+        "</details>" +
       "</div>" +
       '<div class="st-progress" id="med-progress" hidden><div class="st-progress-fill" id="med-progress-fill"></div><div class="st-progress-label" id="med-progress-label"></div></div>' +
-      '<div class="med-preview"><canvas id="med-canvas" aria-label="Video contact sheet preview"></canvas></div>' +
+      '<div class="med-preview">' +
+        '<div class="med-preview-empty" id="med-preview-empty"><strong>No contact sheet yet.</strong><span>Add a video above to sample evenly spaced frames into a printable grid.</span></div>' +
+        '<canvas id="med-canvas" aria-label="Video contact sheet preview"></canvas>' +
+      "</div>" +
       '<div class="med-warnings" id="med-warn" hidden></div>' +
       '<div class="med-error" id="med-error" hidden></div>' +
       '<div class="studio-bar"><div class="studio-meta" id="med-status" aria-live="polite">No video loaded yet.</div>' +
@@ -776,29 +816,40 @@
 
   function silenceMarkup() {
     return '' +
-      '<div class="studio-controls med-controls">' +
-        '<label class="st-field"><span>Silence threshold <b id="med-thr-v">' + state.silence.thresholdDb + ' dBFS</b></span>' +
-          '<input type="range" id="med-thr" min="-80" max="-10" step="1" value="' + state.silence.thresholdDb + '" aria-label="Silence threshold in dBFS"></label>' +
-        '<label class="st-field"><span>Window size <b id="med-win-v">' + state.silence.windowMs + ' ms</b></span>' +
-          '<input type="range" id="med-win" min="20" max="1000" step="10" value="' + state.silence.windowMs + '" aria-label="Analysis window size"></label>' +
-        '<label class="st-field"><span>Minimum gap <b id="med-gap-v">' + state.silence.minGapSec.toFixed(2) + ' s</b></span>' +
-          '<input type="range" id="med-gap" min="0.1" max="5" step="0.1" value="' + state.silence.minGapSec + '" aria-label="Minimum gap length"></label>' +
-        '<label class="st-field"><span>Channel mode</span><select id="med-ch" aria-label="Channel mode">' +
-          ["left", "right", "mix", "max"].map(function (m) {
-            return '<option value="' + m + '"' + (m === state.silence.channel ? " selected" : "") + ">" + esc(m === "max" ? "Max of channels" : m === "mix" ? "Mix (mono)" : m) + "</option>";
-          }).join("") + "</select></label>" +
+      '<div class="studio-controls med-controls med-silence-controls">' +
+        '<div class="med-basic-grid">' +
+          '<label class="st-field"><span>Silence threshold <b id="med-thr-v">' + state.silence.thresholdDb + ' dBFS</b></span>' +
+            '<input type="range" id="med-thr" min="-80" max="-10" step="1" value="' + state.silence.thresholdDb + '" aria-label="Silence threshold in dBFS"></label>' +
+          '<label class="st-field"><span>Minimum gap <b id="med-gap-v">' + state.silence.minGapSec.toFixed(2) + ' s</b></span>' +
+            '<input type="range" id="med-gap" min="0.1" max="5" step="0.1" value="' + state.silence.minGapSec + '" aria-label="Minimum gap length"></label>' +
+        "</div>" +
+        '<details class="med-advanced" id="med-advanced">' +
+          '<summary><span>Detection detail</span><small>Window size, channel mode</small></summary>' +
+          '<div class="med-advanced-grid">' +
+            '<label class="st-field"><span>Window size <b id="med-win-v">' + state.silence.windowMs + ' ms</b></span>' +
+              '<input type="range" id="med-win" min="20" max="1000" step="10" value="' + state.silence.windowMs + '" aria-label="Analysis window size"></label>' +
+            '<label class="st-field"><span>Channel mode</span><select id="med-ch" aria-label="Channel mode">' +
+              ["left", "right", "mix", "max"].map(function (m) {
+                return '<option value="' + m + '"' + (m === state.silence.channel ? " selected" : "") + ">" + esc(m === "max" ? "Max of channels" : m === "mix" ? "Mix (mono)" : m) + "</option>";
+              }).join("") + "</select></label>" +
+          "</div>" +
+        "</details>" +
       "</div>" +
       '<div class="st-progress" id="med-progress" hidden><div class="st-progress-fill" id="med-progress-fill"></div><div class="st-progress-label" id="med-progress-label"></div></div>' +
-      '<div class="stats" id="med-stats"></div>' +
-      '<div class="med-wave"><canvas id="med-wave" aria-label="Waveform with silence gaps shaded"></canvas></div>' +
-      '<audio id="med-audio" preload="none" aria-label="Gap preview player"></audio>' +
-      '<div class="med-error" id="med-error" hidden></div>' +
-      '<div class="med-gaps" id="med-gaps"></div>' +
+      '<div class="med-results" id="med-results">' +
+        '<div class="med-results-head"><h2>Silence analysis</h2><span class="med-results-tip">Click a shaded area or a gap row to preview it</span></div>' +
+        '<div class="med-silence-empty" id="med-silence-empty"><strong>No audio analysed yet.</strong><span>Add an audio file above to see its waveform, silence gaps and export list.</span></div>' +
+        '<div class="stats" id="med-stats"></div>' +
+        '<div class="med-wave"><canvas id="med-wave" aria-label="Waveform with silence gaps shaded"></canvas></div>' +
+        '<audio id="med-audio" preload="none" aria-label="Gap preview player"></audio>' +
+        '<div class="med-error" id="med-error" hidden></div>' +
+        '<div class="med-gaps" id="med-gaps"></div>' +
+      "</div>" +
       '<div class="studio-bar"><div class="studio-meta" id="med-status" aria-live="polite">No audio loaded yet.</div>' +
         '<div class="studio-actions">' +
-          '<button type="button" class="btn" id="med-csv">Download CSV</button>' +
-          '<button type="button" class="btn secondary" id="med-txt">Download text list</button>' +
-          '<button type="button" class="btn secondary" id="med-copy">Copy list</button>' +
+          '<button type="button" class="btn" id="med-csv" disabled>Download CSV</button>' +
+          '<button type="button" class="btn secondary" id="med-txt" disabled>Download text list</button>' +
+          '<button type="button" class="btn secondary" id="med-copy" disabled>Copy list</button>' +
           '<button type="button" class="btn secondary" id="med-clear">Clear</button>' +
         "</div></div>";
   }
@@ -928,6 +979,8 @@
       state.warnings = [];
       showError("");
       renderWarnings();
+      syncThumbsState();
+      syncSilenceState();
       if (state.mode === "thumbs") {
         const c = $("#med-canvas");
         if (c) { const x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height); }
@@ -1014,6 +1067,8 @@
     if (!f) return;
     state.file = f;
     showError("");
+    syncThumbsState();
+    syncSilenceState();
     if (state.mode === "thumbs") {
       await captureSheet(f);
       return;
@@ -1033,6 +1088,7 @@
       const msg = (e && e.message ? e.message : String(e));
       showError("Could not decode this audio file. Your browser may not support its codec or container (for example DRM-protected M4A, some FLAC builds, or raw AC-3). Try converting to WAV or a standard MP3 (128 kbps+) and upload again — everything still stays on your device.\n\nDetails: " + msg);
       setStatus("Could not decode this audio file.");
+      syncSilenceState();
     }
   }
 

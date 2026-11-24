@@ -805,6 +805,10 @@
         ? (state.fileName ? state.fileName + " · " : "") + n + " rows × " + state.headers.length + " columns"
         : "No data yet — Manual mode: the builder text prints as 1 label.";
     }
+    const section = $("#lb-data-section");
+    const dataSummary = $("#lb-data-summary");
+    if (dataSummary) dataSummary.textContent = n ? n + " rows ready" : "Optional — manual mode";
+    if (section && n) section.open = true;
     const sortSel = $("#lb-sortcol");
     if (sortSel) {
       sortSel.innerHTML = state.headers.map((h, i) => '<option value="' + i + '">' + esc(h) + "</option>").join("");
@@ -1108,25 +1112,32 @@
     root.className = "lbl-studio";
     root.innerHTML = `
       <div class="studio-controls lbl-controls">
-        <label class="st-field"><span>Template</span><select id="lb-tpl" aria-label="Label template">${tplOptions}</select></label>
-        <label class="st-field"><span>Font</span><select id="lb-font" aria-label="Font family">${FONTS.map(f => "<option>" + f + "</option>").join("")}</select></label>
-        <label class="st-field"><span>Vertical align</span><select id="lb-valign" aria-label="Vertical alignment">
-          <option value="top">Top</option><option value="middle">Middle</option><option value="bottom">Bottom</option>
-        </select></label>
-        <label class="st-field"><span>Text color</span><input type="color" id="lb-color" value="#000000" aria-label="Text color"></label>
-        <label class="st-field"><span>Overflow</span><select id="lb-overflow" aria-label="Overflow policy">
-          <option value="shrink">Auto-shrink</option><option value="clip">Clip</option>
-        </select></label>
-        <label class="st-field"><span>Repeat</span><select id="lb-repeat" aria-label="Repeat mode">
-          <option value="1">Each row once</option><option value="2">Each row ×2</option><option value="3">Each row ×3</option>
-          <option value="4">Each row ×4</option><option value="first">First row × sheet</option>
-        </select></label>
-        <label class="st-field"><span>Offset X <b class="st-readout" id="lb-offx-r">0 mm</b></span>
-          <input type="range" id="lb-offx" min="-3" max="3" step="0.5" value="0" aria-label="Horizontal calibration offset"></label>
-        <label class="st-field"><span>Offset Y <b class="st-readout" id="lb-offy-r">0 mm</b></span>
-          <input type="range" id="lb-offy" min="-3" max="3" step="0.5" value="0" aria-label="Vertical calibration offset"></label>
-        <label class="st-check"><input type="checkbox" id="lb-guides" checked> Show guides (preview)</label>
-        <label class="st-check"><input type="checkbox" id="lb-eguides"> Include guides in export</label>
+        <div class="lbl-controls-grid">
+          <label class="st-field"><span>Template</span><select id="lb-tpl" aria-label="Label template">${tplOptions}</select></label>
+          <label class="st-field"><span>Font</span><select id="lb-font" aria-label="Font family">${FONTS.map(f => "<option>" + f + "</option>").join("")}</select></label>
+          <label class="st-field"><span>Vertical align</span><select id="lb-valign" aria-label="Vertical alignment">
+            <option value="top">Top</option><option value="middle">Middle</option><option value="bottom">Bottom</option>
+          </select></label>
+          <label class="st-field"><span>Text color</span><input type="color" id="lb-color" value="#000000" aria-label="Text color"></label>
+        </div>
+        <details class="lbl-advanced" id="lb-advanced">
+          <summary><span>Printer &amp; sheet setup</span><small>Overflow, repeat, calibration offsets, guides</small></summary>
+          <div class="lbl-advanced-grid">
+            <label class="st-field"><span>Overflow</span><select id="lb-overflow" aria-label="Overflow policy">
+              <option value="shrink">Auto-shrink</option><option value="clip">Clip</option>
+            </select></label>
+            <label class="st-field"><span>Repeat</span><select id="lb-repeat" aria-label="Repeat mode">
+              <option value="1">Each row once</option><option value="2">Each row ×2</option><option value="3">Each row ×3</option>
+              <option value="4">Each row ×4</option><option value="first">First row × sheet</option>
+            </select></label>
+            <label class="st-field"><span>Offset X <b class="st-readout" id="lb-offx-r">0 mm</b></span>
+              <input type="range" id="lb-offx" min="-3" max="3" step="0.5" value="0" aria-label="Horizontal calibration offset"></label>
+            <label class="st-field"><span>Offset Y <b class="st-readout" id="lb-offy-r">0 mm</b></span>
+              <input type="range" id="lb-offy" min="-3" max="3" step="0.5" value="0" aria-label="Vertical calibration offset"></label>
+            <label class="st-check"><input type="checkbox" id="lb-guides" checked> Show guides (preview)</label>
+            <label class="st-check"><input type="checkbox" id="lb-eguides"> Include guides in export</label>
+          </div>
+        </details>
       </div>
 
       <div class="lbl-custom" id="lb-custom" hidden>
@@ -1147,36 +1158,39 @@
           <span class="lbl-hint">click a column chip to insert it into the focused line · tokens like {{First}}</span>
           <div class="lbl-head-actions">
             <select id="lb-preset" aria-label="Content preset">${presetOptions}</select>
-            <button type="button" class="btn secondary" id="lb-preset-apply">Apply preset</button>
-            <button type="button" class="btn secondary" id="lb-wizard" title="Detect name/address columns and build a 3-line address block">Address wizard</button>
-            <button type="button" class="btn secondary" id="lb-addline">＋ Line</button>
+            <button type="button" class="btn secondary btn-sm" id="lb-preset-apply">Apply preset</button>
+            <button type="button" class="btn secondary btn-sm" id="lb-wizard" title="Detect name/address columns and build a 3-line address block">Address wizard</button>
+            <button type="button" class="btn secondary btn-sm" id="lb-addline">＋ Line</button>
           </div>
         </div>
         <div class="lbl-chips" id="lb-chips" hidden></div>
         <div id="lb-lines"></div>
       </div>
 
-      <div class="lbl-data">
-        <div class="lbl-data-head">
-          <span id="lb-data-stats"></span>
-          <div class="lbl-head-actions">
-            <button type="button" class="btn secondary" id="lb-paste-toggle">Paste rows</button>
-            <select id="lb-sortcol" aria-label="Sort column" disabled></select>
-            <button type="button" class="st-icon-btn" id="lb-sortasc" aria-label="Sort ascending" title="Sort A to Z" disabled>↑</button>
-            <button type="button" class="st-icon-btn" id="lb-sortdesc" aria-label="Sort descending" title="Sort Z to A" disabled>↓</button>
-            <button type="button" class="btn secondary" id="lb-dedupe" disabled>Dedupe</button>
-            <button type="button" class="btn secondary" id="lb-clear" disabled>Clear data</button>
+      <details class="lbl-section" id="lb-data-section">
+        <summary><span class="lbl-section-title">Label data <small>CSV / pasted rows</small></span><span class="lbl-section-state" id="lb-data-summary">Optional — manual mode</span></summary>
+        <div class="lbl-data">
+          <div class="lbl-data-head">
+            <span id="lb-data-stats"></span>
+            <div class="lbl-head-actions">
+              <button type="button" class="btn secondary btn-sm" id="lb-paste-toggle">Paste rows</button>
+              <select id="lb-sortcol" aria-label="Sort column" disabled></select>
+              <button type="button" class="st-icon-btn" id="lb-sortasc" aria-label="Sort ascending" title="Sort A to Z" disabled>↑</button>
+              <button type="button" class="st-icon-btn" id="lb-sortdesc" aria-label="Sort descending" title="Sort Z to A" disabled>↓</button>
+              <button type="button" class="btn secondary btn-sm" id="lb-dedupe" disabled>Dedupe</button>
+              <button type="button" class="btn secondary btn-sm" id="lb-clear" disabled>Clear data</button>
+            </div>
           </div>
-        </div>
-        <div class="lbl-paste" id="lb-paste" hidden>
-          <textarea id="lb-paste-text" rows="6" placeholder="Paste rows from Excel / Google Sheets (tab separated) or CSV text…" aria-label="Paste rows"></textarea>
-          <div class="lbl-paste-opts">
-            <label class="st-check"><input type="checkbox" id="lb-paste-header" checked> First row is the header</label>
-            <button type="button" class="btn secondary" id="lb-paste-load">Load rows</button>
+          <div class="lbl-paste" id="lb-paste" hidden>
+            <textarea id="lb-paste-text" rows="6" placeholder="Paste rows from Excel / Google Sheets (tab separated) or CSV text…" aria-label="Paste rows"></textarea>
+            <div class="lbl-paste-opts">
+              <label class="st-check"><input type="checkbox" id="lb-paste-header" checked> First row is the header</label>
+              <button type="button" class="btn secondary btn-sm" id="lb-paste-load">Load rows</button>
+            </div>
           </div>
+          <div class="lbl-tablewrap" id="lb-table"></div>
         </div>
-        <div class="lbl-tablewrap" id="lb-table"></div>
-      </div>
+      </details>
 
       <div class="studio-toolbar">
         <div class="st-zoom-group">

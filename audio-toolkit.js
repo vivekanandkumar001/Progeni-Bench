@@ -1931,9 +1931,9 @@
   }
 
   function quickAnswerHtml(answerHtml, facts) {
-    return '<aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">' +
-      '<h2 id="quick-answer-title">Quick answer</h2>' +
-      '<p class="answer-text">' + answerHtml + "</p>" +
+    return '<aside class="quick-answer quick-answer--summary" id="quick-answer" aria-labelledby="quick-answer-title">' +
+      '<div class="quick-answer-copy"><h2 id="quick-answer-title">Quick answer</h2>' +
+      '<p class="answer-text">' + answerHtml + "</p></div>" +
       '<dl class="key-facts">' + facts.map(function (fact) {
         return "<div><dt>" + esc(fact[0]) + "</dt><dd>" + esc(fact[1]) + "</dd></div>";
       }).join("") + "</dl></aside>";
@@ -2169,17 +2169,19 @@
 
     const addSection = tool.requiresFile === false
       ? (isRecorder ? "" : "")
-      : '<h2>1. Add ' + (multi ? "files" : "a file") + "</h2>" + drop + '<div id="atk-files" class="itk-files" aria-live="polite"></div>';
+      : '<h2><span class="step-no">1</span>Add ' + (multi ? "files" : "a file") + "</h2>" + drop + '<div id="atk-files" class="itk-files" aria-live="polite"></div>';
 
     app.innerHTML =
-      '<section class="tool-head itk-head">' +
-        '<span class="eyebrow">Bench Audio Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
+      '<section class="tool-head itk-head tool-head--compact">' +
+        '<div class="tool-head-top">' +
+          '<span class="eyebrow">Bench Audio Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
+          '<div class="itk-meta">' + (tool.inputs || []).slice(0, 5).map(function (f) { return '<span class="itk-chip">' + esc(f) + "</span>"; }).join("") +
+            '<span class="itk-chip">' + (tool.engine === "ffmpeg" ? "FFmpeg engine" : tool.engine === "media-recorder" ? "Microphone" : "Web Audio") + "</span>" +
+            '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
+        "</div>" +
         "<h1><span class=\"tool-head-icon\" data-icon=\"" + esc(iconName(tool)) + "\" aria-hidden=\"true\">" + iconSvg(tool) + "</span>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
-        '<div class="itk-meta">' + (tool.inputs || []).slice(0, 4).map(function (f) { return '<span class="itk-chip">' + esc(f) + "</span>"; }).join("") +
-          '<span class="itk-chip">' + (tool.engine === "ffmpeg" ? "FFmpeg engine" : tool.engine === "media-recorder" ? "Microphone" : "Web Audio") + "</span>" +
-          '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
-      "</section>" + toolQuickAnswer(tool) +
+      "</section>" +
       limitation +
       '<section class="itk" id="atk">' +
         '<div class="itk-grid">' +
@@ -2188,18 +2190,18 @@
             recorderPanel +
             micPanel +
             metroPanel +
-            (optionList.length || tool.requiresFile !== false ? "<h2>" + (tool.requiresFile === false ? "1" : "2") + ". Settings</h2>" : "") +
+            (optionList.length || tool.requiresFile !== false ? '<h2><span class="step-no">' + (tool.requiresFile === false ? "1" : "2") + '</span>Settings</h2>' : "") +
             '<form id="atk-form" class="itk-options" novalidate>' + options + "</form>" +
             (isLiveAudio ? "" : '<div class="itk-actions"><button class="btn btn-lg" id="atk-run" type="button">' + esc(tool.action || "Process") + '</button><button class="btn secondary" id="atk-reset" type="button">Reset</button></div>') +
             '<div class="itk-progress" id="atk-progress" aria-live="polite"><div class="itk-bar" role="progressbar" aria-label="Processing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready. Processing happens locally in this tab.</p></div>' +
           "</div>" +
           '<div class="itk-panel itk-output">' +
-            "<h2>" + (isLiveAudio && !isRecorder ? "2. Notes" : (tool.requiresFile === false ? "2" : "3") + ". Results") + "</h2>" +
+            '<h2><span class="step-no">' + (isLiveAudio && !isRecorder ? "2" : (tool.requiresFile === false ? "2" : "3")) + '</span>' + (isLiveAudio && !isRecorder ? "Notes" : "Results") + "</h2>" +
             previewHtml() +
             '<div id="atk-results" class="itk-results" aria-live="polite">' + emptyResults + "</div>" +
           "</div>" +
         "</div>" +
-      "</section>" + seoHtml(tool);
+      "</section>" + toolQuickAnswer(tool) + seoHtml(tool);
 
     const state = { tool: tool, files: [], urls: [], running: false };
     active = state;

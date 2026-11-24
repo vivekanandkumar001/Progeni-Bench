@@ -703,11 +703,16 @@
     const off = state.profile === "custom" ? "" : " disabled";
     return '' +
       '<div class="studio-controls sub-controls">' +
-        '<label class="st-field sub-wide"><span>Profile</span><select id="sub-profile" aria-label="Reading-speed profile">' + opts + "</select></label>" +
-        '<label class="st-field"><span>CPS limit <b class="st-readout" id="sub-cps-r"></b></span><input type="number" id="sub-cps" min="1" max="60" step="1" value="' + state.custom.cps + '"' + off + "></label>" +
-        '<label class="st-field"><span>Min duration (s)</span><input type="number" id="sub-min" min="0" max="20" step="0.1" value="' + state.custom.minDuration + '"' + off + "></label>" +
-        '<label class="st-field"><span>Max chars / line</span><input type="number" id="sub-maxchars" min="5" max="120" step="1" value="' + state.custom.maxCharsPerLine + '"' + off + "></label>" +
-        '<label class="st-field"><span>Max lines</span><input type="number" id="sub-maxlines" min="1" max="6" step="1" value="' + state.custom.maxLines + '"' + off + "></label>" +
+        '<label class="st-field sub-wide"><span>Reading-speed profile</span><select id="sub-profile" aria-label="Reading-speed profile">' + opts + "</select></label>" +
+        '<details class="sub-advanced" id="sub-advanced">' +
+          '<summary><span>Custom limits</span><small>Only used with the Custom profile</small></summary>' +
+          '<div class="sub-advanced-grid">' +
+            '<label class="st-field"><span>CPS limit <b class="st-readout" id="sub-cps-r"></b></span><input type="number" id="sub-cps" min="1" max="60" step="1" value="' + state.custom.cps + '"' + off + "></label>" +
+            '<label class="st-field"><span>Min duration (s)</span><input type="number" id="sub-min" min="0" max="20" step="0.1" value="' + state.custom.minDuration + '"' + off + "></label>" +
+            '<label class="st-field"><span>Max chars / line</span><input type="number" id="sub-maxchars" min="5" max="120" step="1" value="' + state.custom.maxCharsPerLine + '"' + off + "></label>" +
+            '<label class="st-field"><span>Max lines</span><input type="number" id="sub-maxlines" min="1" max="6" step="1" value="' + state.custom.maxLines + '"' + off + "></label>" +
+          "</div>" +
+        "</details>" +
       "</div>";
   }
 
@@ -738,30 +743,68 @@
   }
 
   function speedMarkup() {
-    return textPanel("Paste SubRip (.srt) subtitles here, or use Add .srt file\u2026") +
-      speedControls() +
-      '<div class="studio-toolbar sub-actions">' +
-        '<button type="button" class="btn" id="sub-run">Analyze</button>' +
-        '<button type="button" class="btn secondary" id="sub-csv">Download CSV report</button>' +
-        '<button type="button" class="btn secondary" id="sub-issues">Annotated .issues.srt</button>' +
-        '<a class="btn secondary sub-handoff" id="sub-handoff" href="/tools/subtitle-linefix/">Fix line breaks \u2192</a>' +
-        '<span class="sub-status" id="sub-status" aria-live="polite"></span>' +
-      "</div>" +
-      '<div class="sub-stats" id="sub-stats" aria-live="polite"></div>' +
-      '<div class="sub-issues" id="sub-issue-list" aria-live="polite"></div>';
+    return '' +
+      '<div class="sub-workspace">' +
+        '<div class="sub-grid">' +
+          '<section class="sub-panel sub-input" aria-labelledby="sub-source-title">' +
+            '<div class="sub-panel-head"><h2 id="sub-source-title">Subtitle source</h2><span class="sub-panel-kicker">SubRip .srt</span></div>' +
+            textPanel("Paste SubRip (.srt) subtitles here, or use Add .srt file\u2026") +
+          "</section>" +
+          '<aside class="sub-panel sub-settings" aria-labelledby="sub-settings-title">' +
+            '<h2 id="sub-settings-title">Audit settings</h2>' +
+            '<p class="sub-panel-hint">Start with a broadcast profile. Open custom limits only when you need your own thresholds.</p>' +
+            speedControls() +
+            '<p class="sub-privacy"><strong>Stays local.</strong> Subtitle text is parsed and measured entirely in your browser.</p>' +
+          "</aside>" +
+        "</div>" +
+        '<section class="sub-results" id="sub-results" aria-labelledby="sub-results-title">' +
+          '<div class="sub-results-head"><div><h2 id="sub-results-title">Reading-speed audit</h2><p>Flagged cues are ranked by timecode with CPS, duration, line and overlap notes.</p></div>' +
+            '<span class="sub-status" id="sub-status" aria-live="polite"></span></div>' +
+          '<div class="sub-empty-banner" id="sub-empty"><strong>No subtitles analysed yet.</strong><span>Load a sample or paste your .srt file to see the audit and export a report.</span></div>' +
+          '<div class="studio-toolbar sub-actions">' +
+            '<button type="button" class="btn" id="sub-run">Analyze subtitles</button>' +
+            '<button type="button" class="btn secondary" id="sub-csv" disabled>Download CSV report</button>' +
+            '<button type="button" class="btn secondary" id="sub-issues" disabled>Annotated .issues.srt</button>' +
+            '<a class="btn secondary sub-handoff" id="sub-handoff" href="/tools/subtitle-linefix/" aria-disabled="true">Fix line breaks \u2192</a>' +
+          "</div>" +
+          '<div class="sub-result-body">' +
+            '<div class="sub-stats" id="sub-stats" aria-live="polite"></div>' +
+            '<div class="sub-issues" id="sub-issue-list" aria-live="polite"></div>' +
+          "</div>" +
+        "</section>" +
+      "</div>";
   }
 
   function fixMarkup() {
-    return textPanel("Paste SubRip (.srt) subtitles here to rebalance the line breaks\u2026") +
-      fixControls() +
-      '<div class="studio-toolbar sub-actions">' +
-        '<button type="button" class="btn" id="sub-run">Fix line breaks</button>' +
-        '<button type="button" class="btn secondary" id="sub-download">Download fixed .srt</button>' +
-        '<a class="btn secondary sub-handoff" id="sub-handoff" href="/tools/subtitle-speed/">Send to speed checker \u2192</a>' +
-        '<span class="sub-status" id="sub-status" aria-live="polite"></span>' +
-      "</div>" +
-      '<div class="sub-stats" id="sub-stats" aria-live="polite"></div>' +
-      '<div class="sub-diff" id="sub-diff" aria-live="polite"></div>';
+    return '' +
+      '<div class="sub-workspace">' +
+        '<div class="sub-grid">' +
+          '<section class="sub-panel sub-input" aria-labelledby="sub-source-title">' +
+            '<div class="sub-panel-head"><h2 id="sub-source-title">Subtitle source</h2><span class="sub-panel-kicker">SubRip .srt</span></div>' +
+            textPanel("Paste SubRip (.srt) subtitles here to rebalance the line breaks\u2026") +
+          "</section>" +
+          '<aside class="sub-panel sub-settings" aria-labelledby="sub-settings-title">' +
+            '<h2 id="sub-settings-title">Line-break rules</h2>' +
+            '<p class="sub-panel-hint">Set how much text can sit on one line. Timecodes are never changed.</p>' +
+            fixControls() +
+            '<p class="sub-privacy"><strong>Stays local.</strong> Your subtitle file never leaves this browser.</p>' +
+          "</aside>" +
+        "</div>" +
+        '<section class="sub-results" id="sub-results" aria-labelledby="sub-results-title">' +
+          '<div class="sub-results-head"><div><h2 id="sub-results-title">Rewrap preview</h2><p>Compare the original and fixed line breaks before downloading.</p></div>' +
+            '<span class="sub-status" id="sub-status" aria-live="polite"></span></div>' +
+          '<div class="sub-empty-banner" id="sub-empty"><strong>No subtitles loaded yet.</strong><span>Load a sample or paste your .srt file to preview the rebalanced line breaks.</span></div>' +
+          '<div class="studio-toolbar sub-actions">' +
+            '<button type="button" class="btn" id="sub-run">Fix line breaks</button>' +
+            '<button type="button" class="btn secondary" id="sub-download" disabled>Download fixed .srt</button>' +
+            '<a class="btn secondary sub-handoff" id="sub-handoff" href="/tools/subtitle-speed/" aria-disabled="true">Send to speed checker \u2192</a>' +
+          "</div>" +
+          '<div class="sub-result-body">' +
+            '<div class="sub-stats" id="sub-stats" aria-live="polite"></div>' +
+            '<div class="sub-diff" id="sub-diff" aria-live="polite"></div>' +
+          "</div>" +
+        "</section>" +
+      "</div>";
   }
 
   /* --------------------------------------------------------------- render */
@@ -869,8 +912,26 @@
       "</tr></thead><tbody>" + rows + "</tbody></table></div>";
   }
 
+  function syncSubtitleState() {
+    if (!root) return;
+    const has = state.cues.length > 0;
+    const results = $("#sub-results");
+    if (results) results.classList.toggle("has-data", has);
+    const empty = $("#sub-empty");
+    if (empty) empty.hidden = has;
+    [["#sub-csv", has], ["#sub-issues", has], ["#sub-download", has], ["#sub-run", has]].forEach(function (pair) {
+      const b = $(pair[0]); if (b) b.disabled = !pair[1];
+    });
+    const handoff = $("#sub-handoff");
+    if (handoff) {
+      handoff.setAttribute("aria-disabled", has ? "false" : "true");
+      handoff.classList.toggle("is-disabled", !has);
+    }
+  }
+
   function render() {
     if (!root) return;
+    syncSubtitleState();
     if (state.mode === "speed") renderSpeed(); else renderFix();
     const meta = $("#sub-filemeta");
     if (meta) {

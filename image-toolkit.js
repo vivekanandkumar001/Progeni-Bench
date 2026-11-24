@@ -2663,9 +2663,9 @@
   }
 
   function quickAnswerHtml(answerHtml, facts) {
-    return '<aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">' +
-      '<h2 id="quick-answer-title">Quick answer</h2>' +
-      '<p class="answer-text">' + answerHtml + "</p>" +
+    return '<aside class="quick-answer quick-answer--summary" id="quick-answer" aria-labelledby="quick-answer-title">' +
+      '<div class="quick-answer-copy"><h2 id="quick-answer-title">Quick answer</h2>' +
+      '<p class="answer-text">' + answerHtml + "</p></div>" +
       '<dl class="key-facts">' + facts.map(function (fact) {
         return "<div><dt>" + esc(fact[0]) + "</dt><dd>" + esc(fact[1]) + "</dd></div>";
       }).join("") + "</dl></aside>";
@@ -2781,31 +2781,33 @@
       ? '<div class="itk-status warn"><strong>Experimental</strong><span>' + esc(tool.limitations || "This workflow is still under evaluation.") + "</span></div>" : "";
 
     app.innerHTML =
-      '<section class="tool-head itk-head">' +
-        '<span class="eyebrow">Bench Image Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
+      '<section class="tool-head itk-head tool-head--compact">' +
+        '<div class="tool-head-top">' +
+          '<span class="eyebrow">Bench Image Toolkit' + (tool.status === "implemented" ? "" : " · " + statusBadge(tool.status)) + "</span>" +
+          '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
+            '<span class="itk-chip">up to ' + (tool.maxFiles || 1) + " file" + ((tool.maxFiles || 1) === 1 ? "" : "s") + "</span>" +
+            '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
+        "</div>" +
         "<h1><span class=\"tool-head-icon\" data-icon=\"" + esc(iconName(tool)) + "\" aria-hidden=\"true\">" + iconSvg(tool) + "</span>" + esc(tool.name) + "</h1>" +
         "<p>" + esc(tool.summary) + " <strong>Nothing is uploaded.</strong></p>" +
-        '<div class="itk-meta">' + (tool.inputs || []).map(f => '<span class="itk-chip">' + esc(f) + "</span>").join("") +
-          '<span class="itk-chip">up to ' + (tool.maxFiles || 1) + " file" + ((tool.maxFiles || 1) === 1 ? "" : "s") + "</span>" +
-          '<span class="itk-chip">' + formatBytes(LIMITS.maxFileBytes) + " / file</span></div>" +
-      "</section>" + toolQuickAnswer(tool) +
+      "</section>" +
       limitation +
       '<section class="itk" id="itk">' +
         '<div class="itk-grid">' +
           '<div class="itk-panel itk-controls">' +
-            "<h2>1. Add " + (tool.requiresFile === false ? "content" : "files") + '</h2>' + drop +
+            '<h2><span class="step-no">1</span>Add ' + (tool.requiresFile === false ? "content" : "files") + '</h2>' + drop +
             '<div id="itk-files" class="itk-files" aria-live="polite"></div>' +
-            "<h2>2. Settings</h2>" +
+            '<h2><span class="step-no">2</span>Settings</h2>' +
             '<form id="itk-form" class="itk-options" novalidate>' + options + "</form>" +
             '<div class="itk-actions"><button class="btn btn-lg" id="itk-run" type="button">' + esc(tool.action || "Process") + '</button><button class="btn secondary" id="itk-cancel" type="button" hidden>Cancel</button><button class="btn secondary" id="itk-reset" type="button">Reset files</button></div>' +
             '<div class="itk-progress" id="itk-progress" aria-live="polite"><div class="itk-bar"><span id="itk-bar-fill"></span></div><p id="itk-status">Ready. Processing happens locally in this tab.</p></div>' +
           "</div>" +
           '<div class="itk-panel itk-output">' +
-            "<h2>3. Results</h2>" +
+            '<h2><span class="step-no">3</span>Results</h2>' +
             '<div id="itk-results" class="itk-results" aria-live="polite"><div class="itk-empty"><strong>No results yet</strong><span>Add files and run the tool. Bench creates real output only.</span></div></div>' +
           "</div>" +
         "</div>" +
-      "</section>" + seoHtml(tool);
+      "</section>" + toolQuickAnswer(tool) + seoHtml(tool);
 
     const state = { tool, files: [], urls: [], running: false, controller: null };
     active = state;

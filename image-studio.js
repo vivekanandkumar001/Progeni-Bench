@@ -970,8 +970,13 @@
       set("#ims-keygap", o.keylineGap);
       set("#ims-keyw", o.keylineWidth);
       set("#ims-keyColor", o.keylineColor);
+      const bsel = $("#ims-borderPreset");
+      if (bsel) bsel.value = o.borderColor === "#ffffff" ? "white" : o.borderColor === "#000000" ? "black" : "custom";
+      const colorWrap = $("#ims-borderColor-wrap");
+      if (colorWrap) colorWrap.hidden = !bsel || bsel.value !== "custom";
       const custWrap = $("#ims-custom-wrap"); if (custWrap) custWrap.hidden = o.target !== "custom";
       const bwv = $("#ims-bw-v"); if (bwv) bwv.textContent = o.borderValue + (o.borderUnit === "%" ? "%" : " mm");
+      const kgv = $("#ims-keygap-v"); if (kgv) kgv.textContent = o.keylineGap + " mm";
       const kwv = $("#ims-keyw-v"); if (kwv) kwv.textContent = o.keylineWidth + " mm";
       $$(".ims-mat-only").forEach(el => { el.hidden = !o.mat; });
     } else {
@@ -1040,10 +1045,16 @@
         renderAll();
       });
       on("#ims-bwunit", "change", e => { state.opts.borderUnit = val(e) === "%" ? "%" : "mm"; syncControls(); renderAll(); });
-      on("#ims-borderColor", "input", e => { state.opts.borderColor = val(e); renderAll(); });
+      on("#ims-borderColor", "input", e => {
+        state.opts.borderColor = val(e);
+        const sel = $("#ims-borderPreset"); if (sel) sel.value = "custom";
+        syncControls(); renderAll();
+      });
       on("#ims-borderPreset", "change", e => {
         const v = val(e);
-        state.opts.borderColor = v === "white" ? "#ffffff" : v === "black" ? "#000000" : (state.opts.borderColor || "#2563eb");
+        const old = state.opts.borderColor;
+        state.opts.borderColor = v === "white" ? "#ffffff" : v === "black" ? "#000000"
+          : (old && old !== "#ffffff" && old !== "#000000" ? old : "#2563eb");
         syncControls(); renderAll();
       });
       on("#ims-dpi", "change", e => { state.opts.dpi = parseInt(val(e), 10) === 200 ? 200 : 300; renderAll(); });
@@ -1053,7 +1064,11 @@
         const qv = $("#ims-quality-v"); if (qv) qv.textContent = Math.round(state.opts.quality * 100) + "%";
       });
       on("#ims-mat", "change", e => { state.opts.mat = !!e.target.checked; syncControls(); renderAll(); });
-      on("#ims-keygap", "input", e => { state.opts.keylineGap = Math.max(0, num(val(e), 2)); renderAll(); });
+      on("#ims-keygap", "input", e => {
+        state.opts.keylineGap = Math.max(0, num(val(e), 2));
+        const v = $("#ims-keygap-v"); if (v) v.textContent = state.opts.keylineGap + " mm";
+        renderAll();
+      });
       on("#ims-keyw", "input", e => {
         state.opts.keylineWidth = clamp(num(val(e), 0.5), 0.1, 5);
         const v = $("#ims-keyw-v"); if (v) v.textContent = state.opts.keylineWidth + " mm";
@@ -1104,13 +1119,18 @@
             <option value="rot180">180° rotation (both)</option>
           </select>
         </label>
-        <label class="st-field"><span>Export format</span>
-          <select id="ims-format" aria-label="Export format">${formats}</select>
-        </label>
-        <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
-          <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="Export quality"></label>
-        <label class="st-check"><input type="checkbox" id="ims-flatten"> Flatten onto white background</label>
-        <label class="st-check" id="ims-vector-wrap" hidden><input type="checkbox" id="ims-vector" checked> SVG passthrough (keep vectors, no rasterising)</label>
+        <details class="ims-advanced" id="ims-advanced">
+          <summary><span>Export settings</span><small>Format, quality, transparency</small></summary>
+          <div class="ims-advanced-grid">
+            <label class="st-field"><span>Export format</span>
+              <select id="ims-format" aria-label="Export format">${formats}</select>
+            </label>
+            <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
+              <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="Export quality"></label>
+            <label class="st-check"><input type="checkbox" id="ims-flatten"> Flatten onto white background</label>
+            <label class="st-check" id="ims-vector-wrap" hidden><input type="checkbox" id="ims-vector" checked> SVG passthrough (keep vectors, no rasterising)</label>
+          </div>
+        </details>
       </div>
       <div class="ims-compare" id="ims-compare">
         <figure><figcaption>Before — original</figcaption><img id="ims-before" alt="Original preview"></figure>
@@ -1126,45 +1146,53 @@
     const targets = Object.keys(BORDER_TARGETS).map(k => '<option value="' + k + '">' + esc(BORDER_TARGETS[k].label) + "</option>").join("") +
       '<option value="custom">Custom size…</option>';
     return `
-      <div class="studio-controls ims-controls">
-        <label class="st-field"><span>Target print size</span><select id="ims-target" aria-label="Target print size">${targets}</select></label>
-        <label class="st-field"><span>Fitting mode</span>
-          <select id="ims-mode" aria-label="Fitting mode">
-            <option value="fit">Fit inside (uniform border)</option>
-            <option value="fill">Fit to exact target (crop to fill)</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Units</span>
-          <select id="ims-unit" aria-label="Measurement units"><option value="mm">Millimetres</option><option value="in">Inches</option></select>
-        </label>
-        <label class="st-field" id="ims-custom-wrap" hidden><span>Custom size W × H</span>
-          <span class="ims-inline"><input type="number" id="ims-customW" min="1" step="0.1" value="100" aria-label="Custom width">
-          × <input type="number" id="ims-customH" min="1" step="0.1" value="150" aria-label="Custom height"></span>
-        </label>
-        <label class="st-field st-slider"><span>Border width <b id="ims-bw-v">6 mm</b></span>
-          <input type="range" id="ims-bw" min="0" max="60" step="0.5" value="6" aria-label="Border width"></label>
-        <label class="st-field"><span>Border unit</span>
-          <select id="ims-bwunit" aria-label="Border width unit"><option value="mm">Fixed mm</option><option value="%">% of short side</option></select>
-        </label>
-        <label class="st-field"><span>Border colour</span>
-          <select id="ims-borderPreset" aria-label="Border colour preset">
-            <option value="white">White</option><option value="black">Black</option><option value="custom">Custom…</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Custom colour</span><input type="color" id="ims-borderColor" value="#ffffff" aria-label="Custom border colour"></label>
-        <label class="st-check"><input type="checkbox" id="ims-mat"> Mat effect (keyline around photo)</label>
-        <label class="st-field ims-mat-only" hidden><span>Keyline width <b id="ims-keyw-v">0.5 mm</b></span>
-          <input type="range" id="ims-keyw" min="0.1" max="5" step="0.1" value="0.5" aria-label="Keyline width">
-        </label>
-        <label class="st-field ims-mat-only" hidden><span>Keyline colour</span><input type="color" id="ims-keyColor" value="#111111" aria-label="Keyline colour"></label>
-        <label class="st-field"><span>Output DPI</span>
-          <select id="ims-dpi" aria-label="Output DPI"><option value="200">200 DPI</option><option value="300" selected>300 DPI</option></select>
-        </label>
-        <label class="st-field"><span>Export format</span>
-          <select id="ims-format" aria-label="Export format"><option value="png">PNG</option><option value="jpeg">JPEG</option></select>
-        </label>
-        <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
-          <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="JPEG quality"></label>
+      <div class="studio-controls ims-controls ims-border-controls">
+        <div class="ims-basic-grid">
+          <label class="st-field"><span>Target print size</span><select id="ims-target" aria-label="Target print size">${targets}</select></label>
+          <label class="st-field"><span>Fitting mode</span>
+            <select id="ims-mode" aria-label="Fitting mode">
+              <option value="fit">Fit inside (uniform border)</option>
+              <option value="fill">Fit to exact target (crop to fill)</option>
+            </select>
+          </label>
+          <label class="st-field"><span>Units</span>
+            <select id="ims-unit" aria-label="Measurement units"><option value="mm">Millimetres</option><option value="in">Inches</option></select>
+          </label>
+          <label class="st-field st-slider"><span>Border width <b id="ims-bw-v">6 mm</b></span>
+            <input type="range" id="ims-bw" min="0" max="60" step="0.5" value="6" aria-label="Border width"></label>
+          <label class="st-field"><span>Border colour</span>
+            <select id="ims-borderPreset" aria-label="Border colour preset">
+              <option value="white">White</option><option value="black">Black</option><option value="custom">Custom…</option>
+            </select>
+          </label>
+          <label class="st-field ims-custom-wrap" id="ims-custom-wrap" hidden><span>Custom size W × H</span>
+            <span class="ims-inline"><input type="number" id="ims-customW" min="1" step="0.1" value="100" aria-label="Custom width">
+            × <input type="number" id="ims-customH" min="1" step="0.1" value="150" aria-label="Custom height"></span>
+          </label>
+        </div>
+        <details class="ims-advanced" id="ims-advanced">
+          <summary><span>Border, mat &amp; export</span><small>Units, keyline, DPI, file format</small></summary>
+          <div class="ims-advanced-grid">
+            <label class="st-field"><span>Border unit</span>
+              <select id="ims-bwunit" aria-label="Border width unit"><option value="mm">Fixed mm</option><option value="%">% of short side</option></select>
+            </label>
+            <label class="st-field" id="ims-borderColor-wrap" hidden><span>Custom colour</span><input type="color" id="ims-borderColor" value="#ffffff" aria-label="Custom border colour"></label>
+            <label class="st-check"><input type="checkbox" id="ims-mat"> Mat effect (keyline around photo)</label>
+            <label class="st-field ims-mat-only" hidden><span>Keyline gap <b id="ims-keygap-v">2 mm</b></span>
+              <input type="range" id="ims-keygap" min="0" max="20" step="0.5" value="2" aria-label="Keyline gap"></label>
+            <label class="st-field ims-mat-only" hidden><span>Keyline width <b id="ims-keyw-v">0.5 mm</b></span>
+              <input type="range" id="ims-keyw" min="0.1" max="5" step="0.1" value="0.5" aria-label="Keyline width"></label>
+            <label class="st-field ims-mat-only" hidden><span>Keyline colour</span><input type="color" id="ims-keyColor" value="#111111" aria-label="Keyline colour"></label>
+            <label class="st-field"><span>Output DPI</span>
+              <select id="ims-dpi" aria-label="Output DPI"><option value="200">200 DPI</option><option value="300" selected>300 DPI</option></select>
+            </label>
+            <label class="st-field"><span>Export format</span>
+              <select id="ims-format" aria-label="Export format"><option value="png">PNG</option><option value="jpeg">JPEG</option></select>
+            </label>
+            <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
+              <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="JPEG quality"></label>
+          </div>
+        </details>
       </div>
       <div class="ims-canvas-wrap">
         <canvas id="ims-canvas" aria-label="Bordered photo preview"></canvas>
@@ -1237,9 +1265,10 @@
         ? "Fit inside keeps the whole photo with a uniform border; Fill crops to the exact target."
         : "Pick a device preset, drag the crop box on the preview, then download a ready-to-set wallpaper.";
 
-    container.className = "studio ims-studio";
+    container.className = "studio ims-studio ims-studio--" + state.mode;
     container.innerHTML = `
       <p class="ims-tip">${tip}</p>
+      <p class="ims-empty" id="ims-empty"><strong>No images yet.</strong><span>Drop image files into the upload box above, or use Add files. Everything is processed locally — nothing is uploaded.</span></p>
       <div class="studio-toolbar">
         <button type="button" class="btn" id="ims-add">＋ Add files</button>
       </div>
@@ -1252,8 +1281,7 @@
           <button type="button" class="btn secondary" id="ims-note" disabled hidden>Hand-off note</button>
           <button type="button" class="btn secondary" id="ims-clear" disabled>Clear</button>
         </div>
-      </div>
-      <p class="ims-empty" id="ims-empty">Drop image files into the upload box above, or use Add files. Everything is processed locally — nothing is uploaded.</p>`;
+      </div>`;
 
     const noteBtn = $("#ims-note");
     if (noteBtn) noteBtn.hidden = state.mode !== "mirror";

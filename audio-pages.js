@@ -234,10 +234,21 @@ function toolBody(tool) {
       : 'Web Audio API in your browser';
   const engineNote = copy.processNote(engineShort);
 
-  const fallback = `<section class="toolbox itk-fallback">
-    <h2>How this tool works without JavaScript</h2>
-    <p>${esc(copy.description)}</p>
-    <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
+  const fallback = `<section class="toolbox workspace-preview itk-fallback">
+    <div class="workspace-preview-head">
+      <span class="workspace-preview-icon" aria-hidden="true">&#8681;</span>
+      <div><strong>Interactive workspace</strong><span>Add audio, adjust the settings, then download the result.</span></div>
+    </div>
+    <ol class="workspace-steps">
+      <li><span class="step-no">1</span><div><strong>Add ${tool.requiresFile === false ? 'your settings' : 'your audio'}</strong><small>${esc((tool.inputs || []).slice(0, 3).join(', ') || 'Audio file')} · ${esc(engineShort)}</small></div></li>
+      <li><span class="step-no">2</span><div><strong>Choose the options</strong><small>Every setting is applied locally in this tab.</small></div></li>
+      <li><span class="step-no">3</span><div><strong>Download the output</strong><small>${esc(seo.formatOutputs(tool.outputs))} — no uploads, no account.</small></div></li>
+    </ol>
+    <div class="workspace-noscript">
+      <h2>About this tool</h2>
+      <p>${esc(copy.description)}</p>
+      <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
+    </div>
   </section>`;
 
   const quickAnswer = seo.quickAnswerHtml({
@@ -249,27 +260,30 @@ function toolBody(tool) {
       ['Output', seo.formatOutputs(tool.outputs)],
       ['Engine', engineShort],
       ['Limit', `${C.LIMITS.maxFileBytes / (1024 * 1024)} MB · ${C.LIMITS.maxDurationSec / 60} minutes per file`]
-    ])
+    ]),
+    className: 'quick-answer--summary'
   });
 
   return `<nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/audio/">Audio toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">${esc(tool.name)}</span></nav>
 
-<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Audio Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
+<section class="tool-head itk-head tool-head--compact">
+  <div class="tool-head-top">
+    <span class="eyebrow">Bench Audio Toolkit${tool.status === 'implemented' ? '' : ` · ${statusBadge(tool.status)}`}</span>
+    <div class="itk-meta">
+      ${(tool.inputs || []).slice(0, 5).map(f => `<span class="itk-chip">${esc(f)}</span>`).join('')}
+      <span class="itk-chip">${esc(tool.requiresFile === false ? 'no file needed' : 'up to ' + (tool.maxFiles || 1) + ' file' + ((tool.maxFiles || 1) === 1 ? '' : 's'))}</span>
+      <span class="itk-chip">${esc((C.LIMITS.maxFileBytes / (1024 * 1024)).toFixed(0))} MB / file</span>
+    </div>
+  </div>
   <h1><span class="tool-head-icon" data-icon="${icons.iconName('audio', tool.slug, tool.icon)}">${icons.toolIcon('audio', tool.slug, tool.icon)}</span>${esc(tool.name)}</h1>
   <p>${esc(tool.summary)} <strong>Nothing is uploaded.</strong></p>
-  <div class="itk-meta">
-    ${(tool.inputs || []).slice(0, 5).map(f => `<span class="itk-chip">${esc(f)}</span>`).join('')}
-    <span class="itk-chip">${esc(tool.requiresFile === false ? 'no file needed' : 'up to ' + (tool.maxFiles || 1) + ' file' + ((tool.maxFiles || 1) === 1 ? '' : 's'))}</span>
-    <span class="itk-chip">${esc((C.LIMITS.maxFileBytes / (1024 * 1024)).toFixed(0))} MB / file</span>
-  </div>
 </section>
-
-${quickAnswer}
 
 ${experimental ? `<div class="itk-status warn"><strong>Experimental</strong><span>${esc(limitations)}</span></div>` : ''}
 
 ${fallback}
+
+${quickAnswer}
 
 <section class="seo-section itk-seo">
   <h2>What it does</h2>

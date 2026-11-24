@@ -774,6 +774,10 @@
   }
 
   function renderMeta() {
+    ["#pat-png", "#pat-smooth", "#pat-csv", "#pat-print"].forEach(function (sel) {
+      var b = $(sel);
+      if (b) b.disabled = !state.pattern;
+    });
     var el = $("#pat-meta");
     if (!el) return;
     if (state.flashMsg && Date.now() < state.flashUntil) { el.textContent = state.flashMsg; return; }
@@ -1103,18 +1107,24 @@
         '<button type="button" class="btn secondary btn-sm" id="pat-palette-clear">Clear</button></div>';
 
     var smoothBtn = isE ? '<button type="button" class="btn secondary" id="pat-smooth">Smooth PNG</button>' : "";
+    var advancedControls = isX ? xControls : isD ? dControls : eControls;
+    var advancedLabel = isX ? "Chart style" : isD ? "Drill style &amp; planner" : "Palette &amp; finish";
+    var advancedHint = isX ? "Symbols, grid, dithering" : isD ? "Shape, symbols, canvas planner" : "Hex palette options";
 
     root.className = "pat-studio pat-mode-" + state.mode;
     root.innerHTML =
       '<div class="studio-controls pat-controls">' +
-        '<label class="st-field st-slider"><span>' + (isD ? "Drill width" : "Stitch width") + ' <b id="pat-width-v">' + state.width + (isD ? " drills" : " stitches") + "</b></span>" +
-          '<input type="range" id="pat-width" min="20" max="200" step="1" value="' + state.width + '" aria-label="Chart width"></label>' +
-        '<label class="st-field st-slider"><span>Max colours <b id="pat-colors-v">16 colours</b></span>' +
-          '<input type="range" id="pat-colors" min="2" max="64" step="1" value="16" aria-label="Maximum colours"></label>' +
-        '<label class="st-check"><input type="checkbox" id="pat-snap" checked> Snap to DMC palette</label>' +
-        (isX ? xControls : "") +
-        (isD ? dControls : "") +
-        (isE ? eControls : "") +
+        '<div class="pat-basic-grid">' +
+          '<label class="st-field st-slider"><span>' + (isD ? "Drill width" : "Stitch width") + ' <b id="pat-width-v">' + state.width + (isD ? " drills" : " stitches") + "</b></span>" +
+            '<input type="range" id="pat-width" min="20" max="200" step="1" value="' + state.width + '" aria-label="Chart width"></label>' +
+          '<label class="st-field st-slider"><span>Max colours <b id="pat-colors-v">16 colours</b></span>' +
+            '<input type="range" id="pat-colors" min="2" max="64" step="1" value="16" aria-label="Maximum colours"></label>' +
+          '<label class="st-check"><input type="checkbox" id="pat-snap" checked> Snap to DMC palette</label>' +
+        "</div>" +
+        '<details class="pat-advanced" id="pat-advanced">' +
+          '<summary><span>' + advancedLabel + '</span><small>' + advancedHint + "</small></summary>" +
+          '<div class="pat-advanced-grid">' + advancedControls + "</div>" +
+        "</details>" +
       "</div>" +
 
       '<div class="studio-toolbar">' +

@@ -12,7 +12,8 @@ const {
   filterBookmarkLinks,
   cleanSVG,
   parseVCF,
-  normalizeDate
+  normalizeDate,
+  normalizePhone
 } = (typeof window !== "undefined" && window.ProgeniUtils) ? window.ProgeniUtils : (typeof require === "function" ? require("./utils.js") : {});
 
 // Import brand and tools configuration from single source of truth (site.config.js)
@@ -289,25 +290,31 @@ function layout({ tool, body }) {
     <nav class="tool-breadcrumb" aria-label="Breadcrumb">
       <a href="/">All tools</a><span aria-hidden="true">/</span><span class="tool-breadcrumb-cat">${esc(tool.cat)}</span><span aria-hidden="true">/</span><span aria-current="page">${esc(tool.name)}</span>
     </nav>
-    <div class="tool-shell">
-      <section class="tool-head">
+    <section class="tool-head tool-head--compact">
+      <div class="tool-head-top">
         <span class="eyebrow">${esc(tool.cat)} · ${hasTranslationBackend ? "Local PDF processing · provider-backed translation" : "100% Private Client-Side"}</span>
-        <h1><span class="tool-head-icon" data-icon="${esc(benchIcons ? benchIcons.iconName("core", tool.id, tool.icon) : "")}" aria-hidden="true">${benchToolIcon("core", tool.id, tool.icon)}</span>${esc(tool.keyword || tool.name)}</h1>
-        <p>${esc(tool.desc)} ${hasTranslationBackend
-          ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
-          : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
-      </section>
-
-      <aside class="quick-answer quick-answer--rail" id="quick-answer" aria-labelledby="quick-answer-title">
-        <h2 id="quick-answer-title">At a glance</h2>
-        <p class="answer-text"><strong>${esc(tool.name)}</strong> is a free ${esc(String(tool.cat).toLowerCase())} tool that runs in your browser. ${esc(answerSentence)}</p>
-        <dl class="key-facts">
-          ${quickFacts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
-        </dl>
-      </aside>
-    </div>
+        <div class="tool-head-chips">
+          <span class="itk-chip">Free · no signup</span>
+          <span class="itk-chip">${hasTranslationBackend ? "PDF local · text to DeepL" : "Zero uploads"}</span>
+        </div>
+      </div>
+      <h1><span class="tool-head-icon" data-icon="${esc(benchIcons ? benchIcons.iconName("core", tool.id, tool.icon) : "")}" aria-hidden="true">${benchToolIcon("core", tool.id, tool.icon)}</span>${esc(tool.keyword || tool.name)}</h1>
+      <p>${esc(tool.desc)} ${hasTranslationBackend
+        ? "<strong>PDF pages stay in your browser.</strong> Extracted text is sent to DeepL through a server-side endpoint."
+        : "<strong>Zero server uploads</strong> — all processing happens directly in your browser."}</p>
+    </section>
 
     <section class="toolbox">${body}</section>
+
+    <aside class="quick-answer quick-answer--summary" id="quick-answer" aria-labelledby="quick-answer-title">
+      <div class="quick-answer-copy">
+        <h2 id="quick-answer-title">At a glance</h2>
+        <p class="answer-text"><strong>${esc(tool.name)}</strong> is a free ${esc(String(tool.cat).toLowerCase())} tool that runs in your browser. ${esc(answerSentence)}</p>
+      </div>
+      <dl class="key-facts">
+        ${quickFacts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
+      </dl>
+    </aside>
 
     <details class="tool-details" id="tool-details">
       <summary>About this tool — how it works, limits &amp; FAQ
@@ -381,33 +388,104 @@ function bindPicker(cb) {
   f.onchange = () => fire([...f.files]);
 }
 
-function closeMobileNav() {
-  const nav = document.getElementById("primary-nav");
-  if (nav && nav.classList.contains("open")) {
-    nav.classList.remove("open");
-    const hamburger = document.getElementById("hamburger");
-    if (hamburger) hamburger.setAttribute("aria-expanded", "false");
-  }
+function closeNavPanels() {
+  if (typeof window !== "undefined" && window.__benchHeader) { window.__benchHeader.closeNavPanels(); return; }
+  document.querySelectorAll(".nav-trigger[aria-expanded='true']").forEach(trigger => {
+    trigger.setAttribute("aria-expanded", "false");
+    const panel = document.getElementById(trigger.getAttribute("aria-controls"));
+    if (panel) panel.hidden = true;
+  });
 }
 
-// Mobile navigation toggle
-document.getElementById("hamburger")?.addEventListener("click", () => {
+function closeMobileNav(restoreFocus = false) {
+  if (typeof window !== "undefined" && window.__benchHeader) { window.__benchHeader.closeMobileNav(restoreFocus); return; }
   const nav = document.getElementById("primary-nav");
-  if (nav) {
-    nav.classList.toggle("open");
-    const hamburger = document.getElementById("hamburger");
-    if (hamburger) hamburger.setAttribute("aria-expanded", nav.classList.contains("open"));
-  }
-});
+  const hamburger = document.getElementById("hamburger");
+  if (!nav) return;
+  const wasOpen = nav.classList.contains("open");
+  nav.classList.remove("open");
+  document.body.classList.remove("nav-open");
+  if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+  closeNavPanels();
+  if (restoreFocus && wasOpen && hamburger) hamburger.focus();
+}
 
-// Close the mobile nav on Escape or when clicking outside it.
-addEventListener("keydown", e => { if (e.key === "Escape") closeMobileNav(); });
-document.addEventListener("click", e => {
-  const nav = document.getElementById("primary-nav");
-  if (!nav || !nav.classList.contains("open")) return;
-  if (nav.contains(e.target) || (e.target.closest && e.target.closest("#hamburger"))) return;
-  closeMobileNav();
-});
+function toggleNavPanel(trigger) {
+  if (typeof window !== "undefined" && window.__benchHeader) { window.__benchHeader.toggleNavPanel(trigger); return; }
+  const panel = document.getElementById(trigger.getAttribute("aria-controls"));
+  if (!panel) return;
+  const wasOpen = trigger.getAttribute("aria-expanded") === "true";
+  closeNavPanels();
+  const suggestions = document.getElementById("search-suggestions");
+  if (suggestions && !suggestions.hidden) {
+    suggestions.hidden = true;
+    const searchInput = document.getElementById("search");
+    if (searchInput) searchInput.setAttribute("aria-expanded", "false");
+  }
+  if (wasOpen) {
+    trigger.focus();
+    return;
+  }
+  trigger.setAttribute("aria-expanded", "true");
+  panel.hidden = false;
+}
+
+// Desktop dropdowns and the mobile drawer share the same nav markup, so one
+// delegated handler serves both. header.js normally binds these early; guard
+// here so cached/standalone app.js never double-binds.
+if (typeof window !== "undefined" && !window.__benchNavBound) {
+  window.__benchNavBound = true;
+  document.addEventListener("click", e => {
+    const trigger = e.target.closest && e.target.closest(".nav-trigger");
+    if (trigger) {
+      toggleNavPanel(trigger);
+      return;
+    }
+
+    const nav = document.getElementById("primary-nav");
+    const onHamburger = !!(e.target.closest && e.target.closest("#hamburger"));
+
+    if (nav && nav.contains(e.target)) {
+      if (e.target.closest("a")) {
+        closeMobileNav();
+        closeNavPanels();
+      }
+      return;
+    }
+    if (onHamburger) return;
+    closeNavPanels();
+    if (nav && nav.classList.contains("open")) closeMobileNav();
+  });
+
+  document.getElementById("hamburger")?.addEventListener("click", () => {
+    const nav = document.getElementById("primary-nav");
+    const hamburger = document.getElementById("hamburger");
+    if (!nav || !hamburger) return;
+    const open = !nav.classList.contains("open");
+    closeNavPanels();
+    if (open) {
+      const suggestions = document.getElementById("search-suggestions");
+      if (suggestions) suggestions.hidden = true;
+      const searchInput = document.getElementById("search");
+      if (searchInput) searchInput.setAttribute("aria-expanded", "false");
+    }
+    nav.classList.toggle("open", open);
+    document.body.classList.toggle("nav-open", open);
+    hamburger.setAttribute("aria-expanded", String(open));
+  });
+
+  // Escape closes the topmost open layer first, then returns focus sensibly.
+  addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    const openTrigger = document.querySelector(".nav-trigger[aria-expanded='true']");
+    if (openTrigger) {
+      closeNavPanels();
+      openTrigger.focus();
+      return;
+    }
+    closeMobileNav(true);
+  });
+}
 
 function resultBox(html = "") {
   const r = document.createElement("div");
@@ -481,13 +559,47 @@ async function processTool(id, files) {
           if (seen.has(u)) { a.remove(); dup++; } else { seen.add(u); }
         });
         const out = "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" + doc.documentElement.outerHTML;
-        rs.innerHTML = `<div class="notice">Removed ${dup} duplicate URL entries. ${seen.size} unique bookmarks remain.</div><button class="btn" id="dl">Download cleaned bookmarks.html</button>`;
+        const kept = [...doc.querySelectorAll("a[href]")];
+        const rsEl = $("#result"); if (rsEl) rsEl.classList.add("bm-result");
+        const ez = $("#bm-empty"); if (ez) ez.hidden = true;
+        const rows = kept.slice(0, 12).map(a => `
+          <li class="bm-row">
+            <span class="bm-row-icon" aria-hidden="true">${benchToolIcon("core", "bookmark-cleaner", "bookmark")}</span>
+            <span class="bm-row-info"><strong>${esc(a.textContent.trim() || "Untitled bookmark")}</strong><small>${esc(a.getAttribute("href") || "")}</small></span>
+            <span class="bm-row-tag">kept</span>
+          </li>
+        `).join("");
+        rs.innerHTML = `
+          <div class="bm-result-head">
+            <div><h2>Bookmarks cleaned</h2><p>Duplicate URLs are removed — the first occurrence of each link is kept.</p></div>
+            <span class="bm-chip">${seen.size} unique</span>
+          </div>
+          <div class="bm-summary">
+            <div><b>${links.length}</b><span>Links scanned</span></div>
+            <div><b>${seen.size}</b><span>Unique kept</span></div>
+            <div><b>${dup}</b><span>Duplicates removed</span></div>
+          </div>
+          ${kept.length ? `
+            <section class="bm-list">
+              <div class="bm-section-head"><h3>Kept bookmarks</h3><p>Showing up to 12 links. Folders, order and the original HTML are preserved.</p></div>
+              <ul class="bm-rows">${rows}</ul>
+              ${kept.length > 12 ? `<p class="bm-note">Showing the first 12 of ${kept.length} kept bookmarks.</p>` : ""}
+            </section>
+          ` : `
+            <div class="bm-no-links"><strong>No bookmark links found.</strong><span>This file has no &lt;a href&gt; entries to clean.</span></div>
+          `}
+          <div class="bm-actions">
+            <button class="btn" id="dl">Download cleaned bookmarks.html</button>
+            <span>Standard Netscape bookmark format · opens in any browser</span>
+          </div>
+        `;
         $("#dl").onclick = () => textDownload(out, "bookmarks-cleaned.html", "text/html");
         break;
       }
       case "calendar-cleaner": {
-        const t = await readText(f), lines = t.split(/\r?\n/), out = [], seen = new Set(), dup = [];
+        const t = await readText(f), lines = t.split(/\r?\n/), out = [], seen = new Set(), dup = [], keptEvents = [];
         let event = "", inside = false;
+        const field = (m, fallback) => m ? String(m[1] != null ? m[1] : m[0]).replace(/^[^:]*:/, "").trim() : fallback;
         for (const l of lines) {
           if (l === "BEGIN:VEVENT") { inside = true; event = ""; }
           if (inside) event += l + "\n";
@@ -498,16 +610,54 @@ async function processTool(id, files) {
             const dtstartMatch = event.match(/DTSTART[^:]*?:([^\n]*)/);
             const dtendMatch = event.match(/DTEND[^:]*?:([^\n]*)/);
             const key = [
-              (summaryMatch ? summaryMatch[0] : "").trim(),
-              (dtstartMatch ? dtstartMatch[1] : "").trim(),
-              (dtendMatch ? dtendMatch[1] : "").trim()
+              field(summaryMatch, ""),
+              field(dtstartMatch, ""),
+              field(dtendMatch, "")
             ].join("|");
-            if (seen.has(key)) dup.push(event); else { seen.add(key); out.push(event); }
+            if (seen.has(key)) {
+              dup.push(event);
+            } else {
+              seen.add(key);
+              out.push(event);
+              keptEvents.push({ title: field(summaryMatch, "Untitled event"), start: field(dtstartMatch, "—"), end: field(dtendMatch, "—") });
+            }
           }
         }
         const base = t.replace(/BEGIN:VEVENT[\s\S]*?END:VEVENT\r?\n?/g, "");
         const final = base.replace("END:VCALENDAR", out.join("") + "END:VCALENDAR");
-        rs.innerHTML = `<div class="notice">Found ${seen.size} unique events and removed ${dup.length} duplicate events.</div><button class="btn" id="dl">Download cleaned .ics</button>`;
+        const rsEl = $("#result"); if (rsEl) rsEl.classList.add("cal-result");
+        const ez = $("#cal-empty"); if (ez) ez.hidden = true;
+        const rows = keptEvents.slice(0, 20).map((e, i) => `
+          <li class="cal-row">
+            <span class="cal-num">${i + 1}</span>
+            <span class="cal-info"><strong>${esc(e.title)}</strong><small>${esc(e.start)} → ${esc(e.end)}</small></span>
+            <span class="cal-tag">kept</span>
+          </li>
+        `).join("");
+        rs.innerHTML = `
+          <div class="cal-result-head">
+            <div><h2>Calendar cleaned</h2><p>Events are compared by title and start/end time — later copies are removed.</p></div>
+            <span class="cal-chip">${seen.size} unique event${seen.size === 1 ? "" : "s"}</span>
+          </div>
+          <div class="cal-summary">
+            <div><b>${seen.size + dup.length}</b><span>Events scanned</span></div>
+            <div><b>${seen.size}</b><span>Unique kept</span></div>
+            <div><b>${dup.length}</b><span>Duplicates removed</span></div>
+          </div>
+          ${keptEvents.length ? `
+            <section class="cal-list">
+              <div class="cal-section-head"><h3>Kept events</h3><p>Showing up to 20. The downloaded .ics contains every unique event.</p></div>
+              <ul class="cal-rows">${rows}</ul>
+              ${keptEvents.length > 20 ? `<p class="cal-note">Showing the first 20 of ${keptEvents.length} events.</p>` : ""}
+            </section>
+          ` : `
+            <div class="cal-no-events"><strong>No events found.</strong><span>This file has no VEVENT blocks to clean.</span></div>
+          `}
+          <div class="cal-actions">
+            <button class="btn" id="dl">Download cleaned .ics</button>
+            <span>Standard iCalendar file · opens in any calendar app</span>
+          </div>
+        `;
         $("#dl").onclick = () => textDownload(final, "calendar-cleaned.ics", "text/calendar");
         break;
       }
@@ -522,41 +672,124 @@ async function processTool(id, files) {
         const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", `PRODID:-//${prodBrand}//Timetable//EN`];
         const days = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
         const hostDomain = SITE_URL ? new URL(SITE_URL).hostname : "bench.progeni.live";
+        // ICS timezone fix: treat times as UTC so the "Z" suffix is correct.
+        // Use Date.UTC() to construct dates from year/month/day + hour:minute,
+        // then format with explicit UTC components and a trailing "Z".
+        const fmt = x => {
+          const d = new Date(x);
+          const ms = d.getMilliseconds();
+          const paddedMs = String(ms).padStart(3, "0");
+          return d.getUTCFullYear()
+            + String(d.getUTCMonth() + 1).padStart(2, "0")
+            + String(d.getUTCDate()).padStart(2, "0")
+            + "T"
+            + String(d.getUTCHours()).padStart(2, "0")
+            + String(d.getUTCMinutes()).padStart(2, "0")
+            + String(d.getUTCSeconds()).padStart(2, "0")
+            + "."
+            + paddedMs
+            + "Z";
+        };
+        const clock = (hour, minute) => String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+        const events = [];
         rows.slice(1).forEach((r, i) => {
           let d = date >= 0 && r[date] ? new Date(r[date]) : nextDay(days[(r[day] || "").toLowerCase()]);
-          if (!d) return;
+          if (!d || isNaN(d.getTime())) return;
           const [sh, sm] = (r[start] || "09:00").split(":").map(Number), [eh, em] = (r[end] || "10:00").split(":").map(Number);
-          // ICS timezone fix: treat times as UTC so the "Z" suffix is correct.
-          // Use Date.UTC() to construct dates from year/month/day + hour:minute,
-          // then format with explicit UTC components and a trailing "Z".
-          const fmt = x => {
-            const d = new Date(x);
-            const ms = d.getMilliseconds();
-            const paddedMs = String(ms).padStart(3, "0");
-            return d.getUTCFullYear()
-              + String(d.getUTCMonth() + 1).padStart(2, "0")
-              + String(d.getUTCDate()).padStart(2, "0")
-              + "T"
-              + String(d.getUTCHours()).padStart(2, "0")
-              + String(d.getUTCMinutes()).padStart(2, "0")
-              + String(d.getUTCSeconds()).padStart(2, "0")
-              + "."
-              + paddedMs
-              + "Z";
-          };
-          let a = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), sh, sm, 0));
-          let b = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), eh, em, 0));
-          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@${hostDomain}`, `DTSTAMP:${fmt(a)}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${(r[title] || "Class").replace(/[,;]/g, " ")}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
+          const a = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), sh, sm, 0));
+          const b = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), eh, em, 0));
+          const summary = String(r[title] || "Class").replace(/[,;]/g, " ");
+          ics.push("BEGIN:VEVENT", `UID:ph-${Date.now()}-${i}@${hostDomain}`, `DTSTAMP:${fmt(a)}`, `DTSTART:${fmt(a)}`, `DTEND:${fmt(b)}`, `SUMMARY:${summary}`, "RRULE:FREQ=WEEKLY;COUNT=16", "END:VEVENT");
+          events.push({
+            title: summary,
+            when: d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }),
+            time: clock(sh, sm) + " – " + clock(eh, em)
+          });
         });
         ics.push("END:VCALENDAR");
-        rs.innerHTML = `<div class="notice">Created ${rows.length - 1} recurring calendar events from your CSV.</div><button class="btn" id="dl">Download timetable.ics</button>`;
+        const rsEl = $("#result"); if (rsEl) rsEl.classList.add("tt-result");
+        const ez = $("#tt-empty"); if (ez) ez.hidden = true;
+        const skipped = rows.length - 1 - events.length;
+        const rowsHtml = events.slice(0, 20).map((e, i) => `
+          <li class="tt-row">
+            <span class="tt-num">${i + 1}</span>
+            <span class="tt-info"><strong>${esc(e.title)}</strong><small>${esc(e.when)}</small></span>
+            <span class="tt-time">${esc(e.time)}</span>
+            <span class="tt-tag">weekly</span>
+          </li>
+        `).join("");
+        rs.innerHTML = `
+          <div class="tt-result-head">
+            <div><h2>Timetable converted</h2><p>Each row became a weekly event. The first occurrence and time are shown below.</p></div>
+            <span class="tt-chip">${events.length} recurring event${events.length === 1 ? "" : "s"}</span>
+          </div>
+          <div class="tt-summary">
+            <div><b>${rows.length - 1}</b><span>Rows scanned</span></div>
+            <div><b>${events.length}</b><span>Events created</span></div>
+            <div><b>${skipped}</b><span>Rows skipped</span></div>
+          </div>
+          ${events.length ? `
+            <section class="tt-list">
+              <div class="tt-section-head"><h3>Scheduled classes</h3><p>Showing up to 20. The downloaded .ics contains every event.</p></div>
+              <ul class="tt-rows">${rowsHtml}</ul>
+              ${events.length > 20 ? `<p class="tt-note">Showing the first 20 of ${events.length} events.</p>` : ""}
+            </section>
+          ` : `
+            <div class="tt-no-events"><strong>No events could be created.</strong><span>Check your day/date values and try again.</span></div>
+          `}
+          <div class="tt-rule">
+            <span class="tt-rule-badge">iCal</span>
+            <div><strong>Weekly repeat included</strong><small>RRULE:FREQ=WEEKLY;COUNT=16 · times exported in UTC so calendar apps read them correctly.</small></div>
+          </div>
+          <div class="tt-actions">
+            <button class="btn" id="dl">Download timetable.ics</button>
+            <span>Standard .ics · works with Google Calendar, Outlook and Apple Calendar</span>
+          </div>
+        `;
         $("#dl").onclick = () => textDownload(ics.join("\r\n"), "timetable.ics", "text/calendar");
         break;
       }
       case "svg-cleaner": {
         const raw = await readText(f);
         const cleaned = cleanSVG(raw);
-        rs.innerHTML = `<div class="notice">SVG sanitized. Stripped scripts, dangerous hrefs, and editor metadata.</div><button class="btn" id="dl">Download Cleaned SVG</button>`;
+        const rawDoc = new DOMParser().parseFromString(raw, "image/svg+xml");
+        const cleanDoc = new DOMParser().parseFromString(cleaned, "image/svg+xml");
+        const rawTags = rawDoc.querySelectorAll("*").length;
+        const cleanTags = cleanDoc.querySelectorAll("*").length;
+        const removedTags = Math.max(0, rawTags - cleanTags);
+        const previewUrl = URL.createObjectURL(new Blob([cleaned], { type: "image/svg+xml" }));
+        const rsEl = $("#result"); if (rsEl) rsEl.classList.add("sv-result");
+        const ez = $("#sv-empty"); if (ez) ez.hidden = true;
+        rs.innerHTML = `
+          <div class="sv-result-head">
+            <div><h2>SVG sanitized</h2><p>Scripts, event handlers, unsafe URLs and editor metadata have been stripped.</p></div>
+            <span class="sv-chip">${cleanTags} element${cleanTags === 1 ? "" : "s"} kept</span>
+          </div>
+          <div class="sv-summary">
+            <div><b>${fmtBytes(raw.length)}</b><span>Original size</span></div>
+            <div><b>${fmtBytes(cleaned.length)}</b><span>Cleaned size</span></div>
+            <div><b>${removedTags}</b><span>Elements removed</span></div>
+          </div>
+          <div class="sv-grid">
+            <figure class="sv-preview">
+              <div class="sv-preview-frame"><img src="${previewUrl}" alt="Preview of the sanitized SVG"></div>
+              <figcaption>Cleaned SVG preview — rendered locally in your browser.</figcaption>
+            </figure>
+            <div class="sv-checks">
+              <h3>What was removed</h3>
+              <ul>
+                <li><span aria-hidden="true">✓</span><div><strong>Active content</strong><small>&lt;script&gt;, &lt;iframe&gt;, &lt;object&gt; and event-handler attributes.</small></div></li>
+                <li><span aria-hidden="true">✓</span><div><strong>Unsafe URLs</strong><small>javascript:, vbscript: and data: links in href or style values.</small></div></li>
+                <li><span aria-hidden="true">✓</span><div><strong>Editor metadata</strong><small>Inkscape, Sodipodi and Sketch namespaces plus risky style blocks.</small></div></li>
+              </ul>
+              <p class="sv-privacy"><strong>100% local.</strong> Your SVG never leaves this device.</p>
+            </div>
+          </div>
+          <div class="sv-actions">
+            <button class="btn" id="dl">Download cleaned SVG</button>
+            <span>Valid SVG/XML · ready to use in web, print or design tools</span>
+          </div>
+        `;
         $("#dl").onclick = () => textDownload(cleaned, "cleaned.svg", "image/svg+xml");
         break;
       }
@@ -566,9 +799,43 @@ async function processTool(id, files) {
         const doc = new DOMParser().parseFromString(t, "text/html");
         const rawAnchors = [...doc.querySelectorAll("a[href]")].map(a => ({ href: a.href, text: a.textContent || a.href }));
         const safeLinks = filterBookmarkLinks(rawAnchors);
+        const skipped = rawAnchors.length - safeLinks.length;
+        const domain = href => { try { return new URL(href).hostname.replace(/^www\./, ""); } catch (e) { return "link"; } };
         const as = safeLinks.map(a => `<li><a href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.text)}</a></li>`).join("");
         const out = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Offline Reading List</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6}li{margin:10px 0}a{color:#1d4ed8;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><h1>Reading List</h1><p>Exported from Progeni.</p><ul>${as}</ul></body></html>`;
-        rs.innerHTML = `<div class="notice">${safeLinks.length} valid links converted into clean offline reading list.</div><button class="btn" id="dl">Download reading-list.html</button>`;
+        const rsEl = $("#result"); if (rsEl) rsEl.classList.add("rl-result");
+        const ez = $("#rl-empty"); if (ez) ez.hidden = true;
+        const rows = safeLinks.slice(0, 20).map((a, i) => `
+          <li class="rl-row">
+            <span class="rl-num">${i + 1}</span>
+            <span class="rl-info"><strong>${esc(a.text || "Untitled link")}</strong><small>${esc(a.href)}</small></span>
+            <span class="rl-domain">${esc(domain(a.href))}</span>
+          </li>
+        `).join("");
+        rs.innerHTML = `
+          <div class="rl-result-head">
+            <div><h2>Reading list ready</h2><p>Unsafe and malformed links are filtered out before export.</p></div>
+            <span class="rl-chip">${safeLinks.length} usable link${safeLinks.length === 1 ? "" : "s"}</span>
+          </div>
+          <div class="rl-summary">
+            <div><b>${rawAnchors.length}</b><span>Links found</span></div>
+            <div><b>${safeLinks.length}</b><span>Kept for reading</span></div>
+            <div><b>${skipped}</b><span>Filtered out</span></div>
+          </div>
+          ${safeLinks.length ? `
+            <section class="rl-list">
+              <div class="rl-section-head"><h3>Links in your list</h3><p>Showing up to 20. The downloaded HTML contains every kept link.</p></div>
+              <ol class="rl-rows">${rows}</ol>
+              ${safeLinks.length > 20 ? `<p class="rl-note">Showing the first 20 of ${safeLinks.length} links.</p>` : ""}
+            </section>
+          ` : `
+            <div class="rl-no-links"><strong>No usable links found.</strong><span>The file had no safe http(s) links to add to a reading list.</span></div>
+          `}
+          <div class="rl-actions">
+            <button class="btn" id="dl">Download reading-list.html</button>
+            <span>Simple offline HTML · opens in any browser · keeps hrefs intact</span>
+          </div>
+        `;
         $("#dl").onclick = () => textDownload(out, "reading-list.html", "text/html");
         break;
       }
@@ -709,10 +976,22 @@ async function safeZone(f, rs) {
   ctx.fillText(`⚠️ ${pName} UI Covered Zones`, ox + w9 * 0.08, oy + h9 * 0.90);
 
   const b = await canvasBlob(c);
+  const rsEl = $("#result"); if (rsEl) rsEl.classList.add("vz-result");
+  const ez = $("#vz-empty"); if (ez) ez.hidden = true;
   rs.innerHTML = `
+    <div class="vz-result-head">
+      <h2>Overlay ready — ${esc(pName)}</h2>
+      <span class="vz-result-chip">9:16 guide · ${im.width} × ${im.height} px</span>
+    </div>
     <div class="notice">Red zones show areas obscured by <strong>${pName} UI</strong> (captions, right action buttons, header tabs). Keep critical text inside the center safe area!</div>
-    <img alt="Safe-zone overlay preview for ${esc(pName)}" style="max-width:100%;border-radius:12px;display:block;margin:0 auto 16px;" src="${URL.createObjectURL(b)}">
-    <button class="btn" id="dl-overlay">Download Overlay PNG</button>
+    <figure class="vz-preview">
+      <img alt="Safe-zone overlay preview for ${esc(pName)}" src="${URL.createObjectURL(b)}">
+      <figcaption>Your frame with the ${esc(pName)} guide drawn on it. Download it to use as a reference in your editor.</figcaption>
+    </figure>
+    <div class="vz-result-actions">
+      <button class="btn" id="dl-overlay">Download overlay PNG</button>
+      <span class="vz-result-hint">Switch platform above to compare overlays instantly.</span>
+    </div>
   `;
   $("#dl-overlay").onclick = () => downloadBlob(b, "video-safe-zone-overlay.png");
 }
@@ -779,47 +1058,77 @@ function formatChapters(entries) {
 function csvTool(id, t, rs) {
   const rows = csvParse(t), h = rows[0];
   if (id === "csv-splitter") {
+    const rsEl = $("#result"); if (rsEl) rsEl.classList.add("cs-result");
+    const ez = $("#cs-empty"); if (ez) ez.hidden = true;
     rs.innerHTML = `
-      <div class="controls">
-        <label>Column to Split<select id="col">${h.map((x, i) => `<option value="${i}">${esc(x)}</option>`).join("")}</select></label>
-        <label>Delimiter<input id="delim" value=" " maxlength="3" style="width:80px;"></label>
+      <div class="cs-result-head">
+        <div><h2>Split a column</h2><p>Choose the column that holds combined values and the character that separates them.</p></div>
+        <span class="cs-chip">${rows.length - 1} data rows · ${h.length} columns</span>
       </div>
-      <button class="btn" id="go">Split Column</button>
+      <div class="cs-controls">
+        <label class="cs-field"><span>Column to split</span><select id="col">${h.map((x, i) => `<option value="${i}">${esc(x || "Column " + (i + 1))}</option>`).join("")}</select></label>
+        <label class="cs-field"><span>Delimiter</span><input id="delim" value=" " maxlength="3" aria-label="Delimiter"><small>Use a space, comma, slash or any short separator.</small></label>
+        <button class="btn" id="go">Preview split</button>
+      </div>
+      <div class="cs-preview" id="cs-preview">
+        <div class="cs-preview-empty"><strong>No split preview yet.</strong><span>Pick a column and delimiter, then run the split to see the new headers and sample rows.</span></div>
+      </div>
+      <div class="cs-download" id="cs-download"></div>
     `;
     $("#go").onclick = () => {
-      let c = +$("#col").value, d = $("#delim").value || " ";
+      const c = +$("#col").value, d = $("#delim").value || " ";
       let maxParts = 1;
       const splitRows = rows.map((r, ri) => {
-        const parts = (r[c] || "").split(d);
+        const parts = String(r[c] || "").split(d);
         if (ri > 0 && parts.length > maxParts) maxParts = parts.length;
         return { row: r, parts };
       });
-
       const headerColName = h[c] || "Column";
       const newHeaderCols = maxParts > 1 ? Array.from({ length: maxParts }, (_, i) => `${headerColName}_${i + 1}`) : [headerColName];
       const headerRow = [...h.slice(0, c), ...newHeaderCols, ...h.slice(c + 1)];
-
       const out = [headerRow];
       for (let ri = 1; ri < splitRows.length; ri++) {
         const { row, parts } = splitRows[ri];
         while (parts.length < maxParts) parts.push("");
         out.push([...row.slice(0, c), ...parts, ...row.slice(c + 1)]);
       }
-
-      rs.insertAdjacentHTML("beforeend", `<div class="notice" style="margin-top:16px;">Column split complete into ${maxParts} columns (${out.length - 1} rows).</div><button class="btn secondary" id="dl">Download Cleaned CSV</button>`);
+      const cell = x => "<td>" + esc(String(x == null ? "" : x)) + "</td>";
+      const previewEl = $("#cs-preview");
+      previewEl.innerHTML = `
+        <div class="cs-preview-head"><h3>Preview</h3><span>${maxParts} part${maxParts === 1 ? "" : "s"} from “${esc(headerColName)}”</span></div>
+        <div class="cs-tablewrap"><table class="cs-table"><thead><tr>${headerRow.map(x => "<th>" + esc(String(x)) + "</th>").join("")}</tr></thead>
+          <tbody>${out.slice(1, 9).map(r => "<tr>" + r.map(cell).join("") + "</tr>").join("")}</tbody></table></div>
+        <p class="cs-note">Showing up to 8 sample rows. The download contains all ${out.length - 1} rows.</p>
+      `;
+      $("#cs-download").innerHTML = `
+        <div class="cs-ready"><strong>Ready to download.</strong><span>${out.length - 1} rows · ${out[0].length} columns · UTF-8 CSV</span></div>
+        <button class="btn" id="dl">Download cleaned CSV</button>
+      `;
       $("#dl").onclick = () => textDownload(csvOut(out), "cleaned.csv", "text/csv");
     };
   } else {
     // csv-date or csv-date-preview mode
+    const rsEl = $("#result"); if (rsEl) rsEl.classList.add("cs-result");
+    const ez = $("#cs-date-empty"); if (ez) ez.hidden = true;
     rs.innerHTML = `
-      <div class="controls">
-        <label>Date Column<select id="col">${h.map((x, i) => `<option value="${i}">${esc(x)}</option>`).join("")}</select></label>
-        <label>Target Format<select id="fmt"><option value="YYYY-MM-DD">ISO standard (YYYY-MM-DD)</option><option value="MM/DD/YYYY">US standard (MM/DD/YYYY)</option><option value="DD/MM/YYYY">European standard (DD/MM/YYYY)</option></select></label>
+      <div class="cs-result-head">
+        <div><h2>Normalize dates</h2><p>Choose the column holding dates and the format you want in the cleaned file.</p></div>
+        <span class="cs-chip">${rows.length - 1} data rows · ${h.length} columns</span>
       </div>
-      <button class="btn" id="go">Normalize Dates</button>
+      <div class="cs-controls">
+        <label class="cs-field"><span>Date column</span><select id="col">${h.map((x, i) => `<option value="${i}">${esc(x || "Column " + (i + 1))}</option>`).join("")}</select></label>
+        <label class="cs-field"><span>Target format</span><select id="fmt"><option value="YYYY-MM-DD">ISO standard (YYYY-MM-DD)</option><option value="MM/DD/YYYY">US standard (MM/DD/YYYY)</option><option value="DD/MM/YYYY">European standard (DD/MM/YYYY)</option></select><small>Ambiguous values are flagged before conversion.</small></label>
+        <button class="btn" id="go">Preview dates</button>
+      </div>
+      <div class="cs-preview" id="cs-date-preview">
+        <div class="cs-preview-empty"><strong>No preview yet.</strong><span>Pick a column and target format, then run the normalizer to sample the conversions.</span></div>
+      </div>
+      <div class="cs-download" id="cs-date-download"></div>
     `;
     $("#go").onclick = () => {
       const c = +$("#col").value, fmt = $("#fmt").value;
+      const dlWrap = $("#cs-date-download");
+      if (dlWrap) dlWrap.innerHTML = "";
       // First pass: identify ambiguous dates (where day and month both <= 12)
       const ambiguous = [];
       const rowIsAmbiguous = new Map();
@@ -855,10 +1164,29 @@ function csvTool(id, t, rs) {
         });
       });
 
+      const cell = x => "<td>" + esc(String(x == null ? "" : x)) + "</td>";
+      const renderPreview = out => {
+        const preview = $("#cs-date-preview");
+        if (!preview) return;
+        const samples = out.slice(1, 9).map((r, i) => {
+          const original = rows[i + 1][c];
+          const changed = String(original) !== String(r[c]);
+          return "<tr>" + cell(original) + cell(r[c]) + '<td class="cs-date-state ' + (changed ? "cs-date-state--changed" : "") + '">' + (changed ? "changed" : "same") + "</td></tr>";
+        }).join("");
+        preview.innerHTML = `
+          <div class="cs-preview-head"><h3>Conversion preview</h3><span>${fmt} · ${rows.length - 1} rows</span></div>
+          <div class="cs-tablewrap"><table class="cs-table"><thead><tr><th>Original</th><th>Normalized</th><th>Status</th></tr></thead><tbody>${samples}</tbody></table></div>
+          <p class="cs-note">Showing up to 8 sample rows. The download contains all ${out.length - 1} rows.</p>
+        `;
+      };
+
       const writeResult = out => {
-        const existing = $("#csv-date-out");
-        if (existing) existing.remove();
-        rs.insertAdjacentHTML("beforeend", `<div id="csv-date-out"><div class="notice" style="margin-top:16px;">Dates standardized to ${fmt}.</div><button class="btn secondary" id="dl">Download Normalized CSV</button></div>`);
+        renderPreview(out);
+        if (!dlWrap) return;
+        dlWrap.innerHTML = `
+          <div class="cs-ready"><strong>Ready to download.</strong><span>${out.length - 1} rows · ${fmt} · UTF-8 CSV</span></div>
+          <button class="btn" id="dl">Download normalized CSV</button>
+        `;
         $("#dl").onclick = () => textDownload(csvOut(out), "normalized.csv", "text/csv");
       };
 
@@ -866,34 +1194,36 @@ function csvTool(id, t, rs) {
 
       // Preview + explicit choice for ambiguous dates
       const previewHtml = `
-        <div id="ambiguous-preview" class="ambiguity-preview">
-          <div class="ambiguity-title">Date ambiguity preview</div>
-          <p>${ambiguous.length} date(s) could be parsed as either US (MM/DD/YYYY) or European (DD/MM/YYYY) format. These have day and month both ≤ 12:</p>
-          <div class="ambiguity-list">
-            ${ambiguous.map(a => `
-              <div class="ambiguity-row">
-                <div class="ambiguity-row-label">Row ${a.rowIndex + 1}: <code>${esc(a.original)}</code></div>
-                <div class="ambiguity-row-meta">
-                  <span>Parsed as US (MM/DD/YYYY): <strong>${a.val1}/${a.val2}/${a.year}</strong></span>
-                  <span>Parsed as European (DD/MM/YYYY): <strong>${a.val2}/${a.val1}/${a.year}</strong></span>
-                </div>
+        <div id="ambiguous-preview" class="cs-ambiguity">
+          <div class="cs-ambiguity-head">
+            <span class="cs-ambiguity-badge">${ambiguous.length}</span>
+            <div><strong>Ambiguous dates found</strong><p>${ambiguous.length} value${ambiguous.length === 1 ? "" : "s"} could be read as US (MM/DD/YYYY) or European (DD/MM/YYYY). Choose how to interpret them before downloading.</p></div>
+          </div>
+          <div class="cs-ambiguity-list">
+            ${ambiguous.slice(0, 8).map(a => `
+              <div class="cs-ambiguity-row">
+                <span class="cs-ambiguity-row-id">Row ${a.rowIndex + 1}</span>
+                <code>${esc(a.original)}</code>
+                <span>US <strong>${a.val1}/${a.val2}/${a.year}</strong></span>
+                <span>EU <strong>${a.val2}/${a.val1}/${a.year}</strong></span>
               </div>
             `).join("")}
           </div>
-          <div class="ambiguity-actions">
+          ${ambiguous.length > 8 ? `<p class="cs-note">Showing the first 8 of ${ambiguous.length} ambiguous values.</p>` : ""}
+          <div class="cs-ambiguity-actions">
             <label class="sr-only" for="resolveAmbiguous">How to read ambiguous dates</label>
             <select id="resolveAmbiguous">
-              <option value="us">Apply US format (MM/DD/YYYY) to all ambiguous</option>
-              <option value="eu">Apply European format (DD/MM/YYYY) to all ambiguous</option>
+              <option value="us">Apply US format (MM/DD/YYYY)</option>
+              <option value="eu">Apply European format (DD/MM/YYYY)</option>
             </select>
-            <button class="btn tiny" id="confirmAmbiguous" type="button">Continue</button>
+            <button class="btn" id="confirmAmbiguous" type="button">Apply &amp; continue</button>
           </div>
         </div>
       `;
 
       const old = $("#ambiguous-preview");
       if (old) old.remove();
-      rs.insertAdjacentHTML("afterbegin", previewHtml);
+      $("#cs-date-preview").insertAdjacentHTML("afterbegin", previewHtml);
       $("#confirmAmbiguous").onclick = () => {
         const resolve = $("#resolveAmbiguous").value === "eu" ? "eu" : "us";
         const preview = $("#ambiguous-preview");
@@ -905,14 +1235,60 @@ function csvTool(id, t, rs) {
 }
 
 function contactDedupe(t, rs) {
-  const rows = csvParse(t), h = rows[0].map(x => x.toLowerCase());
-  const ei = h.findIndex(x => x.includes("email")), pi = h.findIndex(x => x.includes("phone") || x.includes("mobile") || x.includes("cell"));
-  const seen = new Set(), out = [rows[0]], dups = [];
-  rows.slice(1).forEach(r => {
+  const rows = csvParse(t).filter(r => r.some(c => String(c).trim() !== ""));
+  if (!rows.length) {
+    rs.innerHTML = '<div class="error">No CSV rows found. Paste a CSV with a header row or upload a file.</div>';
+    return;
+  }
+  const h = rows[0].map(x => String(x).toLowerCase());
+  const ei = h.findIndex(x => x.includes("email"));
+  const pi = h.findIndex(x => x.includes("phone") || x.includes("mobile") || x.includes("cell"));
+  const seen = new Map(), out = [rows[0]], dups = [];
+  rows.slice(1).forEach((r, i) => {
     const k = buildContactKey(r, ei, pi);
-    if (seen.has(k)) dups.push(r); else { seen.add(k); out.push(r); }
+    if (seen.has(k)) dups.push({ row: i + 2, data: r, first: seen.get(k) });
+    else { seen.set(k, i + 2); out.push(r); }
   });
-  rs.innerHTML = `<div class="notice">Found ${out.length - 1} unique contacts; merged and removed ${dups.length} duplicate entries.</div><button class="btn" id="dl">Download Deduplicated CSV</button>`;
+  const label = (i) => esc(h[i] ? h[i].replace(/[_-]/g, " ") : "Column " + (i + 1));
+  const preview = (list, count) => list.slice(0, count).map(r =>
+    "<tr>" + r.map(c => "<td>" + esc(String(c == null ? "" : c)) + "</td>").join("") + "</tr>"
+  ).join("");
+  const dupRows = dups.slice(0, 8).map(d =>
+    '<tr><td class="cd-num">' + d.row + '</td><td class="cd-num">' + d.first + "</td>" +
+    d.data.map(c => "<td>" + esc(String(c == null ? "" : c)) + "</td>").join("") + "</tr>"
+  ).join("");
+  const rsEl = $("#result"); if (rsEl) rsEl.classList.add("cd-result");
+  const ez = $("#cd-empty"); if (ez) ez.hidden = true;
+  rs.innerHTML = `
+    <div class="cd-result-head">
+      <h2>Deduplication complete</h2>
+      <span class="cd-result-chip">${ei >= 0 || pi >= 0 ? "Email / phone match" : "Full-row match"}</span>
+    </div>
+    <div class="cd-summary">
+      <div><b>${rows.length - 1}</b><span>Rows read</span></div>
+      <div><b>${out.length - 1}</b><span>Unique kept</span></div>
+      <div><b>${dups.length}</b><span>Duplicates removed</span></div>
+      <div><b>${out.length - 1 ? Math.round(dups.length / (rows.length - 1) * 100) : 0}%</b><span>Duplicate rate</span></div>
+    </div>
+    <div class="cd-tables">
+      <section class="cd-table-panel">
+        <h3>Kept contacts <span>${out.length - 1}</span></h3>
+        <div class="cd-tablewrap"><table class="cd-table"><thead><tr>${h.map(label).map(x => "<th>" + x + "</th>").join("")}</tr></thead>
+          <tbody>${preview(out.slice(1), 10)}</tbody></table></div>
+        ${out.length > 11 ? '<p class="cd-table-note">Showing the first 10 kept contacts. The download contains all ' + (out.length - 1) + '.</p>' : ""}
+      </section>
+      <section class="cd-table-panel cd-table-panel--dups">
+        <h3>Removed duplicates <span>${dups.length}</span></h3>
+        ${dups.length
+          ? '<div class="cd-tablewrap"><table class="cd-table"><thead><tr><th>Row</th><th>Matches</th>' + h.map(label).map(x => "<th>" + x + "</th>").join("") + '</tr></thead><tbody>' + dupRows + "</tbody></table></div>" + (dups.length > 8 ? '<p class="cd-table-note">Showing the first 8 removed rows.</p>' : "")
+          : '<div class="cd-no-dups"><strong>No duplicates found.</strong><span>Every contact was kept in the cleaned file.</span></div>'}
+      </section>
+    </div>
+    <div class="cd-result-actions">
+      <button class="btn" id="dl">Download deduplicated CSV</button>
+      <span>Header row preserved · original column order kept · works fully offline</span>
+    </div>
+  `;
   $("#dl").onclick = () => textDownload(csvOut(out), "contacts-deduped.csv", "text/csv");
 }
 
@@ -941,43 +1317,64 @@ async function vcardTool(files, rs) {
     .filter(([, members]) => members.length > 1)
     .map(([phone, members], gi) => ({ phone, members, gi, action: "merge" }));
 
+  const withPhone = cards.filter(c => c._phone).length;
+  const initial = name => String(name || "?").trim().charAt(0).toUpperCase();
+  const rsEl = $("#result"); if (rsEl) rsEl.classList.add("vc-result");
+  const ez = $("#vc-empty"); if (ez) ez.hidden = true;
   const render = () => {
     rs.innerHTML = `
-      <div class="notice">Found <strong>${cards.length}</strong> valid vCard contact cards.</div>
+      <div class="vc-result-head">
+        <div><h2>vCards loaded</h2><p>Review possible duplicates, then download the cleaned set or any single contact.</p></div>
+        <span class="vc-chip">${cards.length} card${cards.length === 1 ? "" : "s"} · ${dedupeGroups.length} duplicate group${dedupeGroups.length === 1 ? "" : "s"}</span>
+      </div>
+      <div class="vc-summary">
+        <div><b>${cards.length}</b><span>Contacts</span></div>
+        <div><b>${withPhone}</b><span>With phone</span></div>
+        <div><b>${dedupeGroups.length}</b><span>Duplicate groups</span></div>
+      </div>
       ${dedupeGroups.length > 0 ? `
-        <div style="margin: 16px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Deduplication Preview</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
+        <section class="vc-dedupe">
+          <div class="vc-section-head"><h3>Review possible duplicates</h3><p>Cards sharing a phone number are grouped. Decide whether to merge or keep each group separate.</p></div>
+          <div class="vc-groups">
             ${dedupeGroups.map(g => {
               const keep = g.action === "merge" ? g.members[0] : null;
               return `
-              <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-                <div style="font-size:12px;color: #64748b;margin-bottom:4px;">Duplicate group #${g.gi + 1} · shares phone ${esc(g.phone)}</div>
-                <div style="font-size:13px;margin-bottom:6px;">
-                  ${g.members.map(i => `👤 ${esc(cards[i].name)}`).join(", ")}
+              <div class="vc-group">
+                <div class="vc-group-head">
+                  <span class="vc-group-id">Group ${g.gi + 1}</span>
+                  <span class="vc-group-phone">${esc(g.phone)}</span>
                 </div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button class="btn tiny" style="padding:4px 8px;font-size:11px;" data-act="merge" data-g="${g.gi}">Merge into one</button>
-                  <button class="btn secondary" style="padding:4px 8px;font-size:11px;" data-act="keep" data-g="${g.gi}">Keep separate</button>
+                <div class="vc-group-names">
+                  ${g.members.map(i => `<span class="vc-person"><span class="vc-avatar">${esc(initial(cards[i].name))}</span>${esc(cards[i].name)}</span>`).join("")}
                 </div>
-                <div style="font-size:11px;color:#64748b;margin-top:6px;">Action: <strong>${keep === null ? "keep separate" : `merge → keeping ${esc(cards[keep].name)}`}</strong></div>
+                <div class="vc-group-actions">
+                  <button class="btn btn-sm" data-act="merge" data-g="${g.gi}">Merge into one</button>
+                  <button class="btn secondary btn-sm" data-act="keep" data-g="${g.gi}">Keep separate</button>
+                </div>
+                <div class="vc-group-status ${keep === null ? "vc-group-status--keep" : "vc-group-status--merge"}">Action: <strong>${keep === null ? "keep separate" : `merge → keeping ${esc(cards[keep].name)}`}</strong></div>
               </div>`;
             }).join("")}
           </div>
-        </div>
-      ` : ""}
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <button class="btn" id="dl-merge">Download Merged (.VCF)</button>
+        </section>
+      ` : `
+        <div class="vc-no-dups"><strong>No duplicate phone numbers found.</strong><span>Every card is distinct — download the set as-is.</span></div>
+      `}
+      <div class="vc-actions">
+        <button class="btn" id="dl-merge">Download merged .vcf</button>
+        <span>Merge drops later cards in each group. Everything runs locally.</span>
       </div>
-      <div style="max-height:220px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;">
-        <strong style="display:block;margin-bottom:8px;font-size:13px;">Individual Contact Cards:</strong>
-        ${cards.map((c, i) => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:13px;">
-            <span>👤 ${esc(c.name)} ${c._phone ? `<span style="font-size:11px;color:#64748b;">${esc(c._phone)}</span>` : ""}</span>
-            <button class="btn secondary" style="padding:4px 10px;font-size:12px;" data-save="${i}">Save .vcf</button>
-          </div>
-        `).join("")}
-      </div>
+      <section class="vc-list">
+        <div class="vc-section-head"><h3>Individual cards</h3><p>Save any single contact as its own .vcf file.</p></div>
+        <ul class="vc-cards">
+          ${cards.map((c, i) => `
+            <li class="vc-card">
+              <span class="vc-avatar vc-avatar--lg">${esc(initial(c.name))}</span>
+              <div class="vc-card-info"><strong>${esc(c.name)}</strong><small>${c._phone ? esc(c._phone) : "No phone number"}</small></div>
+              <button class="btn secondary btn-sm" data-save="${i}">Save .vcf</button>
+            </li>
+          `).join("")}
+        </ul>
+      </section>
     `;
 
     rs.querySelectorAll("[data-act]").forEach(btn => {
@@ -1326,7 +1723,10 @@ function installHeaderSearch() {
   };
 
   input.addEventListener("input", refresh);
-  input.addEventListener("focus", () => { if (input.value.trim()) refresh(); });
+  input.addEventListener("focus", () => {
+    closeNavPanels();
+    if (input.value.trim()) refresh();
+  });
   input.addEventListener("keydown", event => {
     if (event.key === "ArrowDown") { event.preventDefault(); setActive(active + 1); return; }
     if (event.key === "ArrowUp") { event.preventDefault(); setActive(active - 1); return; }
@@ -1376,22 +1776,43 @@ function initHomeCatalog() {
   let activeCategory = "all";
 
   const index = new Map(cards.map(card => [card, benchNormalize(`${card.dataset.search || ""} ${card.textContent}`)]));
+  const countsByCategory = new Map();
+  cards.forEach(card => {
+    const key = card.dataset.category;
+    if (key) countsByCategory.set(key, (countsByCategory.get(key) || 0) + 1);
+  });
   const categories = categorySelect
     ? [...categorySelect.options].slice(1).map(option => {
         const parts = option.value.split(":");
-        return { value: option.value, toolkit: parts[0], name: parts.slice(1).join(":") };
+        const toolkit = parts[0];
+        const rawText = (option.textContent || "").trim();
+        const label = rawText.includes("·") ? rawText.split("·").slice(1).join("·").trim() : (rawText || parts.slice(1).join(":"));
+        return {
+          value: option.value,
+          toolkit,
+          name: label,
+          allName: toolkit === "image" && label === "Convert" ? "Image Convert" : label,
+          count: countsByCategory.get(option.value) || 0
+        };
       })
     : [];
+
+  const clearButtons = [...document.querySelectorAll("[data-clear-filters]")];
 
   const renderChips = () => {
     if (!chipRow) return;
     const visible = categories.filter(item => activeToolkit === "all" || item.toolkit === activeToolkit);
-    chipRow.innerHTML = `<button class="category-filter-button${activeCategory === "all" ? " active" : ""}" type="button" data-category-tab="all" aria-pressed="${activeCategory === "all"}">All categories</button>`
-      + visible.map(item => `<button class="category-filter-button${activeCategory === item.value ? " active" : ""}" type="button" data-category-tab="${esc(item.value)}" aria-pressed="${activeCategory === item.value}">${esc(item.name)}</button>`).join("");
+    const allCount = visible.reduce((sum, item) => sum + item.count, 0);
+    chipRow.innerHTML = `<button class="category-filter-button${activeCategory === "all" ? " active" : ""}" type="button" data-category-tab="all" aria-pressed="${activeCategory === "all"}">All categories <span class="cat-chip-count">${allCount}</span></button>`
+      + visible.map(item => {
+        const label = activeToolkit === "all" ? item.allName : item.name;
+        return `<button class="category-filter-button${activeCategory === item.value ? " active" : ""}" type="button" data-category-tab="${esc(item.value)}" aria-pressed="${activeCategory === item.value}">${esc(label)} <span class="cat-chip-count">${item.count}</span></button>`;
+      }).join("");
   };
 
   const render = () => {
-    const terms = benchNormalize(searchEl ? searchEl.value : "").split(/\s+/).filter(Boolean);
+    const query = searchEl ? searchEl.value.trim() : "";
+    const terms = benchNormalize(query).split(/\s+/).filter(Boolean);
     let visible = 0;
     cards.forEach(card => {
       const text = index.get(card) || "";
@@ -1413,7 +1834,16 @@ function initHomeCatalog() {
       const label = section.querySelector(".catalog-group-count");
       if (label) label.textContent = `${count} ${count === 1 ? "tool" : "tools"}`;
     });
-    if (countEl) countEl.innerHTML = visible === total ? `<strong>${total}</strong> tools` : `Showing <strong>${visible}</strong> of ${total} tools`;
+    const hasFilters = activeToolkit !== "all" || activeCategory !== "all" || !!query;
+    if (countEl) {
+      countEl.classList.toggle("is-filtered", hasFilters);
+      countEl.innerHTML = hasFilters
+        ? `Showing <strong>${visible}</strong> of ${total} tools`
+        : `<strong>${total}</strong> tools`;
+    }
+    clearButtons.forEach(btn => {
+      if (btn.closest(".catalog-toolbar")) btn.hidden = !hasFilters;
+    });
     tabs.forEach(tab => {
       const on = tab.dataset.toolkitTab === activeToolkit;
       tab.classList.toggle("active", on);
@@ -1963,41 +2393,92 @@ function toolPage(id) {
 
   if (id === "audio-chapters") {
     body = `
-      <div class="controls">
-        <label style="width:100%">Chapter Timestamps & Titles (MM:SS or HH:MM:SS Title)
-          <textarea id="chap" rows="8" style="width:100%;font-family:monospace;" placeholder="00:00 Introduction&#10;02:15 Main Topic&#10;06:40 Key Insights&#10;11:20 Conclusion"></textarea>
-        </label>
-      </div>
-      <div id="chap-preview" class="notice" style="display:none;margin-top:12px;"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-        <button class="btn" id="dl-chap">Download Chapters.txt</button>
-        <button class="btn secondary" id="clean-chap">Validate & Clean</button>
+      <div class="chap-workspace">
+        <div class="chap-grid">
+          <section class="chap-panel chap-input" aria-labelledby="chap-input-title">
+            <h2 id="chap-input-title">Chapter source</h2>
+            <p class="chap-hint">One chapter per line — <code>MM:SS Title</code> or <code>HH:MM:SS Title</code>. Lines are sorted and normalized automatically.</p>
+            <label class="chap-field" for="chap">Timestamps &amp; titles
+              <textarea id="chap" rows="9" spellcheck="false" placeholder="00:00 Introduction&#10;02:15 Main Topic&#10;06:40 Key Insights&#10;11:20 Conclusion"></textarea>
+            </label>
+            <div class="chap-input-bar">
+              <span class="chap-count" id="chap-count">0 lines</span>
+              <div class="chap-input-actions">
+                <button type="button" class="btn secondary btn-sm" id="chap-sample">Load example</button>
+                <button type="button" class="btn secondary btn-sm" id="chap-clear">Clear</button>
+              </div>
+            </div>
+          </section>
+          <section class="chap-panel chap-output" aria-labelledby="chap-output-title">
+            <div class="chap-output-head">
+              <h2 id="chap-output-title">Cleaned chapters</h2>
+              <span class="chap-status" id="chap-status" hidden></span>
+            </div>
+            <div id="chap-preview" class="notice chap-preview" style="display:none;"></div>
+          </section>
+        </div>
+        <div class="chap-actions">
+          <button class="btn" id="dl-chap" disabled>Download chapters.txt</button>
+          <button class="btn secondary" id="clean-chap">Validate &amp; clean</button>
+          <span class="chap-actions-hint">Everything runs locally — your chapter list is never uploaded.</span>
+        </div>
       </div>
     `;
     layout({ tool, body });
+    const sample = "00:00 Introduction\n02:15 Main Topic\n06:40 Key Insights\n11:20 Conclusion";
     const updatePreview = () => {
       const raw = $("#chap").value;
+      const hasInput = !!raw.trim();
+      const lines = raw.split(/\r?\n/).filter(l => l.trim()).length;
+      const count = $("#chap-count");
+      if (count) count.textContent = lines + (lines === 1 ? " line" : " lines");
       const res = parseChapters(raw);
       const prev = $("#chap-preview");
+      const status = $("#chap-status");
+      const dl = $("#dl-chap");
+      if (dl) dl.disabled = !hasInput || res.entries.length === 0;
       if (!prev) return;
-      if (res.issues.length) {
-        prev.innerHTML = `Issues: ${res.issues.join("; ")}<br><pre>${esc(res.clean || "")}</pre>`;
+      if (hasInput && (res.issues.length || res.entries.length)) {
+        let html = "";
+        if (res.issues.length) {
+          html += '<ul class="chap-issues">' + res.issues.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul>";
+        }
+        if (res.entries.length) {
+          const rows = res.entries.map((e, i) => {
+            const gap = i === 0 ? "" : fmtTime(e.ts - res.entries[i - 1].ts);
+            return '<li class="chap-row"><span class="chap-time">' + esc(fmtTime(e.ts)) + '</span><span class="chap-title">' + esc(e.title) + '</span>' + (gap ? '<span class="chap-gap">+' + esc(gap) + '</span>' : "") + "</li>";
+          }).join("");
+          html += '<ol class="chap-rows">' + rows + "</ol>";
+          html += '<details class="chap-raw"><summary>Show normalized text</summary><pre>' + esc(res.clean) + "</pre></details>";
+        }
+        prev.innerHTML = html;
         prev.style.display = "block";
-        prev.className = "warn";
-      } else if (res.entries.length) {
-        prev.innerHTML = `<pre>${esc(res.clean)}</pre>`;
-        prev.style.display = "block";
-        prev.className = "notice";
+        prev.className = "chap-preview " + (res.issues.length ? "warn" : "notice");
+        if (status) {
+          status.hidden = false;
+          status.textContent = res.entries.length + (res.entries.length === 1 ? " chapter" : " chapters") + (res.issues.length ? " · " + res.issues.length + " note" + (res.issues.length === 1 ? "" : "s") : " · ready");
+          status.className = "chap-status " + (res.issues.length ? "chap-status--warn" : "chap-status--ok");
+        }
       } else {
         prev.style.display = "none";
+        if (status) status.hidden = true;
       }
     };
     $("#clean-chap").onclick = updatePreview;
     $("#dl-chap").onclick = () => {
-      const raw = $("#chap").value;
-      const chapters = parseChapters(raw);
+      const chapters = parseChapters($("#chap").value);
+      if (!chapters.entries.length) return;
       textDownload(chapters.clean, "chapters.txt");
     };
+    const sampleBtn = $("#chap-sample");
+    if (sampleBtn) sampleBtn.onclick = () => { $("#chap").value = sample; updatePreview(); };
+    const clearBtn = $("#chap-clear");
+    if (clearBtn) clearBtn.onclick = () => { $("#chap").value = ""; updatePreview(); $("#chap").focus(); };
+    let chapTimer = 0;
+    $("#chap").addEventListener("input", () => {
+      clearTimeout(chapTimer);
+      chapTimer = setTimeout(updatePreview, 180);
+    });
     updatePreview();
     return;
   }
@@ -2031,6 +2512,307 @@ function toolPage(id) {
     return;
   }
 
+  if (id === "contact-dedupe") {
+    const sampleCsv = "name,email,phone,city\nAisha Rao,aisha@example.com,9876543210,Delhi\nRavi Kumar,ravi@example.com,9876543211,Mumbai\nAisha R.,aisha@example.com,9876543210,Delhi\nMeera Shah,meera@example.com,9822334455,Pune\nRavi K.,ravi@example.com,9876543211,Mumbai";
+    body = `
+      <div class="cd-workspace">
+        <div class="cd-grid">
+          <section class="cd-panel cd-input" aria-labelledby="cd-input-title">
+            <h2 id="cd-input-title">Your contact list</h2>
+            <p class="cd-hint">Upload a CSV with a header row, or paste spreadsheet rows below. Email and phone columns are used as the identity key when present.</p>
+            ${body}
+            <label class="cd-field" for="cd-paste">Or paste CSV rows
+              <textarea id="cd-paste" rows="6" spellcheck="false" placeholder="name,email,phone&#10;Aisha Rao,aisha@example.com,9876543210&#10;Ravi Kumar,ravi@example.com,9876543211"></textarea>
+            </label>
+            <div class="cd-input-actions">
+              <button type="button" class="btn" id="cd-use-paste">Use pasted CSV</button>
+              <button type="button" class="btn secondary" id="cd-sample">Load example</button>
+              <button type="button" class="btn secondary" id="cd-reset">Clear</button>
+            </div>
+            <p class="cd-status" id="cd-status" aria-live="polite"></p>
+          </section>
+          <aside class="cd-panel cd-guide" aria-labelledby="cd-guide-title">
+            <h2 id="cd-guide-title">How matching works</h2>
+            <ol class="cd-steps">
+              <li><strong>Find identity columns</strong><span>Headers containing “email” or “phone / mobile / cell” become the match key.</span></li>
+              <li><strong>Keep the first row</strong><span>The earliest occurrence stays; later matches are listed as removed duplicates.</span></li>
+              <li><strong>Download clean CSV</strong><span>Header and column order are preserved, so the file drops straight back into your CRM.</span></li>
+            </ol>
+            <p class="cd-privacy"><strong>100% local.</strong> Contacts are compared in your browser — nothing is uploaded or stored.</p>
+          </aside>
+        </div>
+        <div class="cd-empty" id="cd-empty">
+          <strong>No list processed yet.</strong>
+          <span>Add a CSV above to see unique contacts, removed duplicates and a clean download.</span>
+        </div>
+      </div>
+    `;
+    layout({ tool, body });
+    const runDedupe = text => {
+      const old = $("#result"); if (old) old.remove();
+      try { contactDedupe(text, resultBox()); }
+      catch (err) {
+        const rs = resultBox();
+        rs.innerHTML = '<div class="error">Could not read that CSV: ' + esc(err && err.message ? err.message : String(err)) + "</div>";
+      }
+    };
+    const setStatus = msg => { const s = $("#cd-status"); if (s) s.textContent = msg; };
+    bindPicker(files => {
+      if (!files || !files[0]) return;
+      setStatus("Reading " + files[0].name + "…");
+      readText(files[0]).then(text => { runDedupe(text); setStatus(files[0].name + " processed locally."); })
+        .catch(err => setStatus("Could not read that file: " + (err && err.message ? err.message : String(err))));
+    });
+    const usePaste = $("#cd-use-paste");
+    if (usePaste) usePaste.onclick = () => {
+      const text = $("#cd-paste").value;
+      if (!text.trim()) { setStatus("Paste some CSV rows first."); return; }
+      runDedupe(text); setStatus("Pasted rows processed locally.");
+    };
+    const sample = $("#cd-sample");
+    if (sample) sample.onclick = () => {
+      $("#cd-paste").value = sampleCsv;
+      runDedupe(sampleCsv); setStatus("Example list loaded and processed.");
+    };
+    const reset = $("#cd-reset");
+    if (reset) reset.onclick = () => {
+      const old = $("#result"); if (old) old.remove();
+      $("#cd-paste").value = "";
+      const ez = $("#cd-empty"); if (ez) ez.hidden = false;
+      setStatus("Cleared.");
+    };
+    return;
+  }
+
+  if (id === "timetable-calendar") {
+    body = `
+      <div class="tt-workspace">
+        <div class="tt-grid">
+          <section class="tt-panel tt-input" aria-labelledby="tt-input-title">
+            <h2 id="tt-input-title">Your timetable CSV</h2>
+            <p class="cs-hint">Upload a timetable with a day or date, start time, end time and title. Every row becomes a recurring weekly event.</p>
+            ${body}
+            <div class="tt-example">
+              <span>Expected columns</span>
+              <code>day,start,end,title</code>
+              <small>Use <code>Monday</code> in the day column, or include a <code>date</code> column for a fixed first class. <code>subject</code> works instead of <code>title</code>.</small>
+            </div>
+            <p class="cs-formats">Accepts .csv / text-csv with a header row. Times use 24-hour <code>HH:MM</code>. Everything stays on your device.</p>
+          </section>
+          <aside class="tt-panel tt-guide" aria-labelledby="tt-guide-title">
+            <h2 id="tt-guide-title">How conversion works</h2>
+            <ol class="cs-steps">
+              <li><strong>Read each class row</strong><span>Day names schedule the next matching weekday; a date column pins the first occurrence exactly.</span></li>
+              <li><strong>Build a weekly event</strong><span>Start and end times become UTC iCalendar values with a 16-week repeat rule.</span></li>
+              <li><strong>Download the .ics</strong><span>Import it into any calendar app to see the whole term at once.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Your timetable is converted in the browser — no upload, no storage.</p>
+          </aside>
+        </div>
+        <div class="tt-empty cs-empty" id="tt-empty">
+          <strong>No timetable loaded yet.</strong>
+          <span>Add a CSV above to preview the generated classes and download a ready-to-import .ics file.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "calendar-cleaner") {
+    body = `
+      <div class="cal-workspace">
+        <div class="cal-grid">
+          <section class="cal-panel cal-input" aria-labelledby="cal-input-title">
+            <h2 id="cal-input-title">Your calendar file</h2>
+            <p class="cs-hint">Export a calendar as an .ics file, then remove repeated events locally.</p>
+            ${body}
+            <p class="cs-formats">Accepts .ics / text-calendar. Event order and calendar settings are preserved. Nothing is uploaded.</p>
+          </section>
+          <aside class="cal-panel cal-guide" aria-labelledby="cal-guide-title">
+            <h2 id="cal-guide-title">How cleanup works</h2>
+            <ol class="cs-steps">
+              <li><strong>Compare whole events</strong><span>Title plus start and end times form the match key — not just the name.</span></li>
+              <li><strong>Keep the first copy</strong><span>Later duplicates are removed while the calendar structure stays intact.</span></li>
+              <li><strong>Download the clean file</strong><span>Import the .ics back into your calendar app to replace the duplicates.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Your events never leave this device.</p>
+          </aside>
+        </div>
+        <div class="cal-empty cs-empty" id="cal-empty">
+          <strong>No calendar loaded yet.</strong>
+          <span>Add an .ics file above to scan for duplicate events and download a cleaned copy.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "svg-cleaner") {
+    body = `
+      <div class="sv-workspace">
+        <div class="sv-setup-grid">
+          <section class="sv-panel sv-input" aria-labelledby="sv-input-title">
+            <h2 id="sv-input-title">Your SVG file</h2>
+            <p class="cs-hint">Upload an SVG from a design tool or the web. It is parsed and sanitized locally before you download a safe copy.</p>
+            ${body}
+            <p class="cs-formats">Accepts .svg / image-svg+xml. Scripts and unsafe links are removed — nothing is uploaded.</p>
+          </section>
+          <aside class="sv-panel sv-guide" aria-labelledby="sv-guide-title">
+            <h2 id="sv-guide-title">How sanitizing works</h2>
+            <ol class="cs-steps">
+              <li><strong>Parse the XML</strong><span>Invalid SVG documents are rejected before any cleaning begins.</span></li>
+              <li><strong>Strip active content</strong><span>Scripts, embedded frames, dangerous hrefs and editor namespaces are removed.</span></li>
+              <li><strong>Download a safe SVG</strong><span>The cleaned file keeps the artwork and viewBox, ready for web or print.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Sanitizing happens entirely in your browser.</p>
+          </aside>
+        </div>
+        <div class="sv-empty cs-empty" id="sv-empty">
+          <strong>No SVG loaded yet.</strong>
+          <span>Add an SVG above to preview the sanitized version and download a safe copy.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "bookmark-reading") {
+    body = `
+      <div class="rl-workspace">
+        <div class="rl-grid">
+          <section class="rl-panel rl-input" aria-labelledby="rl-input-title">
+            <h2 id="rl-input-title">Your bookmarks file</h2>
+            <p class="cs-hint">Export bookmarks from your browser as HTML, then turn the safe links into a clean, portable reading list.</p>
+            ${body}
+            <p class="cs-formats">Accepts .html / .htm bookmark exports. Filtering happens locally — nothing is uploaded.</p>
+          </section>
+          <aside class="rl-panel rl-guide" aria-labelledby="rl-guide-title">
+            <h2 id="rl-guide-title">What you get</h2>
+            <ol class="cs-steps">
+              <li><strong>Only real links</strong><span>JavaScript, data and other unsafe URL schemes are dropped before export.</span></li>
+              <li><strong>One tidy page</strong><span>The result is a single HTML file with every kept link and its title.</span></li>
+              <li><strong>Works offline</strong><span>Open it in any browser, share it, or keep it as a personal reading queue.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Your bookmarks never leave this device.</p>
+          </aside>
+        </div>
+        <div class="rl-empty cs-empty" id="rl-empty">
+          <strong>No bookmarks file loaded yet.</strong>
+          <span>Add an HTML bookmark export above to build your offline reading list.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "bookmark-cleaner") {
+    body = `
+      <div class="bm-workspace">
+        <div class="bm-grid">
+          <section class="bm-panel bm-input" aria-labelledby="bm-input-title">
+            <h2 id="bm-input-title">Your bookmarks file</h2>
+            <p class="cs-hint">Export bookmarks from your browser as an HTML file, then upload it here. Duplicate URLs are removed locally.</p>
+            ${body}
+            <p class="cs-formats">Accepts .html / .htm bookmark exports. Nothing is uploaded — cleanup happens in your browser.</p>
+          </section>
+          <aside class="bm-panel bm-guide" aria-labelledby="bm-guide-title">
+            <h2 id="bm-guide-title">How cleanup works</h2>
+            <ol class="cs-steps">
+              <li><strong>Scan every link</strong><span>Each bookmark URL is normalized — query strings, fragments and “www.” are ignored for comparison.</span></li>
+              <li><strong>Keep the first copy</strong><span>Later links pointing to the same address are removed; folders and ordering stay intact.</span></li>
+              <li><strong>Download the clean file</strong><span>Import it back into your browser to replace the duplicate-heavy export.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Your bookmarks never leave this device.</p>
+          </aside>
+        </div>
+        <div class="bm-empty cs-empty" id="bm-empty">
+          <strong>No bookmarks file loaded yet.</strong>
+          <span>Add an HTML bookmark export above to scan for duplicate URLs and download a cleaned copy.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "vcard") {
+    body = `
+      <div class="vc-workspace">
+        <div class="vc-grid">
+          <section class="vc-panel vc-input" aria-labelledby="vc-input-title">
+            <h2 id="vc-input-title">Your vCard files</h2>
+            <p class="cs-hint">Upload one or more .vcf files. Contacts are parsed locally, then cards sharing a phone number are flagged for review.</p>
+            ${body}
+            <p class="cs-formats">Accepts .vcf / text-vcard. Multiple files are combined into one list. Nothing is uploaded.</p>
+          </section>
+          <aside class="vc-panel vc-guide" aria-labelledby="vc-guide-title">
+            <h2 id="vc-guide-title">What you can do</h2>
+            <ol class="cs-steps">
+              <li><strong>Review duplicate groups</strong><span>Cards with the same normalized phone number are grouped so you can merge or keep them.</span></li>
+              <li><strong>Download the merged set</strong><span>One .vcf containing every kept card, with original fields preserved.</span></li>
+              <li><strong>Save individual cards</strong><span>Export any single contact as its own .vcf file.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> vCards are parsed in your browser — no upload, no storage.</p>
+          </aside>
+        </div>
+        <div class="vc-empty cs-empty" id="vc-empty">
+          <strong>No vCards loaded yet.</strong>
+          <span>Add one or more .vcf files above to review contacts and possible duplicates.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "csv-date") {
+    body = `
+      <div class="cs-workspace">
+        <div class="cs-grid">
+          <section class="cs-panel cs-input" aria-labelledby="cs-date-input-title">
+            <h2 id="cs-date-input-title">Your CSV file</h2>
+            <p class="cs-hint">Upload a CSV with a header row. Mixed date formats are detected and flagged before conversion.</p>
+            ${body}
+            <p class="cs-formats">Accepts .csv / text-csv. Quoted values and multiple separators are handled. Everything stays on your device.</p>
+          </section>
+          <aside class="cs-panel cs-guide" aria-labelledby="cs-date-guide-title">
+            <h2 id="cs-date-guide-title">How normalization works</h2>
+            <ol class="cs-steps">
+              <li><strong>Choose the date column</strong><span>Every column from your header is available, even if the values are in different formats.</span></li>
+              <li><strong>Review ambiguous values</strong><span>Dates where day and month are both ≤ 12 are shown with US and European readings so you decide.</span></li>
+              <li><strong>Download clean CSV</strong><span>All other columns are preserved and the header stays exactly as it was.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Dates are parsed in your browser — no upload, no storage.</p>
+          </aside>
+        </div>
+        <div class="cs-empty" id="cs-date-empty">
+          <strong>No file loaded yet.</strong>
+          <span>Add a CSV above to pick a date column, preview conversions and download the normalized file.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (id === "csv-splitter") {
+    body = `
+      <div class="cs-workspace">
+        <div class="cs-grid">
+          <section class="cs-panel cs-input" aria-labelledby="cs-input-title">
+            <h2 id="cs-input-title">Your CSV file</h2>
+            <p class="cs-hint">Upload a CSV with a header row. The tool detects every column, so you can choose which one holds combined values.</p>
+            ${body}
+            <p class="cs-formats">Accepts .csv / text-csv. Quoted commas and line breaks are handled correctly. Everything stays on your device.</p>
+          </section>
+          <aside class="cs-panel cs-guide" aria-labelledby="cs-guide-title">
+            <h2 id="cs-guide-title">How splitting works</h2>
+            <ol class="cs-steps">
+              <li><strong>Pick a column</strong><span>Choose the column containing values joined by a separator, such as a full name or a tag list.</span></li>
+              <li><strong>Set the delimiter</strong><span>Enter the character that separates parts — a space, comma, slash or any short string.</span></li>
+              <li><strong>Preview &amp; download</strong><span>New columns are numbered automatically. The header and all other columns are preserved.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Your file is parsed in the browser — no upload, no storage.</p>
+          </aside>
+        </div>
+        <div class="cs-empty" id="cs-empty">
+          <strong>No file loaded yet.</strong>
+          <span>Add a CSV above to pick a column, preview the split and download the cleaned file.</span>
+        </div>
+      </div>
+    `;
+  }
+
   if (id === "panorama") {
     body = `
       <div class="controls">
@@ -2048,16 +2830,38 @@ function toolPage(id) {
   }
   if (id === "video-safe-zone") {
     body = `
-      <div class="controls">
-        <label>Social Platform Preview
-          <select id="platformSelect">
-            <option value="tiktok" selected>TikTok UI (9:16 - Like, Share, Captions Safe Area)</option>
-            <option value="reels">Instagram Reels (9:16)</option>
-            <option value="shorts">YouTube Shorts (9:16)</option>
-          </select>
-        </label>
+      <div class="vz-workspace">
+        <div class="vz-grid">
+          <section class="vz-panel vz-setup" aria-labelledby="vz-setup-title">
+            <h2 id="vz-setup-title">Set up your check</h2>
+            <div class="controls vz-controls">
+              <label for="platformSelect">Social platform preview
+                <select id="platformSelect">
+                  <option value="tiktok" selected>TikTok UI (9:16 · likes, share, captions)</option>
+                  <option value="reels">Instagram Reels (9:16)</option>
+                  <option value="shorts">YouTube Shorts (9:16)</option>
+                </select>
+              </label>
+            </div>
+            ${body}
+            <p class="vz-formats">Accepts MP4, WebM, MOV clips or a still image. The first frame is used for the guide.</p>
+          </section>
+          <aside class="vz-panel vz-guide" aria-labelledby="vz-guide-title">
+            <h2 id="vz-guide-title">How to read the overlay</h2>
+            <ul class="vz-legend">
+              <li><span class="vz-swatch vz-swatch-frame" aria-hidden="true"></span><div><strong>9:16 frame</strong><small>Red outline marks the vertical canvas the platform actually shows.</small></div></li>
+              <li><span class="vz-swatch vz-swatch-zone" aria-hidden="true"></span><div><strong>UI covered zones</strong><small>Shaded red areas hide content behind captions, action buttons and tabs.</small></div></li>
+              <li><span class="vz-swatch vz-swatch-safe" aria-hidden="true"></span><div><strong>Safe area</strong><small>The clear centre. Keep titles, subtitles and key subjects inside it.</small></div></li>
+            </ul>
+            <p class="vz-privacy"><strong>Stays on your device.</strong> Video frames are decoded locally — no file is uploaded.</p>
+          </aside>
+        </div>
+        <div class="vz-empty" id="vz-empty">
+          <strong>No frame loaded yet.</strong>
+          <span>Add a vertical image or a short video clip above to preview its platform overlay.</span>
+        </div>
       </div>
-    ` + body;
+    `;
   }
 
   layout({ tool, body });
@@ -2071,20 +2875,37 @@ function toolPage(id) {
     activeFiles = files;
     let old = $("#result");
     if (old) { revokeResultURLs(old); old.remove(); }
+    ["#cs-empty", "#cs-date-empty", "#vc-empty", "#bm-empty", "#rl-empty", "#sv-empty", "#cal-empty", "#tt-empty"].forEach(sel => {
+      const csEmpty = $(sel);
+      if (csEmpty) csEmpty.hidden = false;
+    });
     processTool(id, files);
   });
 }
 
 function setActiveNav() {
   const path = location.pathname;
-  document.querySelectorAll("#primary-nav a").forEach(a => {
-    const href = a.getAttribute("href");
-    const isHomeLink = href === "/" && (path === "/" || path.startsWith("/tools/"));
-    const isActive = isHomeLink || (href && href !== "/" && (path === href || path.startsWith(href)));
-    a.classList.toggle("active", !!isActive);
-    if (isActive) a.setAttribute("aria-current", "page");
-    else a.removeAttribute("aria-current");
+  const nav = document.getElementById("primary-nav");
+  if (!nav) return;
+
+  // Clear panel links too: the mega menu is a map, not a second active state.
+  nav.querySelectorAll("a").forEach(a => {
+    a.classList.remove("active");
+    a.removeAttribute("aria-current");
   });
+
+  nav.querySelectorAll(":scope > a").forEach(a => {
+    const href = a.getAttribute("href");
+    const isActive = !!href && href !== "/" && (path === href || path.startsWith(href));
+    a.classList.toggle("active", isActive);
+    if (isActive) a.setAttribute("aria-current", "page");
+  });
+
+  const allTrigger = nav.querySelector('.nav-trigger[data-nav-key="all"]');
+  if (allTrigger) {
+    const isAllActive = !path.startsWith("/about/") && !path.startsWith("/contact/");
+    allTrigger.classList.toggle("active", isAllActive);
+  }
 }
 
 function route() {
@@ -2176,6 +2997,20 @@ document.addEventListener("click", e => {
   const href = a.getAttribute("href");
   if (!href || href.startsWith("//") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
   if (href === "/" && location.pathname !== "/") return;
+  if (href.includes("#")) {
+    const [targetPath, targetHash] = href.split("#");
+    const normPath = targetPath || "/";
+    if (location.pathname !== normPath) return;
+    const anchor = targetHash ? document.getElementById(targetHash) : null;
+    if (anchor) {
+      e.preventDefault();
+      history.pushState(null, "", href);
+      closeMobileNav();
+      closeNavPanels();
+      anchor.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+  }
   // Legal/info pages are fully server-rendered with their own content. A
   // client-side route change would leave the previous page's body in place and
   // keep its title/canonical, so let the browser load the real document.

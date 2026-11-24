@@ -38,6 +38,7 @@
         { "key": "Link", "value": "</llms.txt>; rel=\"alternate\"; type=\"text/plain\", </llms-full.txt>; rel=\"alternate\"; type=\"text/plain\"" },
         {
           "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' https://tessdata.projectnaptha.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';"
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://c.bing.com https://*.clarity.ms; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' https://tessdata.projectnaptha.com https://www.clarity.ms https://*.clarity.ms https://c.bing.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';"
         }
       ]

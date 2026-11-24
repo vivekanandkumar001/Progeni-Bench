@@ -1149,78 +1149,86 @@ ${body.join("\n")}
   /* ---------- mount ---------- */
   function mount(container) {
     root = container;
+    root.classList.add("sticker-studio");
     root.innerHTML = `
-      <div class="studio-controls">
-        <label class="st-field"><span>Paper</span>
-          <select id="st-paper" aria-label="Paper size">${Object.keys(PAPERS).map(k => `<option value="${k}">${PAPERS[k].label}</option>`).join("")}</select>
-        </label>
-        <label class="st-field"><span>Columns</span>
-          <select id="st-cols" aria-label="Columns">
-            <option value="auto">Auto (fit one page)</option>
-            ${[1, 2, 3, 4, 5, 6].map(c => `<option value="${c}">${c}</option>`).join("")}
-          </select>
-        </label>
-        <label class="st-field"><span>Rows</span>
-          <select id="st-rows" aria-label="Rows">
-            <option value="auto">Auto (from paper)</option>
-            ${[1, 2, 3, 4, 5, 6, 8, 10, 12].map(r => `<option value="${r}">${r}</option>`).join("")}
-          </select>
-        </label>
-        <label class="st-field"><span>Fit</span>
-          <select id="st-fit" aria-label="Image fit">
-            <option value="contain">Contain (whole image)</option>
-            <option value="cover">Cover (fill &amp; crop)</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Shape</span>
-          <select id="st-shape" aria-label="Sticker shape">
-            <option value="none">Square</option>
-            <option value="rounded">Rounded</option>
-            <option value="circle">Circle (true)</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Cut lines</span>
-          <select id="st-cut" aria-label="Cut lines">
-            <option value="off">Off</option>
-            <option value="dashed">Dashed (kiss-cut)</option>
-            <option value="solid">Solid</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Cut line color</span>
-          <select id="st-cutcolor" aria-label="Cut line color">
-            <option value="#6b7280">Gray (home print)</option>
-            <option value="#000000">Black (Cricut Print-Then-Cut)</option>
-            <option value="#db2777">Magenta</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Sheet background</span>
-          <select id="st-bg" aria-label="Sheet background">
-            <option value="white">White</option>
-            <option value="cream">Cream (warm print)</option>
-            <option value="none">Transparent (PNG/SVG)</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Sheet copies</span>
-          <select id="st-repeat" aria-label="Repeat every sticker">
-            <option value="1">1 × (each once)</option>
-            <option value="2">2 × (each twice)</option>
-            <option value="3">3 × (each 3 times)</option>
-            <option value="4">4 × (each 4 times)</option>
-          </select>
-        </label>
-        <label class="st-field st-slider"><span>Spacing <b id="st-gap-v"></b></span>
-          <input type="range" id="st-gap" min="0" max="20" step="1" aria-label="Spacing">
-        </label>
-        <label class="st-field st-slider"><span>Margins <b id="st-margin-v"></b></span>
-          <input type="range" id="st-margin" min="0" max="30" step="1" aria-label="Margins">
-        </label>
-        <label class="st-field st-slider"><span>White border <b id="st-border-v"></b></span>
-          <input type="range" id="st-border" min="0" max="10" step="0.5" aria-label="White border width">
-        </label>
-        <label class="st-field st-slider"><span>Bleed <b id="st-bleed-v"></b></span>
-          <input type="range" id="st-bleed" min="0" max="4" step="0.5" aria-label="Bleed beyond cut line" title="Artwork extends past the cut line">
-        </label>
-        <label class="st-check"><input type="checkbox" id="st-reg"> Corner registration marks</label>
+      <div class="studio-controls sticker-controls">
+        <div class="st-controls-grid">
+          <label class="st-field"><span>Paper</span>
+            <select id="st-paper" aria-label="Paper size">${Object.keys(PAPERS).map(k => `<option value="${k}">${PAPERS[k].label}</option>`).join("")}</select>
+          </label>
+          <label class="st-field"><span>Columns</span>
+            <select id="st-cols" aria-label="Columns">
+              <option value="auto">Auto (fit one page)</option>
+              ${[1, 2, 3, 4, 5, 6].map(c => `<option value="${c}">${c}</option>`).join("")}
+            </select>
+          </label>
+          <label class="st-field"><span>Rows</span>
+            <select id="st-rows" aria-label="Rows">
+              <option value="auto">Auto (from paper)</option>
+              ${[1, 2, 3, 4, 5, 6, 8, 10, 12].map(r => `<option value="${r}">${r}</option>`).join("")}
+            </select>
+          </label>
+          <label class="st-field"><span>Fit</span>
+            <select id="st-fit" aria-label="Image fit">
+              <option value="contain">Contain (whole image)</option>
+              <option value="cover">Cover (fill &amp; crop)</option>
+            </select>
+          </label>
+          <label class="st-field"><span>Shape</span>
+            <select id="st-shape" aria-label="Sticker shape">
+              <option value="none">Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="circle">Circle (true)</option>
+            </select>
+          </label>
+          <label class="st-field"><span>Sheet background</span>
+            <select id="st-bg" aria-label="Sheet background">
+              <option value="white">White</option>
+              <option value="cream">Cream (warm print)</option>
+              <option value="none">Transparent (PNG/SVG)</option>
+            </select>
+          </label>
+          <label class="st-field st-slider"><span>Spacing <b id="st-gap-v"></b></span>
+            <input type="range" id="st-gap" min="0" max="20" step="1" aria-label="Spacing">
+          </label>
+          <label class="st-field st-slider"><span>Margins <b id="st-margin-v"></b></span>
+            <input type="range" id="st-margin" min="0" max="30" step="1" aria-label="Margins">
+          </label>
+          <label class="st-field st-slider"><span>White border <b id="st-border-v"></b></span>
+            <input type="range" id="st-border" min="0" max="10" step="0.5" aria-label="White border width">
+          </label>
+        </div>
+        <details class="st-advanced" id="st-advanced">
+          <summary><span>Advanced print &amp; cut</span><small>Cut lines, bleed, copies, registration marks</small></summary>
+          <div class="st-advanced-grid">
+            <label class="st-field"><span>Cut lines</span>
+              <select id="st-cut" aria-label="Cut lines">
+                <option value="off">Off</option>
+                <option value="dashed">Dashed (kiss-cut)</option>
+                <option value="solid">Solid</option>
+              </select>
+            </label>
+            <label class="st-field"><span>Cut line color</span>
+              <select id="st-cutcolor" aria-label="Cut line color">
+                <option value="#6b7280">Gray (home print)</option>
+                <option value="#000000">Black (Cricut Print-Then-Cut)</option>
+                <option value="#db2777">Magenta</option>
+              </select>
+            </label>
+            <label class="st-field"><span>Sheet copies</span>
+              <select id="st-repeat" aria-label="Repeat every sticker">
+                <option value="1">1 × (each once)</option>
+                <option value="2">2 × (each twice)</option>
+                <option value="3">3 × (each 3 times)</option>
+                <option value="4">4 × (each 4 times)</option>
+              </select>
+            </label>
+            <label class="st-field st-slider"><span>Bleed <b id="st-bleed-v"></b></span>
+              <input type="range" id="st-bleed" min="0" max="4" step="0.5" aria-label="Bleed beyond cut line" title="Artwork extends past the cut line">
+            </label>
+            <label class="st-check"><input type="checkbox" id="st-reg"> Corner registration marks</label>
+          </div>
+        </details>
       </div>
 
       <div class="studio-toolbar">
@@ -1248,7 +1256,7 @@ ${body.join("\n")}
         </div>
         <div class="studio-side">
           <div class="studio-pages" id="st-pages"></div>
-          <div class="studio-hint" id="st-hint">Drop PNG/JPEG images on the upload box above to build your sheet — drag thumbnails to reorder, ✎ to edit each sticker.</div>
+          <div class="studio-hint" id="st-hint"><strong>No stickers yet.</strong><span>Add PNG, JPEG, WebP or SVG images to build your sheet, then drag thumbnails to reorder or use ✎ to edit each sticker.</span></div>
           <div class="st-progress" id="st-progress" hidden>
             <span class="st-progress-fill" id="st-progress-fill"></span>
             <span class="st-progress-label" id="st-progress-label">Loading…</span>

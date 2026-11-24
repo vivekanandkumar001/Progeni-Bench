@@ -446,7 +446,11 @@
     const gridopts = $("#shs-gridopts");
     if (gridopts) gridopts.hidden = state.mode !== "ironon" && state.opts.pack !== "grid";
     const bcol = $("#shs-bordercolor-wrap");
-    if (bcol) bcol.hidden = state.mode !== "printlayout" || state.opts.borderColor !== "#custom";
+    const bsel = $("#shs-bordersel");
+    const customColor = bsel
+      ? bsel.value === "custom"
+      : state.opts.borderColor !== "#ffffff" && state.opts.borderColor !== "#000000";
+    if (bcol) bcol.hidden = state.mode !== "printlayout" || !customColor;
   }
 
   function renderMeta(L) {
@@ -808,17 +812,19 @@
     const colOptions = [1, 2, 3, 4, 5, 6].map(c => '<option value="' + c + '">' + c + "</option>").join("");
     const rowOptions = [1, 2, 3, 4, 5, 6, 8].map(r => '<option value="' + r + '">' + r + "</option>").join("");
 
-    const ironControls = `
+    const ironBasic = `
         <label class="st-field"><span>Preset profile</span>
           <select id="shs-preset" aria-label="Transfer paper preset">
             ${Object.keys(IRONON_PRESETS).map(k => '<option value="' + k + '">' + IRONON_PRESETS[k].label + "</option>").join("")}
           </select>
         </label>
-        <label class="st-check"><input type="checkbox" id="shs-mirror" checked> Mirror all images</label>
+        <label class="st-check"><input type="checkbox" id="shs-mirror" checked> Mirror all images</label>`;
+
+    const ironAdvanced = `
         <label class="st-check"><input type="checkbox" id="shs-cut"> Cut lines (guides)</label>
         <label class="st-check" id="shs-cutexport-wrap" hidden><input type="checkbox" id="shs-cutexport"> Bake cut lines into export</label>`;
 
-    const printControls = `
+    const printBasic = `
         <label class="st-field"><span>Pack mode</span>
           <select id="shs-pack" aria-label="Layout mode">
             <option value="grid">Uniform grid (rows × cols)</option>
@@ -828,7 +834,9 @@
         <div class="shs-gridopts" id="shs-gridopts">
           <label class="st-field"><span>Rows</span><select id="shs-rows" aria-label="Rows">${rowOptions}</select></label>
         </div>
-        <label class="st-check"><input type="checkbox" id="shs-autorot" checked> Auto-rotate to fit (90°)</label>
+        <label class="st-check"><input type="checkbox" id="shs-autorot" checked> Auto-rotate to fit (90°)</label>`;
+
+    const printAdvanced = `
         <label class="st-field st-slider"><span>Border <b id="shs-border-v">3 mm</b></span>
           <input type="range" id="shs-border" min="0" max="12" step="0.5" value="3" aria-label="Border width in mm"></label>
         <label class="st-field"><span>Border color</span>
@@ -844,19 +852,25 @@
     root.className = "shs-studio";
     root.innerHTML = `
       <div class="studio-controls shs-controls">
-        <label class="st-field"><span>Paper</span><select id="shs-paper" aria-label="Paper size">${paperOptions}</select></label>
-        <label class="st-field"><span>Columns</span><select id="shs-cols" aria-label="Columns">${colOptions}</select></label>
-        ${iron ? ironControls : printControls}
-        <label class="st-field st-slider"><span>Margin <b id="shs-margin-v">10 mm</b></span>
-          <input type="range" id="shs-margin" min="0" max="30" step="1" value="10" aria-label="Sheet margin in mm"></label>
-        <label class="st-field st-slider"><span>Gap <b id="shs-gap-v">4 mm</b></span>
-          <input type="range" id="shs-gap" min="0" max="20" step="1" value="4" aria-label="Gap between cells in mm"></label>
-        <label class="st-field"><span>Export DPI</span>
-          <select id="shs-dpi" aria-label="Export resolution">
-            <option value="150">150 DPI (draft)</option>
-            <option value="300" selected>300 DPI (print)</option>
-          </select>
-        </label>
+        <div class="shs-controls-grid">${iron ? ironBasic : printBasic}</div>
+        <details class="shs-advanced" id="shs-advanced">
+          <summary><span>Sheet layout &amp; print</span><small>Paper, grid, spacing, export quality</small></summary>
+          <div class="shs-advanced-grid">
+            <label class="st-field"><span>Paper</span><select id="shs-paper" aria-label="Paper size">${paperOptions}</select></label>
+            <label class="st-field"><span>Columns</span><select id="shs-cols" aria-label="Columns">${colOptions}</select></label>
+            <label class="st-field st-slider"><span>Margin <b id="shs-margin-v">10 mm</b></span>
+              <input type="range" id="shs-margin" min="0" max="30" step="1" value="10" aria-label="Sheet margin in mm"></label>
+            <label class="st-field st-slider"><span>Gap <b id="shs-gap-v">4 mm</b></span>
+              <input type="range" id="shs-gap" min="0" max="20" step="1" value="4" aria-label="Gap between cells in mm"></label>
+            <label class="st-field"><span>Export DPI</span>
+              <select id="shs-dpi" aria-label="Export resolution">
+                <option value="150">150 DPI (draft)</option>
+                <option value="300" selected>300 DPI (print)</option>
+              </select>
+            </label>
+            ${iron ? ironAdvanced : printAdvanced}
+          </div>
+        </details>
       </div>
 
       <div class="studio-toolbar">

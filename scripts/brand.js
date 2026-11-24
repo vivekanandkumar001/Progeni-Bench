@@ -11,16 +11,19 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-let version = '';
-try {
-  const svg = fs.readFileSync(path.join(__dirname, '..', 'assets', 'favicon.svg'));
-  version = '?v=' + crypto.createHash('sha1').update(svg).digest('hex').slice(0, 8);
-} catch (err) {
-  // First checkout without the asset: fall back to the plain URLs.
-  version = '';
+function assetVersion(relPath) {
+  try {
+    const data = fs.readFileSync(path.join(__dirname, '..', relPath));
+    return '?v=' + crypto.createHash('sha1').update(data).digest('hex').slice(0, 8);
+  } catch (err) {
+    return '';
+  }
 }
 
+const version = assetVersion('assets/favicon.svg');
 const logo = `/assets/favicon.svg${version}`;
+const stylesHref = `/styles.css${assetVersion('styles.css')}`;
+const headerSrc = `/header.js${assetVersion('header.js')}`;
 
 function iconLinks() {
   return `  <link rel="manifest" href="/manifest.webmanifest">
@@ -32,4 +35,4 @@ function iconLinks() {
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png${version}">`;
 }
 
-module.exports = { version, logo, iconLinks };
+module.exports = { version, logo, stylesHref, headerSrc, iconLinks };

@@ -30,7 +30,8 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/audio/ringtone-maker/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
   <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Full LLM-readable tool reference">
@@ -43,21 +44,95 @@
       <img src="/assets/favicon.svg?v=0b940904" alt="" width="32" height="32" class="brand-logo">
       <span class="brand-name">Progeni Bench</span>
     </a>
+    <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+      <div class="nav-item nav-item--mega">
+        <button class="nav-trigger active" type="button" data-nav-key="all" aria-expanded="false" aria-controls="nav-all-tools">All tools <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-panel mega-panel" id="nav-all-tools" hidden>
+          <div class="mega-inner">
+            <div class="mega-head">
+              <span class="mega-eyebrow">Browse by job</span>
+              <a class="mega-view-all" href="/#tools">View all 122 tools <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="mega-grid">
+            <section class="mega-group">
+              <h3>Convert</h3>
+              <p>Change the format, keep the job.</p>
+              <ul><li><a href="/image/convert/">Image converter</a></li><li><a href="/image/image-to-pdf/">Image to PDF</a></li><li><a href="/audio/convert/">Audio converter</a></li><li><a href="/audio/to-mp3/">MP3 / WAV / FLAC</a></li><li><a href="/tools/pdf-translator/">PDF translator</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Compress &amp; resize</h3>
+              <p>Smaller files, exact dimensions.</p>
+              <ul><li><a href="/image/compress/">Image compressor</a></li><li><a href="/image/compress-to-size/">Target file size</a></li><li><a href="/image/resize/">Resize image</a></li><li><a href="/image/crop/">Crop image</a></li><li><a href="/audio/compress/">Audio compressor</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Edit &amp; enhance</h3>
+              <p>Fix, decorate and fine-tune.</p>
+              <ul><li><a href="/image/adjust/">Colour adjustments</a></li><li><a href="/image/watermark/">Visible watermark</a></li><li><a href="/image/collage/">Collage maker</a></li><li><a href="/audio/trimmer/">Audio trimmer</a></li><li><a href="/audio/fade/">Fade in / out</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Organize &amp; combine</h3>
+              <p>Put the pieces in order.</p>
+              <ul><li><a href="/tools/pdf-page-manager/">PDF page manager</a></li><li><a href="/tools/vcard/">vCard split &amp; merge</a></li><li><a href="/tools/bookmark-cleaner/">Bookmark cleaner</a></li><li><a href="/tools/calendar-cleaner/">Calendar dedupe</a></li><li><a href="/audio/joiner/">Audio joiner</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Create &amp; generate</h3>
+              <p>Make something new.</p>
+              <ul><li><a href="/image/favicon/">Favicon &amp; app icons</a></li><li><a href="/image/qr-code/">QR code</a></li><li><a href="/image/og-image/">Open Graph image</a></li><li><a href="/image/gif-studio/">GIF studio</a></li><li><a href="/audio/tone-generator/">Tone generator</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Inspect &amp; clean</h3>
+              <p>Check quality, remove traces.</p>
+              <ul><li><a href="/image/inspection/">Image inspector</a></li><li><a href="/image/strip-metadata/">EXIF &amp; GPS remover</a></li><li><a href="/image/scan-cleanup/">Scan cleanup</a></li><li><a href="/audio/loudness-analyzer/">Loudness analyser</a></li><li><a href="/tools/duplicate-finder/">Photo duplicate finder</a></li></ul>
+            </section>
+            <section class="mega-group">
+              <h3>Print &amp; craft</h3>
+              <p>Ready for paper, vinyl and fabric.</p>
+              <ul><li><a href="/tools/sticker-sheet/">Sticker sheet</a></li><li><a href="/tools/labels/">Label maker</a></li><li><a href="/tools/tshirt-mirror/">T-shirt mirror</a></li><li><a href="/tools/ironon-sheet/">Iron-on transfer</a></li><li><a href="/tools/cross-stitch/">Cross-stitch pattern</a></li></ul>
+            </section>
+            <section class="mega-group mega-group--hubs">
+              <h3>Toolkits &amp; hubs</h3>
+              <p>Jump straight into a full suite.</p>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+            </section>
+            </div>
+            <div class="mega-foot">
+              <span class="mega-trust"><svg class="nav-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> 100% local · no upload · no signup</span>
+              <a href="/about/">How it works</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-item nav-item--menu">
+        <button class="nav-trigger" type="button" data-nav-key="popular" aria-expanded="false" aria-controls="nav-popular">Popular <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-panel menu-panel" id="nav-popular" hidden>
+          <span class="mega-eyebrow">Most used this week</span>
+          <ul class="menu-list"><li><a href="/image/compress/">Compress image</a></li><li><a href="/image/resize/">Resize image</a></li><li><a href="/image/convert/">Image converter</a></li><li><a href="/audio/convert/">Audio converter</a></li><li><a href="/audio/to-mp3/">MP3 converter</a></li><li><a href="/tools/sticker-sheet/">Sticker sheet</a></li><li><a href="/tools/pdf-page-manager/">PDF page manager</a></li><li><a href="/image/favicon/">Favicon generator</a></li></ul>
+        </div>
+      </div>
+      <div class="nav-item nav-item--menu">
+        <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-panel menu-panel" id="nav-studios" hidden>
+          <span class="mega-eyebrow">Batch workflows</span>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+        </div>
+      </div>
+      <a href="/about/" class="nav-link">About</a>
+      <a href="/contact/" class="nav-link">Contact</a>
+      <div class="nav-mobile-foot"><svg class="nav-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>100% local · no upload · no signup</span></div>
+    </nav>
     <div class="topbar-search" id="header-search" role="search">
       <label class="sr-only" for="search">Search Bench tools</label>
       <div class="search-box">
         <svg class="search-box-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8.25" cy="8.25" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12.2 12.2L15.75 15.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <input id="search" class="search-box-input" type="search" name="q" autocomplete="off" spellcheck="false"
-          placeholder="Search 122 tools — try “compress image” or “mp3”"
+          placeholder="Search 122 tools…"
           aria-label="Search Bench tools" role="combobox" aria-expanded="false" aria-controls="search-suggestions" aria-autocomplete="list" aria-haspopup="listbox">
         <kbd class="search-kbd" aria-hidden="true">/</kbd>
       </div>
       <div class="search-suggestions" id="search-suggestions" role="listbox" aria-label="Tool suggestions" hidden></div>
       <p class="sr-only" id="search-status" role="status" aria-live="polite"></p>
     </div>
-    <nav id="primary-nav" aria-label="Primary navigation">
-      <a href="/">All tools</a><a href="/image/">Images</a><a href="/audio/" class="active" aria-current="page">Audio &amp; Video</a><a href="/about/">About</a>
-    </nav>
+    <span class="topbar-trust" title="Files stay on this device"><svg class="nav-lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>100% local</span></span>
     <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="primary-nav">
       <span></span><span></span><span></span>
     </button>
@@ -67,18 +142,39 @@
 <main id="app" class="container" tabindex="-1">
 <nav class="itk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/audio/">Audio toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">Ringtone Maker</span></nav>
 
-<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Audio Toolkit</span>
+<section class="tool-head itk-head tool-head--compact">
+  <div class="tool-head-top">
+    <span class="eyebrow">Bench Audio Toolkit</span>
+    <div class="itk-meta">
+      <span class="itk-chip">MP3</span><span class="itk-chip">WAV</span><span class="itk-chip">FLAC</span><span class="itk-chip">AAC/M4A</span><span class="itk-chip">OGG</span>
+      <span class="itk-chip">up to 1 file</span>
+      <span class="itk-chip">100 MB / file</span>
+    </div>
+  </div>
   <h1><span class="tool-head-icon" data-icon="bell-ring"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0M22 8c0-2.3-.8-4.3-2-6M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326M4 2C2.8 3.7 2 5.7 2 8"/></svg></span>Ringtone Maker</h1>
   <p>Crop a song to a 30-second ringtone, add a fade and export as MP3 or M4A. <strong>Nothing is uploaded.</strong></p>
-  <div class="itk-meta">
-    <span class="itk-chip">MP3</span><span class="itk-chip">WAV</span><span class="itk-chip">FLAC</span><span class="itk-chip">AAC/M4A</span><span class="itk-chip">OGG</span>
-    <span class="itk-chip">up to 1 file</span>
-    <span class="itk-chip">100 MB / file</span>
-  </div>
 </section>
 
-<aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
+
+
+<section class="toolbox workspace-preview itk-fallback">
+    <div class="workspace-preview-head">
+      <span class="workspace-preview-icon" aria-hidden="true">&#8681;</span>
+      <div><strong>Interactive workspace</strong><span>Add audio, adjust the settings, then download the result.</span></div>
+    </div>
+    <ol class="workspace-steps">
+      <li><span class="step-no">1</span><div><strong>Add your audio</strong><small>MP3, WAV, FLAC · FFmpeg.wasm on your device</small></div></li>
+      <li><span class="step-no">2</span><div><strong>Choose the options</strong><small>Every setting is applied locally in this tab.</small></div></li>
+      <li><span class="step-no">3</span><div><strong>Download the output</strong><small>Audio file — no uploads, no account.</small></div></li>
+    </ol>
+    <div class="workspace-noscript">
+      <h2>About this tool</h2>
+      <p>Select a section of a track, apply a short fade in/out and export a phone-ready ringtone.</p>
+      <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
+    </div>
+  </section>
+
+<aside class="quick-answer quick-answer--summary" id="quick-answer" aria-labelledby="quick-answer-title">
   <h2 id="quick-answer-title">Quick answer</h2>
   <p class="answer-text"><strong>Ringtone Maker</strong> Ringtone Maker works on MP3, WAV and other supported formats locally in your browser for Crop a song to a 30-second ringtone, add a fade and export as MP3 or M4A. Typical use: turn your favourite section of a song into a ringtone. No upload is required.</p>
   <dl class="key-facts">
@@ -90,14 +186,6 @@
     <div><dt>Limit</dt><dd>100 MB · 30 minutes per file</dd></div>
   </dl>
 </aside>
-
-
-
-<section class="toolbox itk-fallback">
-    <h2>How this tool works without JavaScript</h2>
-    <p>Select a section of a track, apply a short fade in/out and export a phone-ready ringtone.</p>
-    <p><em>Enable JavaScript to use the interactive tool. Processing happens locally in your browser; nothing is uploaded.</em></p>
-  </section>
 
 <section class="seo-section itk-seo">
   <h2>What it does</h2>
