@@ -714,8 +714,8 @@
     const el = $("#alb-results");
     if (!el) return;
     if (!state.items.length) {
-      el.innerHTML = '<p class="alb-empty">Add photos to build a self-contained chronological album. '
-        + "Dates come from EXIF DateTimeOriginal first, then the file date.</p>";
+      el.innerHTML = '<div class="alb-empty pb-empty"><strong>No photos added yet.</strong>'
+        + "<span>Add photos above to build a chronological album. Dates come from EXIF first, then the file date.</span></div>";
       return;
     }
     const model = buildTimelineModel();
@@ -748,8 +748,8 @@
     const el = $("#alb-results");
     if (!el) return;
     if (!state.items.length) {
-      el.innerHTML = '<p class="alb-empty">Add photos (and any other files) to build a year \u2192 month \u2192 day tree, '
-        + "fix wrong dates in bulk, and preview the proposed folder structure.</p>";
+      el.innerHTML = '<div class="alb-empty pb-empty"><strong>No files added yet.</strong>'
+        + "<span>Add photos or other files above to build a year \u2192 month \u2192 day tree and preview the proposed folder structure.</span></div>";
       return;
     }
     const years = groupByYear(sortedItems());
@@ -995,16 +995,47 @@
         + '<span class="alb-size" id="alb-size"></span>'
         + '<button type="button" class="btn secondary" id="alb-clear">Clear</button>';
 
-    return '<p class="alb-tip">' + tip + "</p>"
+    const steps = isOrg
+      ? '<li><strong>Read EXIF dates</strong><span>DateTimeOriginal is preferred; files without it fall back to the file date and are flagged for correction.</span></li>'
+        + '<li><strong>Fix dates in bulk</strong><span>Override whole years, months or days, or edit an individual photo date right on its card.</span></li>'
+        + '<li><strong>Plan and export</strong><span>Preview the proposed folder structure, then download the HTML archive plus a CSV/JSON rename plan.</span></li>'
+      : '<li><strong>Read EXIF dates</strong><span>DateTimeOriginal comes first, then the file date. Ambiguous dates can be corrected on each card.</span></li>'
+        + '<li><strong>Group chronologically</strong><span>Photos are grouped by day, switching to month or year for very large sets.</span></li>'
+        + '<li><strong>Export one file</strong><span>Download a self-contained HTML album with embedded thumbnails and a full-resolution lightbox.</span></li>';
+    const setupTitle = isOrg ? "Organizer setup" : "Album setup";
+    const previewTitle = isOrg ? "Date tree &amp; rename plan" : "Timeline preview";
+
+    return '<div class="pb-workspace alb-workspace">'
+      + '<section class="pb-panel alb-setup" aria-labelledby="alb-setup-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">01</span><div>'
+      + '<h2 id="alb-setup-title">' + setupTitle + '</h2>'
+      + '<p>Choose how thumbnails are embedded and how files are named.</p>'
+      + '</div></div>'
+      + '<p class="alb-tip">' + tip + '</p>'
       + '<div class="studio-controls alb-controls" id="alb-controls">' + thumb + title + pattern + "</div>"
       + '<div class="st-progress" id="alb-progress" hidden>'
       + '<div class="st-progress-fill" id="alb-progress-fill"></div>'
       + '<div class="st-progress-label" id="alb-progress-label"></div></div>'
-      + '<div class="stats" id="alb-stats"></div>'
+      + '</section>'
+      + '<aside class="pb-panel pb-guide alb-guide" aria-labelledby="alb-guide-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">02</span><div>'
+      + '<h2 id="alb-guide-title">' + (isOrg ? "How organizing works" : "How dating works") + '</h2>'
+      + '<p>Everything happens locally in this browser tab.</p>'
+      + '</div></div>'
+      + '<ol class="cs-steps">' + steps + '</ol>'
+      + '<p class="cs-privacy"><strong>100% local.</strong> Photos and filenames never leave your device.</p>'
+      + '</aside>'
+      + '<section class="pb-panel alb-results-panel" aria-labelledby="alb-results-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">03</span><div>'
+      + '<h2 id="alb-results-title">' + previewTitle + '</h2>'
+      + '<p>Review the date groups and fix any wrong dates before exporting.</p>'
+      + '</div><span class="pb-status" id="alb-meta" aria-live="polite">No files loaded yet.</span></div>'
+      + '<div class="stats pb-stats alb-stats" id="alb-stats"></div>'
       + '<div class="alb-results" id="alb-results"></div>'
       + '<div class="alb-errors" id="alb-errors"></div>'
-      + '<div class="studio-bar"><div class="studio-meta" id="alb-meta" aria-live="polite">No files loaded yet.</div>'
-      + '<div class="studio-actions">' + actions + "</div></div>";
+      + '</section>'
+      + '<div class="studio-bar pb-bar alb-bar"><div class="studio-actions">' + actions + "</div></div>"
+      + '</div>';
   }
 
   function bindEvents() {
@@ -1082,7 +1113,7 @@
     state.processing = false;
     seq = 0;
 
-    root.className = "studio alb-studio";
+    root.className = "studio alb-studio alb-studio--" + state.mode;
     root.innerHTML = shell();
     bindEvents();
     render();

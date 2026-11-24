@@ -1897,6 +1897,10 @@
   function statusBadge(status) {
     return status === "implemented" ? "" : '<em class="itk-badge ' + statusClass(status) + '">' + esc(statusLabel(status)) + "</em>";
   }
+  function pageBreadcrumb(current, parent) {
+    var trail = parent ? '<a href="' + esc(parent.url) + '">' + esc(parent.label) + '</a> <span aria-hidden="true">/</span> ' : "";
+    return '<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> ' + trail + '<span aria-current="page">' + esc(current) + "</span></nav>";
+  }
 
   function optionHtml(opt, idx) {
     const id = "atk-opt-" + idx;
@@ -2583,7 +2587,7 @@
 
   function hubInfoHtml(config) {
     const limits = config.LIMITS || {};
-    return '<section class="toolbox itk-notice-box">' +
+    return '<section class="toolbox itk-notice-box tk-notice"><span class="tk-kicker">Before you start</span>' +
       '<h2>Status and limits</h2><p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: ' + esc(limits.maxFileBytes / (1024 * 1024)) + ' MB per file, ' + esc(limits.maxDurationSec / 60) + ' minutes per file, ' + esc(limits.maxFiles) + ' files per batch.</p>' +
       '<h2>How processing works</h2><p>Simple editing, analysis, recording and WAV export use the Web Audio API directly in the tab. Format conversion and complex filters (loudness normalisation, denoise, speed, EQ) use a WebAssembly build of FFmpeg that runs on your device. Either way, the audio bytes never leave your machine and Bench keeps no copy.</p>' +
       '<h2>Licences and source</h2><p>The FFmpeg engine shipped here is the official <code>@ffmpeg/core</code> build, licensed under the <strong>GNU General Public License v2.0 or later</strong>. It is served unmodified from this site at <code>/vendor/ffmpeg/</code> and is never loaded from a third-party CDN. The JavaScript wrapper (<code>@ffmpeg/ffmpeg</code>) is MIT licensed.</p>' +
@@ -2613,11 +2617,18 @@
     }).join("");
     const impl = PUBLIC.filter(function (t) { return t.status === "implemented"; }).length;
     const exp = PUBLIC.filter(function (t) { return t.status === "experimental"; }).length;
-    app.innerHTML = '<section class="tool-head itk-head atk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Private audio tools that run in your browser</h1>' +
+    app.innerHTML = pageBreadcrumb("Audio toolkit") +
+      '<section class="tk-hero tk-hero--hub"><div class="tk-hero-main">' +
+      '<section class="tool-head itk-head atk-head tk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Private audio tools that run in your browser</h1>' +
       "<p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool has a real client-side handler and a tested download path.</p>" +
-      '<div class="itk-meta"><span class="itk-chip">' + impl + ' implemented</span><span class="itk-chip">' + exp + ' experimental</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div></section>' +
+      '<div class="itk-meta tk-stats"><span class="itk-chip">' + impl + ' implemented</span><span class="itk-chip">' + exp + ' experimental</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div>' +
+      '<div class="tk-actions"><a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a><a class="btn secondary" href="/audio/studio/">Open Audio Studio</a><a class="btn secondary" href="/">Browse all Bench tools</a></div></section>' +
+      '</div><aside class="tk-hero-side" aria-label="Toolkit highlights"><span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>' +
+      '<section class="tk-start-card"><span class="tk-kicker">Start here</span><h2>Pick a job, not a codec</h2><a href="/audio/trimmer/">Trim a clip <span aria-hidden="true">→</span></a><a href="/audio/convert/">Convert a format <span aria-hidden="true">→</span></a><a href="/audio/studio/">Run a studio chain <span aria-hidden="true">→</span></a></section>' +
+      '<section class="tk-start-card tk-start-card--quiet"><span class="tk-kicker">How it runs</span><p>Web Audio for simple edits, same-origin FFmpeg.wasm for heavy filters. Your audio bytes stay on this device.</p></section></aside></section>' +
       hubQuickAnswerHtml(PUBLIC) +
-      '<section class="itk-categories">' + cats + "</section>" + hubInfoHtml(config);
+      '<section class="tk-section-head"><div><span class="tk-kicker">Tool directory</span><h2>' + PUBLIC.length + ' tools grouped by what you need to do</h2></div><p>Every card opens a working tool. Experimental results are labelled and should be checked before important use.</p></section>' +
+      '<section class="itk-categories tk-categories">' + cats + "</section>" + hubInfoHtml(config);
     setActiveNav();
   }
 
@@ -2626,13 +2637,23 @@
     const app = document.getElementById("app");
     if (!app) return;
     unmount();
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Audio Toolkit</span><h1>Audio Studio</h1>' +
-      "<p>Load one audio file, then apply several operations in order and export the result. Everything runs locally.</p></section>" +
+    app.innerHTML = pageBreadcrumb("Audio Studio", { label: "Audio toolkit", url: "/audio/" }) +
+      '<section class="tk-hero tk-hero--studio"><div class="tk-hero-main">' +
+      '<section class="tool-head itk-head atk-head tk-head"><span class="eyebrow">Bench Audio Toolkit · Studio</span><h1>Audio Studio</h1>' +
+      "<p>Load one audio file and run a repeatable chain: normalise loudness, add a short fade-in and export a clean MP3. The processing stays on this device.</p>" +
+      '<div class="itk-meta tk-stats"><span class="itk-chip">One file at a time</span><span class="itk-chip">MP3 192 kbps output</span><span class="itk-chip">-16 LUFS target</span></div>' +
+      '<div class="tk-actions"><a class="btn" href="#audio-studio-workspace">Open the workspace</a><a class="btn secondary" href="/audio/">Back to all audio tools</a></div></section>' +
+      '</div><aside class="tk-hero-side" aria-label="Studio highlights"><span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>' +
+      '<section class="tk-start-card"><span class="tk-kicker">Two steps</span><h2>Fixed chain, honest output</h2><ol class="tk-step-list"><li><b>01</b> Add audio</li><li><b>02</b> Run chain</li><li><b>03</b> Export MP3</li></ol></section>' +
+      '<section class="tk-start-card tk-start-card--quiet"><span class="tk-kicker">Need more control?</span><p>Open a single-purpose tool for trimming, format conversion, gain, denoise or analysis.</p><a href="/audio/trimmer/">Open Audio Trimmer <span aria-hidden="true">→</span></a></section></aside></section>' +
       studioQuickAnswerHtml() +
-      '<section class="itk-grid"><div class="itk-panel"><h2>1. Add audio</h2><div id="atk-drop" class="drop" role="button" tabindex="0"><strong>Drop an audio file</strong><span>or click to browse. Stays on this device.</span><input id="atk-file" type="file" accept="' + AUDIO_ACCEPT + '" hidden></div>' +
+      '<section class="tk-section-head" id="audio-studio-workspace"><div><span class="tk-kicker">Workspace</span><h2>Run a predictable audio chain</h2></div><p>Add audio on the left, run the fixed chain, then download the MP3 on the right.</p></section>' +
+      '<section class="itk tk-studio-shell"><div class="itk-grid"><div class="itk-panel tk-panel">' +
+      '<span class="tk-step-badge">01</span><h2>Add audio</h2><div id="atk-drop" class="drop" role="button" tabindex="0"><strong>Drop an audio file</strong><span>or click to browse. Stays on this device.</span><input id="atk-file" type="file" accept="' + AUDIO_ACCEPT + '" hidden></div>' +
       '<div class="itk-actions"><button class="btn btn-lg" id="atk-studio-run" type="button">Run chain</button></div>' +
       '<div class="itk-progress"><div class="itk-bar"><span id="atk-bar-fill"></span></div><p id="atk-status">Ready.</p></div></div>' +
-      '<div class="itk-panel"><h2>2. Results</h2><div id="atk-results" class="itk-results"><div class="itk-empty"><strong>No results yet</strong><span>Add a file and run the chain.</span></div></div></div></section>';
+      '<div class="itk-panel tk-panel"><span class="tk-step-badge">02</span><h2>Results</h2><div id="atk-results" class="itk-results"><div class="itk-empty"><strong>No results yet</strong><span>Add a file and run the chain.</span></div></div></div></div></section>' +
+      '<section class="seo-section tk-seo"><span class="tk-kicker">Details</span><h2>What Audio Studio does</h2><p>Audio Studio decodes the selected file, normalises perceived loudness to -16 LUFS, adds a gentle one-second fade-in and encodes the result as MP3. It is deliberately fixed so the output is repeatable.</p><h2>Limits</h2><p>One file is processed at a time. Large or unusual files may be rejected by the browser decoder; that failure is reported honestly. The FFmpeg engine is cached after its first download and is not loaded from a third-party CDN.</p></section>';
 
     let file = null;
     const dropEl = document.getElementById("atk-drop");
@@ -2662,8 +2683,9 @@
         renderResults(resultsEl, [{ name: safeName(file.name, "") + "-studio.mp3", blob: blob, size: blob.size, kind: "audio", note: "Normalised to -16 LUFS, fade-in, MP3 192 kbps.", url: url }], [], urls);
         barEl.style.width = "100%"; statusEl.textContent = "Done.";
       } catch (err) {
-        renderResults(resultsEl, [], [{ name: file.name, message: err.message }], urls);
-        statusEl.textContent = "Failed: " + err.message;
+        const message = err && err.message ? err.message : String(err);
+        renderResults(resultsEl, [], [{ name: file.name, message: message }], urls);
+        statusEl.textContent = "Failed: " + message;
       } finally { runEl.disabled = false; }
     });
   }

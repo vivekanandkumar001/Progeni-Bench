@@ -128,7 +128,7 @@ function shell(title, desc, canonicalUrl, body, opts) {
 <body><a class="skip-link" href="#app">Skip to main content</a>
 ${chrome.siteHeader({ active: 'audio' })}
 
-<main id="app" class="container" tabindex="-1">
+<main id="app" class="container tk-page tk-page--audio" tabindex="-1">
 ${body}
 </main>
 
@@ -155,6 +155,11 @@ ${chrome.siteFooter({
 `;
 }
 
+function pageBreadcrumb(current, parent) {
+  const trail = parent ? `<a href="${parent.url}">${esc(parent.label)}</a> <span aria-hidden="true">/</span> ` : '';
+  return `<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> ${trail}<span aria-current="page">${esc(current)}</span></nav>`;
+}
+
 function toolCard(tool) {
   return `<a class="itk-tool-card" href="/audio/${esc(tool.slug)}/">
   <strong><span class="itk-card-icon" aria-hidden="true">${icons.toolIcon('audio', tool.slug, tool.icon)}</span>${esc(tool.name)}</strong>
@@ -176,26 +181,57 @@ function hubBody() {
 </section>`;
   }).join('\n');
 
-  return `<section class="tool-head itk-head atk-head">
-  <span class="eyebrow">Bench Audio Toolkit</span>
-  <h1>Private audio tools that run in your browser</h1>
-  <p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
-  <div class="itk-meta">
-    <span class="itk-chip">${IMPLEMENTED.length} implemented tools</span>
-    <span class="itk-chip">${EXPERIMENTAL.length} experimental</span>
-    <span class="itk-chip">No account</span>
-    <span class="itk-chip">No uploads</span>
+  return `${pageBreadcrumb('Audio toolkit')}
+<section class="tk-hero tk-hero--hub">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head atk-head tk-head">
+      <span class="eyebrow">Bench Audio Toolkit</span>
+      <h1>Private audio tools that run in your browser</h1>
+      <p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
+      <div class="itk-meta tk-stats">
+        <span class="itk-chip">${IMPLEMENTED.length} implemented tools</span>
+        <span class="itk-chip">${EXPERIMENTAL.length} experimental</span>
+        <span class="itk-chip">No account</span>
+        <span class="itk-chip">No uploads</span>
+      </div>
+      <div class="tk-actions">
+        <a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a>
+        <a class="btn secondary" href="/audio/studio/">Open Audio Studio</a>
+        <a class="btn secondary" href="/">Browse all Bench tools</a>
+      </div>
+    </section>
   </div>
-  <p><a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
+  <aside class="tk-hero-side" aria-label="Toolkit highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Start here</span>
+      <h2>Pick a job, not a codec</h2>
+      <a href="/audio/trimmer/">Trim a clip <span aria-hidden="true">→</span></a>
+      <a href="/audio/convert/">Convert a format <span aria-hidden="true">→</span></a>
+      <a href="/audio/studio/">Run a studio chain <span aria-hidden="true">→</span></a>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">How it runs</span>
+      <p>Web Audio for simple edits, same-origin FFmpeg.wasm for heavy filters. Your audio bytes stay on this device.</p>
+    </section>
+  </aside>
 </section>
 
 ${hubQuickAnswer}
 
-<section class="itk-categories">
+<section class="tk-section-head">
+  <div>
+    <span class="tk-kicker">Tool directory</span>
+    <h2>${PUBLIC.length} tools grouped by what you need to do</h2>
+  </div>
+  <p>Every card opens a working tool. Experimental results are labelled and should be checked before important use.</p>
+</section>
+<section class="itk-categories tk-categories">
 ${categories}
 </section>
 
-<section class="toolbox itk-notice-box">
+<section class="toolbox itk-notice-box tk-notice">
+  <span class="tk-kicker">Before you start</span>
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: ${esc(C.LIMITS.maxFileBytes / (1024 * 1024))} MB per file, ${esc(C.LIMITS.maxDurationSec / 60)} minutes per file, ${esc(C.LIMITS.maxFiles)} files per batch. Conversion and complex filters use a ${esc((C.LIMITS.ffmpegCoreBytes / (1024 * 1024)).toFixed(0))} MB FFmpeg engine downloaded once and cached.</p>
   <h2>How processing works</h2>
@@ -206,11 +242,99 @@ ${categories}
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>
 
-<section class="home-faq" aria-labelledby="audio-faq-title">
-  <h2 id="audio-faq-title">Quick answers about the audio toolkit</h2>
+<section class="home-faq tk-faq" aria-labelledby="audio-faq-title">
+  <div class="tk-section-head">
+    <div>
+      <span class="tk-kicker">Answers first</span>
+      <h2 id="audio-faq-title">Quick answers about the audio toolkit</h2>
+    </div>
+  </div>
   <div class="home-faq-grid">
     ${HUB_FAQ.map(({ q, a }) => `<article class="home-faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('\n    ')}
   </div>
+</section>`;
+}
+
+const studioQuickAnswer = seo.quickAnswerHtml({
+  answerHtml: `<strong>Audio Studio</strong> loads one audio file, then applies a fixed local chain — loudness normalisation to -16 LUFS, a one-second fade-in and MP3 192 kbps encoding. Web Audio and same-origin FFmpeg.wasm do the work on your device; nothing is uploaded.`,
+  facts: seo.keyFacts([
+    ['Input', 'One audio file'],
+    ['Chain', 'Normalise → fade in → MP3 192 kbps'],
+    ['Engine', 'Web Audio API + same-origin FFmpeg.wasm'],
+    ['Uploads', 'No audio is uploaded'],
+    ['Account', 'Not required']
+  ])
+});
+
+function studioBody() {
+  return `${pageBreadcrumb('Audio Studio', { label: 'Audio toolkit', url: '/audio/' })}
+<section class="tk-hero tk-hero--studio">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head atk-head tk-head">
+      <span class="eyebrow">Bench Audio Toolkit · Studio</span>
+      <h1>Audio Studio</h1>
+      <p>Load one audio file and run a repeatable chain: normalise loudness, add a short fade-in and export a clean MP3. The processing stays on this device.</p>
+      <div class="itk-meta tk-stats"><span class="itk-chip">One file at a time</span><span class="itk-chip">MP3 192 kbps output</span><span class="itk-chip">-16 LUFS target</span></div>
+      <div class="tk-actions"><a class="btn" href="#audio-studio-workspace">Open the workspace</a><a class="btn secondary" href="/audio/">Back to all audio tools</a></div>
+    </section>
+  </div>
+  <aside class="tk-hero-side" aria-label="Studio highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Two steps</span>
+      <h2>Fixed chain, honest output</h2>
+      <ol class="tk-step-list"><li><b>01</b> Add audio</li><li><b>02</b> Run chain</li><li><b>03</b> Export MP3</li></ol>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">Need more control?</span>
+      <p>Open a single-purpose tool for trimming, format conversion, gain, denoise or analysis.</p>
+      <a href="/audio/trimmer/">Open Audio Trimmer <span aria-hidden="true">→</span></a>
+    </section>
+  </aside>
+</section>
+
+${studioQuickAnswer}
+
+<section class="tk-section-head" id="audio-studio-workspace">
+  <div>
+    <span class="tk-kicker">Workspace</span>
+    <h2>Run a predictable audio chain</h2>
+  </div>
+  <p>Static guide below. JavaScript mounts the interactive studio in the same two-pane layout.</p>
+</section>
+<section class="itk-grid tk-studio-static">
+  <div class="itk-panel tk-panel">
+    <span class="tk-step-badge">01</span>
+    <h2>Add audio</h2>
+    <p>Drop an audio file into the picker. The live studio keeps the file in browser memory and reports progress while it decodes.</p>
+    <span class="tk-step-badge">02</span>
+    <h2>Run the chain</h2>
+    <p>The studio converts the file to WAV, applies loudness normalisation and a one-second fade-in, then encodes MP3 at 192 kbps.</p>
+    <noscript><p><em>Enable JavaScript to use the interactive studio. Audio processing happens in your browser.</em></p></noscript>
+  </div>
+  <div class="itk-panel tk-panel">
+    <span class="tk-kicker">Results</span>
+    <h2>What you get</h2>
+    <p>One downloadable MP3 with a clear note describing the applied chain. If decoding or encoding fails, the error is reported instead of a silent empty result.</p>
+    <h2>Related tools</h2>
+    <div class="tool-links tk-links">
+      <a href="/audio/trimmer/">${icons.toolIcon('audio', 'trimmer')} Audio Trimmer</a>
+      <a href="/audio/convert/">${icons.toolIcon('audio', 'convert')} Audio Converter</a>
+      <a href="/audio/loudness-normalizer/">${icons.toolIcon('audio', 'loudness-normalizer')} Loudness Normalizer</a>
+      <a href="/audio/fade/">${icons.toolIcon('audio', 'fade')} Fade In / Out</a>
+    </div>
+    <p><a class="btn" href="/audio/">Browse every audio tool</a></p>
+  </div>
+</section>
+
+<section class="seo-section itk-seo tk-seo">
+  <span class="tk-kicker">Details</span>
+  <h2>What Audio Studio does</h2>
+  <p>Audio Studio is a shortcut for a common cleanup chain: decode the selected file, normalise perceived loudness to -16 LUFS, add a gentle one-second fade-in and encode the result as MP3. It is deliberately fixed so the output is repeatable.</p>
+  <h2>Privacy &amp; security</h2>
+  <p>Decoding uses the Web Audio API. Encoding uses an official FFmpeg.wasm build served from this site, so audio bytes never leave your machine. Generated object URLs are revoked when results are replaced or the page is left.</p>
+  <h2>Limits</h2>
+  <p>One file is processed at a time. Large or unusual files may be rejected by the browser decoder; that failure is reported honestly. The FFmpeg engine is cached after its first download and is not loaded from a third-party CDN.</p>
 </section>`;
 }
 
@@ -334,6 +458,42 @@ function hubSchema() {
   ]);
 }
 
+function studioSchema() {
+  return seo.graph([
+    seo.organizationNode(),
+    seo.websiteNode(),
+    seo.webPageNode({
+      url: `${SITE_URL}/audio/studio/`,
+      name: 'Audio Studio: local normalise, fade and MP3 export',
+      description: 'Run a fixed local audio chain: normalise loudness, add a fade-in and export MP3. No uploads and no account.',
+      type: 'WebPage',
+      dateModified: seoCopy.UPDATED.audio
+    }),
+    seo.softwareApplicationNode({
+      name: 'Audio Studio',
+      url: `${SITE_URL}/audio/studio/`,
+      description: 'Normalise loudness, add a fade-in and export MP3 locally in the browser.',
+      category: 'MultimediaApplication',
+      requirements: 'Requires a modern browser with Web Audio and WebAssembly support',
+      featureList: ['Loudness normalisation', 'Fade-in', 'MP3 export', 'Local processing']
+    }),
+    seo.howToNode('Audio Studio', 'Normalise loudness, add a fade-in and export MP3 locally in the browser.', [
+      'Add one audio file with the file picker or by dropping it onto the page.',
+      'Run the fixed chain to normalise loudness, add a one-second fade-in and encode MP3.',
+      'Download the finished MP3 result from the results panel.'
+    ], `${SITE_URL}/audio/studio/`),
+    seo.breadcrumbList([
+      { name: 'Home', url: `${SITE_URL}/` },
+      { name: 'Audio toolkit', url: `${SITE_URL}/audio/` },
+      { name: 'Audio Studio', url: `${SITE_URL}/audio/studio/` }
+    ]),
+    seo.faqPageNode([
+      { q: 'Does Audio Studio upload my audio?', a: 'No. Decoding uses the Web Audio API and encoding uses same-origin FFmpeg.wasm, so audio stays on your device.' },
+      { q: 'What chain does Audio Studio apply?', a: 'It normalises loudness to -16 LUFS, adds a one-second fade-in and encodes the result as MP3 at 192 kbps.' }
+    ])
+  ]);
+}
+
 function toolSchema(tool) {
   const copy = seoCopy.forTool(tool, 'audio');
   const faq = (tool.faq || [])
@@ -372,6 +532,12 @@ function generateHubHtml() {
   return shell(title, desc, `${SITE_URL}/audio/`, hubBody(), { schema: hubSchema() });
 }
 
+function generateStudioHtml() {
+  const title = 'Audio Studio: local normalise, fade and MP3 export';
+  const desc = 'Run a fixed local audio chain: normalise loudness, add a fade-in and export MP3. No uploads, no account and no cloud processing.';
+  return shell(title, desc, `${SITE_URL}/audio/studio/`, studioBody(), { schema: studioSchema() });
+}
+
 function generateToolHtml(tool) {
   const title = tool.seoTitle || `${tool.name} | Bench Audio Toolkit`;
   const desc = seoCopy.forTool(tool, 'audio').seoDescription;
@@ -393,7 +559,8 @@ function buildAudioPages(baseDir) {
   const targets = [baseDir, distDir];
 
   const pages = [
-    ['audio', generateHubHtml()]
+    ['audio', generateHubHtml()],
+    [path.join('audio', 'studio'), generateStudioHtml()]
   ];
   PUBLIC.forEach(tool => {
     pages.push([path.join('audio', tool.slug), generateToolHtml(tool)]);

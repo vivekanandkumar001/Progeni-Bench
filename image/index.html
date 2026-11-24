@@ -30,7 +30,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <link rel="stylesheet" href="/styles.css?v=a97f42b8">
   <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/image/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -92,7 +92,7 @@
             <section class="mega-group mega-group--hubs">
               <h3>Toolkits &amp; hubs</h3>
               <p>Jump straight into a full suite.</p>
-              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
             </section>
             </div>
             <div class="mega-foot">
@@ -113,7 +113,7 @@
         <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-panel menu-panel" id="nav-studios" hidden>
           <span class="mega-eyebrow">Batch workflows</span>
-          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
         </div>
       </div>
       <a href="/about/" class="nav-link">About</a>
@@ -139,18 +139,40 @@
   </div>
 </header>
 
-<main id="app" class="container" tabindex="-1">
-<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Image Toolkit</span>
-  <h1>Private image tools that run in your browser</h1>
-  <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path.</p>
-  <div class="itk-meta">
-    <span class="itk-chip">39 implemented tools</span>
-    <span class="itk-chip">3 experimental</span>
-    <span class="itk-chip">No account</span>
-    <span class="itk-chip">No uploads</span>
+<main id="app" class="container tk-page tk-page--image" tabindex="-1">
+<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Image toolkit</span></nav>
+<section class="tk-hero tk-hero--hub">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head tk-head">
+      <span class="eyebrow">Bench Image Toolkit</span>
+      <h1>Private image tools that run in your browser</h1>
+      <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path.</p>
+      <div class="itk-meta tk-stats">
+        <span class="itk-chip">39 implemented tools</span>
+        <span class="itk-chip">3 experimental</span>
+        <span class="itk-chip">No account</span>
+        <span class="itk-chip">No uploads</span>
+      </div>
+      <div class="tk-actions">
+        <a class="btn btn-lg" href="/image/studio/">Open Image Studio</a>
+        <a class="btn secondary" href="/">Browse all Bench tools</a>
+      </div>
+    </section>
   </div>
-  <p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
+  <aside class="tk-hero-side" aria-label="Toolkit highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Start here</span>
+      <h2>Pick a job, not a format</h2>
+      <a href="/image/compress/">Compress for web <span aria-hidden="true">→</span></a>
+      <a href="/image/resize/">Resize to exact pixels <span aria-hidden="true">→</span></a>
+      <a href="/image/studio/">Batch a whole folder <span aria-hidden="true">→</span></a>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">Good to know</span>
+      <p>Every result is created in this tab. Close the page and the files are gone.</p>
+    </section>
+  </aside>
 </section>
 
 <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
@@ -165,7 +187,14 @@
   </dl>
 </aside>
 
-<section class="itk-categories">
+<section class="tk-section-head">
+  <div>
+    <span class="tk-kicker">Tool directory</span>
+    <h2>42 tools grouped by what you need to do</h2>
+  </div>
+  <p>Choose a category below, or open Image Studio when one recipe should apply to every file.</p>
+</section>
+<section class="itk-categories tk-categories">
 <section class="itk-category">
   <div class="itk-category-head">
     <h2>Compress &amp; Optimize</h2>
@@ -433,14 +462,20 @@
 
 </section>
 
-<section class="toolbox itk-notice-box">
+<section class="toolbox itk-notice-box tk-notice">
+  <span class="tk-kicker">Before you start</span>
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real pixel work but have limited validation; their results should be checked before important use. Limits: 50 MB per file, 40 megapixels per image, 30 files per batch, and a maximum dimension of 12000 px.</p>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>
 
-<section class="home-faq" aria-labelledby="image-faq-title">
-  <h2 id="image-faq-title">Quick answers about the image toolkit</h2>
+<section class="home-faq tk-faq" aria-labelledby="image-faq-title">
+  <div class="tk-section-head">
+    <div>
+      <span class="tk-kicker">Answers first</span>
+      <h2 id="image-faq-title">Quick answers about the image toolkit</h2>
+    </div>
+  </div>
   <div class="home-faq-grid">
     <article class="home-faq-item"><h3>Are my images uploaded when I use the Bench Image Toolkit?</h3><p>No. Decoding, editing and encoding run inside your browser using Canvas and File APIs. Image bytes are not sent to Bench or a third party.</p></article>
     <article class="home-faq-item"><h3>How many image tools are available?</h3><p>42 public image tools are available: 39 implemented tools and 3 experimental tools. Image Studio adds a batch resize, convert and ZIP workflow.</p></article>

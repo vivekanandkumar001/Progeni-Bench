@@ -19,21 +19,18 @@ npm start
 
 ### Deployment
 
+#### Cloudflare Pages (Primary)
+1. Connect repository (`vivekanandkumar001/Progeni-Bench`)
+2. Build command: `npm run build`
+3. Build output directory: `dist`
+4. Configuration: `wrangler.toml`, `functions/`, `_headers`, `_redirects`
+5. Custom domain: `bench.progeni.live` (HTTPS automatic)
+
 #### Netlify
 1. Connect repository or upload `dist/` folder
 2. Build command: `npm run build`
 3. Publish directory: `dist`
 4. Custom domain: `bench.progeni.live` (HTTPS automatic)
-
-#### Vercel
-1. Connect repository
-2. `vercel.json` has `cleanUrls: true` enabled
-3. Set custom domain: `bench.progeni.live` (HTTPS automatic)
-
-#### Cloudflare Pages
-1. Build command: `npm run build`
-2. Build output directory: `dist`
-3. Configure custom domain: `bench.progeni.live`
 
 ## 🗂️ Repository Layout
 
@@ -45,13 +42,13 @@ bench/
 ├─ *-pages.js, *-toolkit.js, *-studio.js         # Page generators, runtimes and feature modules
 ├─ tools/, image/, audio/                        # Generated static pages (do not hand-edit)
 ├─ assets/, data/, vendor/                       # Static assets, shared data, same-origin deps
-├─ api/                                          # Vercel Function used only by PDF Translator
+├─ functions/                                    # Cloudflare Pages Functions (PDF Translator & WASM)
 ├─ build_seo_pages.js                            # Build: generates pages and writes dist/
 ├─ scripts/                                      # Build, serve, verify and audit tooling
 ├─ docs/                                         # Architecture, audits, guides and reports
 ├─ tests/                                        # Playwright end-to-end specs
 ├─ dist/                                         # Build output (gitignored)
-└─ _headers, _redirects, netlify.toml, vercel.json, robots.txt, sitemap.xml
+└─ _headers, _redirects, wrangler.toml, netlify.toml, robots.txt, sitemap.xml
 ```
 
 Repository rules:
@@ -72,7 +69,7 @@ The `dist/` folder contains everything needed for static production hosting:
 
 - **index.html** - Single-page app root with fast category search
 - **app.js** - Client-side router + core tool processors
-- **PDF Translator** - Browser-side PDF parsing, OCR and PDF generation with DeepL text translation through a Vercel Function. See [docs/PDF-TRANSLATOR.md](./docs/PDF-TRANSLATOR.md) for setup, privacy and limits.
+- **PDF Translator** - Browser-side PDF parsing, OCR and PDF generation with DeepL text translation through a Cloudflare Pages Function. See [docs/PDF-TRANSLATOR.md](./docs/PDF-TRANSLATOR.md) for setup, privacy and limits.
 - **PDF Page Manager** - Edit page order, insert, delete, duplicate, and merge PDFs entirely in the browser. See [docs/PDF-PAGE-MANAGER.md](./docs/PDF-PAGE-MANAGER.md) for usage, limits, privacy, tests, and deployment.
 - **utils.js** - Pure utility helper module (XSS escaping, CSV parsing, SRT parser)
 - **site.config.js** - Single source of truth for site configuration & brand model
@@ -80,7 +77,7 @@ The `dist/` folder contains everything needed for static production hosting:
 - **_headers** - Strict Content-Security-Policy & security headers
 - **_redirects** - Netlify 404 handler
 - **manifest.webmanifest** - PWA configuration
-- **sitemap.xml** - 122 crawlable URLs for `bench.progeni.live` (5 static pages + 32 core tools + 3 image/audio hubs + 39 image tools + 43 audio tools; experimental pages are `noindex` and excluded)
+- **sitemap.xml** - 123 crawlable URLs for `bench.progeni.live` (5 static pages + 32 core tools + 3 hubs + 2 studios + 39 image tools + 43 audio tools; experimental pages are `noindex` and excluded)
 - **robots.txt** - Crawler directives, including explicit allowances for search and AI answer engines
 - **llms.txt / llms-full.txt** - Short and full machine-readable references for generative and answer engines
 - **docs/SEO-GEO-AEO.md** - How metadata, structured data, answer blocks and AI discovery fit together
@@ -98,7 +95,7 @@ The `dist/` folder contains everything needed for static production hosting:
 - **vendor/** - Same-origin third-party bundles (QR, barcode, GIF, TIFF) — no CDN
 - **vendor/ffmpeg/** - Same-origin FFmpeg.wasm engine (GPL, `NOTICE.txt` included) — no CDN
 - **assets/** - favicon.svg
-- **vercel.json** - Vercel clean URL routing configuration
+- **wrangler.toml** - Cloudflare Pages configuration (`dist` output & `nodejs_compat`)
 
 ## 🖼️ Bench Image Toolkit (63 tools · 42 public)
 

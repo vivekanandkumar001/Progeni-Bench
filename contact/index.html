@@ -31,7 +31,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <link rel="stylesheet" href="/styles.css?v=a97f42b8">
   <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/contact/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -93,7 +93,7 @@
             <section class="mega-group mega-group--hubs">
               <h3>Toolkits &amp; hubs</h3>
               <p>Jump straight into a full suite.</p>
-              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
             </section>
             </div>
             <div class="mega-foot">
@@ -114,7 +114,7 @@
         <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-panel menu-panel" id="nav-studios" hidden>
           <span class="mega-eyebrow">Batch workflows</span>
-          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
         </div>
       </div>
       <a href="/about/" class="nav-link">About</a>
@@ -140,27 +140,69 @@
   </div>
 </header>
 
-<main id="app" class="container prose-page" tabindex="-1">
+<main id="app" class="container prose-page static-page static-page--contact" tabindex="-1">
   <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Contact Support</span></nav>
-  <section class="tool-head">
-    <span class="eyebrow">Progeni Bench</span>
-    <h1>Contact Support</h1>
+  <section class="static-hero">
+    <div class="static-hero-copy">
+      <span class="eyebrow">Progeni Bench · Information</span>
+      <h1>Contact Support</h1>
+      <p>Questions, ideas, or a bug to report? Reach the team directly by email — no form, no upload, no account.</p>
+    </div>
+    <div class="static-hero-side">
+      <span class="static-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+      <a class="btn secondary" href="/#tools">Browse all 122 tools <span aria-hidden="true">→</span></a>
+    </div>
   </section>
-  <section class="toolbox prose-content">
-    
+  <div class="static-layout">
+    <section class="toolbox prose-content static-content">
+      
   <div class="contact-card">
-    <h2>Direct Email Inquiries</h2>
-    <p>For general support, feedback, and inquiries regarding Progeni Bench:</p>
-    <p class="contact-email"><span aria-hidden="true">&#9993;</span><a href="mailto:support@progeni.live">support@progeni.live</a></p>
-    <h3>Feature Suggestions &amp; Bug Reports</h3>
-    <p>Progeni Bench is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
-    <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
-    <h3>Why there is no contact form</h3>
-    <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
-    <p class="contact-meta">We usually respond to all inquiries within 24 to 48 business hours.</p>
+    <header class="contact-hero">
+      <span class="eyebrow">Direct line</span>
+      <h2>Direct Email Inquiries</h2>
+      <p>For general support, feedback, and inquiries regarding Progeni Bench:</p>
+      <p class="contact-email"><span aria-hidden="true">&#9993;</span><a href="mailto:support@progeni.live">support@progeni.live</a></p>
+    </header>
+    <div class="contact-sections">
+      <section class="contact-section">
+        <h3>Feature Suggestions &amp; Bug Reports</h3>
+        <p>Progeni Bench is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
+        <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
+      </section>
+      <section class="contact-section">
+        <h3>Why there is no contact form</h3>
+        <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
+      </section>
+    </div>
+    <p class="contact-meta"><span aria-hidden="true">◷</span> We usually respond to all inquiries within 24 to 48 business hours.</p>
   </div>
 
+    </section>
+    <aside class="static-rail" aria-label="Page highlights">
+      
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Before you write</span>
+    <h2>Useful details</h2>
+    <ul class="static-rail-list">
+      <li>Tool name and page URL</li>
+      <li>Browser name and version</li>
+      <li>Steps that triggered the issue</li>
+      <li>A short note on the expected result</li>
+    </ul>
   </section>
+  <section class="static-rail-card static-rail-card--accent">
+    <span class="static-rail-kicker">No form, by design</span>
+    <p>Email goes straight from your mail provider to our inbox. There is no extra endpoint collecting or retaining your message.</p>
+    <a href="/privacy/">See the privacy policy <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Typical reply</span>
+    <p>We usually answer within 24 to 48 business hours. Please do not attach selected files — we never need them to reproduce a browser-side issue.</p>
+    <a href="/#tools">Browse tools while you wait <span aria-hidden="true">→</span></a>
+  </section>
+
+    </aside>
+  </div>
 </main>
 
 <footer role="contentinfo">

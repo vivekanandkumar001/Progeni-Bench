@@ -134,7 +134,7 @@ function shell(title, desc, canonicalUrl, body, opts) {
 <body><a class="skip-link" href="#app">Skip to main content</a>
 ${chrome.siteHeader({ active: 'image' })}
 
-<main id="app" class="container" tabindex="-1">
+<main id="app" class="container tk-page tk-page--image" tabindex="-1">
 ${body}
 </main>
 
@@ -161,6 +161,11 @@ ${chrome.siteFooter({
 `;
 }
 
+function pageBreadcrumb(current, parent) {
+  const trail = parent ? `<a href="${parent.url}">${esc(parent.label)}</a> <span aria-hidden="true">/</span> ` : '';
+  return `<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> ${trail}<span aria-current="page">${esc(current)}</span></nav>`;
+}
+
 function toolCard(tool) {
   return `<a class="itk-tool-card" href="/image/${esc(tool.slug)}/">
   <strong><span class="itk-card-icon" aria-hidden="true">${icons.toolIcon('image', tool.slug, tool.icon)}</span>${esc(tool.name)}</strong>
@@ -182,33 +187,68 @@ function hubBody() {
 </section>`;
   }).join('\n');
 
-  return `<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Image Toolkit</span>
-  <h1>Private image tools that run in your browser</h1>
-  <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path.</p>
-  <div class="itk-meta">
-    <span class="itk-chip">${IMPLEMENTED.length} implemented tools</span>
-    <span class="itk-chip">${EXPERIMENTAL.length} experimental</span>
-    <span class="itk-chip">No account</span>
-    <span class="itk-chip">No uploads</span>
+  return `${pageBreadcrumb('Image toolkit')}
+<section class="tk-hero tk-hero--hub">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head tk-head">
+      <span class="eyebrow">Bench Image Toolkit</span>
+      <h1>Private image tools that run in your browser</h1>
+      <p>Compress, resize, convert, edit, inspect and generate images without uploading them. Every tool below has a real client-side handler and a tested download path.</p>
+      <div class="itk-meta tk-stats">
+        <span class="itk-chip">${IMPLEMENTED.length} implemented tools</span>
+        <span class="itk-chip">${EXPERIMENTAL.length} experimental</span>
+        <span class="itk-chip">No account</span>
+        <span class="itk-chip">No uploads</span>
+      </div>
+      <div class="tk-actions">
+        <a class="btn btn-lg" href="/image/studio/">Open Image Studio</a>
+        <a class="btn secondary" href="/">Browse all Bench tools</a>
+      </div>
+    </section>
   </div>
-  <p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
+  <aside class="tk-hero-side" aria-label="Toolkit highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Start here</span>
+      <h2>Pick a job, not a format</h2>
+      <a href="/image/compress/">Compress for web <span aria-hidden="true">→</span></a>
+      <a href="/image/resize/">Resize to exact pixels <span aria-hidden="true">→</span></a>
+      <a href="/image/studio/">Batch a whole folder <span aria-hidden="true">→</span></a>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">Good to know</span>
+      <p>Every result is created in this tab. Close the page and the files are gone.</p>
+    </section>
+  </aside>
 </section>
 
 ${hubQuickAnswer}
 
-<section class="itk-categories">
+<section class="tk-section-head">
+  <div>
+    <span class="tk-kicker">Tool directory</span>
+    <h2>${PUBLIC.length} tools grouped by what you need to do</h2>
+  </div>
+  <p>Choose a category below, or open Image Studio when one recipe should apply to every file.</p>
+</section>
+<section class="itk-categories tk-categories">
 ${categories}
 </section>
 
-<section class="toolbox itk-notice-box">
+<section class="toolbox itk-notice-box tk-notice">
+  <span class="tk-kicker">Before you start</span>
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real pixel work but have limited validation; their results should be checked before important use. Limits: ${esc(C.LIMITS.maxFileBytes / (1024 * 1024))} MB per file, ${esc((C.LIMITS.maxPixels / 1e6).toFixed(0))} megapixels per image, ${esc(C.LIMITS.maxFiles)} files per batch, and a maximum dimension of ${esc(C.LIMITS.maxDimension)} px.</p>
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>
 
-<section class="home-faq" aria-labelledby="image-faq-title">
-  <h2 id="image-faq-title">Quick answers about the image toolkit</h2>
+<section class="home-faq tk-faq" aria-labelledby="image-faq-title">
+  <div class="tk-section-head">
+    <div>
+      <span class="tk-kicker">Answers first</span>
+      <h2 id="image-faq-title">Quick answers about the image toolkit</h2>
+    </div>
+  </div>
   <div class="home-faq-grid">
     ${HUB_FAQ.map(({ q, a }) => `<article class="home-faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('\n    ')}
   </div>
@@ -227,34 +267,64 @@ const studioQuickAnswer = seo.quickAnswerHtml({
 });
 
 function studioBody() {
-  return `<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Image Toolkit</span>
-  <h1>Image Studio</h1>
-  <p>A three-step batch recipe for real work: add images, choose one set of export settings, then download every result or a ZIP. Everything runs locally — the files never leave your device.</p>
-  <div class="itk-meta"><span class="itk-chip">Up to ${esc(C.LIMITS.maxFiles)} files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div>
+  return `${pageBreadcrumb('Image Studio', { label: 'Image toolkit', url: '/image/' })}
+<section class="tk-hero tk-hero--studio">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head tk-head">
+      <span class="eyebrow">Bench Image Toolkit · Studio</span>
+      <h1>Image Studio</h1>
+      <p>A three-step batch recipe for real work: add images, choose one set of export settings, then download every result or a ZIP. Everything runs locally — the files never leave your device.</p>
+      <div class="itk-meta tk-stats"><span class="itk-chip">Up to ${esc(C.LIMITS.maxFiles)} files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div>
+      <div class="tk-actions"><a class="btn" href="#studio-workspace">Open the workspace</a><a class="btn secondary" href="/image/">Back to all image tools</a></div>
+    </section>
+  </div>
+  <aside class="tk-hero-side" aria-label="Studio highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Three steps</span>
+      <h2>One recipe, every file</h2>
+      <ol class="tk-step-list"><li><b>01</b> Add images</li><li><b>02</b> Choose a recipe</li><li><b>03</b> Export results</li></ol>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">Need one file only?</span>
+      <p>Use a single-purpose tool for a one-off crop, convert or compression job.</p>
+      <a href="/image/resize/">Open Resize Image <span aria-hidden="true">→</span></a>
+    </section>
+  </aside>
 </section>
 
 ${studioQuickAnswer}
 
-<section class="itk-grid itk-studio-static">
-  <div class="itk-panel">
-    <h2>1. Add images</h2>
+<section class="tk-section-head" id="studio-workspace">
+  <div>
+    <span class="tk-kicker">Workspace</span>
+    <h2>Prepare a consistent batch</h2>
+  </div>
+  <p>Static guide below. JavaScript mounts the interactive studio in the same two-pane layout.</p>
+</section>
+<section class="itk-grid itk-studio-static tk-studio-static">
+  <div class="itk-panel tk-panel">
+    <span class="tk-step-badge">01</span>
+    <h2>Add images</h2>
     <p>Drop JPEG, PNG, WebP, GIF, BMP, TIFF, AVIF or SVG files, or use the picker. The live studio shows each preview, dimensions and byte size before you run anything.</p>
-    <h2>2. Choose a recipe</h2>
+    <span class="tk-step-badge">02</span>
+    <h2>Choose a recipe</h2>
     <ul>
       <li>Output format: WebP, JPEG or PNG.</li>
       <li>Maximum width: 0 keeps the original size; the default is 1600 px.</li>
       <li>Square crop, quality, background colour and metadata stripping.</li>
     </ul>
-    <h2>3. Export</h2>
+    <span class="tk-step-badge">03</span>
+    <h2>Export</h2>
     <p>Download each successful result, or take one ZIP containing everything. Files that fail are listed separately and never replaced with a fake success.</p>
     <noscript><p><em>Enable JavaScript to use the interactive studio. The individual tool pages below also need JavaScript because all processing happens in your browser.</em></p></noscript>
   </div>
-  <div class="itk-panel">
-    <h2>Why a studio instead of another page?</h2>
+  <div class="itk-panel tk-panel">
+    <span class="tk-kicker">Why a studio?</span>
+    <h2>One pipeline, no duplicate pages</h2>
     <p>Batch resize, batch convert and batch compression share exactly the same decode → transform → encode pipeline. Folding them into one recipe avoids three thin, duplicate pages while keeping the individual single-purpose tools available.</p>
     <h2>Related tools</h2>
-    <div class="tool-links">
+    <div class="tool-links tk-links">
       <a href="/image/compress/">${icons.toolIcon('image', 'compress')} Image Compressor</a>
       <a href="/image/resize/">${icons.toolIcon('image', 'resize')} Resize Image</a>
       <a href="/image/convert/">${icons.toolIcon('image', 'convert')} Image Converter</a>
@@ -265,7 +335,8 @@ ${studioQuickAnswer}
   </div>
 </section>
 
-<section class="seo-section itk-seo">
+<section class="seo-section itk-seo tk-seo">
+  <span class="tk-kicker">Details</span>
   <h2>What Image Studio does</h2>
   <p>Image Studio applies one resize, format and quality recipe to several images at once. It is intended for preparing web images, marketplace photos and consistent documentation. It is not a photo editor: use the individual crop, annotate, watermark and adjustment tools for per-image edits.</p>
   <h2>Privacy &amp; security</h2>

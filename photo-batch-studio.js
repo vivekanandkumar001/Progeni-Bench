@@ -843,12 +843,12 @@
     const results = $("#pbs-results");
     if (!results) return;
     if (!state.files.length) {
-      results.innerHTML = '<p class="pbs-empty">Add files to scan for exact and perceptual duplicates. Any file type is accepted.</p>';
+      results.innerHTML = '<div class="pbs-empty pb-empty"><strong>No files scanned yet.</strong><span>Add files above to find exact copies and near-duplicate photos.</span></div>';
       renderErrors();
       return;
     }
     if (!state.groups.length) {
-      results.innerHTML = '<p class="pbs-empty">No duplicates found at the current similarity threshold. Raise the near-duplicate sensitivity to catch more.</p>';
+      results.innerHTML = '<div class="pbs-empty pb-empty"><strong>No duplicates found.</strong><span>Nothing matches at the current sensitivity. Raise the near-duplicate threshold to catch more copies.</span></div>';
       renderErrors();
       return;
     }
@@ -928,7 +928,10 @@
     const sel = $("#pbs-compare-n");
     const n = sel ? clamp(parseInt(sel.value, 10) || 4, 2, 6) : 4;
     const top = state.rank.slice(0, n);
-    if (!top.length) { el.innerHTML = ""; return; }
+    if (!top.length) {
+      el.innerHTML = '<div class="pbs-empty pb-empty bs-empty"><strong>No shots to compare yet.</strong><span>Add a burst above to see the top-ranked frames side by side.</span></div>';
+      return;
+    }
     el.innerHTML = top.map(function (it) {
       return '<figure class="pbs-cmp-fig">'
         + (it.thumb ? '<img src="' + it.thumb + '" alt="">' : '<span class="pbs-noimg">?</span>')
@@ -951,7 +954,7 @@
     const list = $("#pbs-results");
     if (!list) return;
     if (!state.photos.length) {
-      list.innerHTML = '<p class="pbs-empty">Add burst photos to rank them by sharpness, exposure and contrast. Everything is scored locally.</p>';
+      list.innerHTML = '<div class="pbs-empty pb-empty bs-empty"><strong>No photos ranked yet.</strong><span>Add a burst of images above to see local sharpness, exposure and contrast scores.</span></div>';
       compareMarkup();
       renderErrors();
       return;
@@ -1319,6 +1322,94 @@
     if (cmpN) cmpN.addEventListener("change", compareMarkup);
   }
 
+  /* ---------------------------------------------------- dedupe shell */
+
+  function dedupeMarkup(tip) {
+    return '<div class="pb-workspace">'
+      + '<section class="pb-panel pb-setup" aria-labelledby="pb-setup-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">01</span><div>'
+      + '<h2 id="pb-setup-title">Scan settings</h2>'
+      + '<p>Choose how strictly files are matched. Every hash is computed locally.</p>'
+      + '</div></div>'
+      + '<p class="pbs-tip">' + tip + '</p>'
+      + dedupeControls()
+      + '<div class="st-progress" id="pbs-progress" hidden>'
+      + '<div class="st-progress-fill" id="pbs-progress-fill"></div>'
+      + '<div class="st-progress-label" id="pbs-progress-label"></div></div>'
+      + '</section>'
+      + '<aside class="pb-panel pb-guide" aria-labelledby="pb-guide-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">02</span><div>'
+      + '<h2 id="pb-guide-title">How review works</h2>'
+      + '<p>Tick the copies you want to remove, not the keeper.</p>'
+      + '</div></div>'
+      + '<ol class="cs-steps">'
+      + '<li><strong>Exact byte match</strong><span>Files with identical content are grouped by SHA-256, even when filenames differ.</span></li>'
+      + '<li><strong>Near-duplicate scan</strong><span>aHash and dHash compare resized or recompressed photos at the chosen sensitivity.</span></li>'
+      + '<li><strong>Review and export</strong><span>The recommended original is marked Keep. Export a CSV or standalone HTML cleanup report.</span></li>'
+      + '</ol>'
+      + '<p class="cs-privacy"><strong>100% local.</strong> Hashing and thumbnails stay in this browser tab — no file is uploaded.</p>'
+      + '</aside>'
+      + '<section class="pb-panel pb-results" aria-labelledby="pb-results-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">03</span><div>'
+      + '<h2 id="pb-results-title">Duplicate groups</h2>'
+      + '<p>Review each set below and choose which copies to remove.</p>'
+      + '</div><span class="pb-status" id="pbs-meta" aria-live="polite">No files loaded yet.</span></div>'
+      + '<div class="stats pb-stats" id="pbs-stats"></div>'
+      + '<div class="pbs-results" id="pbs-results"></div>'
+      + '<div class="pbs-errors" id="pbs-errors"></div>'
+      + '</section>'
+      + '<div class="studio-bar pb-bar">' + barMarkup() + '</div>'
+      + '</div>';
+  }
+
+  function bestMarkup(tip) {
+    return '<div class="pb-workspace">'
+      + '<section class="pb-panel bs-setup" aria-labelledby="bs-setup-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">01</span><div>'
+      + '<h2 id="bs-setup-title">Scoring weights</h2>'
+      + '<p>Tune what matters most for this burst. Scores update instantly.</p>'
+      + '</div></div>'
+      + '<p class="pbs-tip">' + tip + '</p>'
+      + bestControls()
+      + '<div class="st-progress" id="pbs-progress" hidden>'
+      + '<div class="st-progress-fill" id="pbs-progress-fill"></div>'
+      + '<div class="st-progress-label" id="pbs-progress-label"></div></div>'
+      + '</section>'
+      + '<aside class="pb-panel pb-guide bs-guide" aria-labelledby="bs-guide-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">02</span><div>'
+      + '<h2 id="bs-guide-title">What the score means</h2>'
+      + '<p>Three local measurements are blended into one 0–100 score.</p>'
+      + '</div></div>'
+      + '<ol class="cs-steps">'
+      + '<li><strong>Sharpness</strong><span>Variance of Laplacian edges on an aspect-preserving 256 px downsample catches motion blur and soft focus.</span></li>'
+      + '<li><strong>Exposure</strong><span>Clipped highlights and crushed shadows are penalised so blown-out frames do not win.</span></li>'
+      + '<li><strong>Contrast</strong><span>Overall tonal separation rewards punchy frames and keeps flat shots from ranking too high.</span></li>'
+      + '</ol>'
+      + '<p class="cs-privacy"><strong>100% local.</strong> Pixels are analysed in your browser — no photo is uploaded.</p>'
+      + '</aside>'
+      + '<section class="pb-panel bs-compare-panel" aria-labelledby="bs-compare-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">03</span><div>'
+      + '<h2 id="bs-compare-title">Compare the top shots</h2>'
+      + '<p>See the highest-ranked frames side by side before choosing a keeper.</p>'
+      + '</div><div class="pbs-compare-head"><span>Compare top</span>'
+      + '<select id="pbs-compare-n" aria-label="Number of photos to compare">'
+      + '<option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option>'
+      + '</select></div></div>'
+      + '<div class="pbs-compare" id="pbs-compare"></div>'
+      + '</section>'
+      + '<section class="pb-panel pb-results bs-results" aria-labelledby="bs-results-title">'
+      + '<div class="pb-panel-head"><span class="pb-panel-num">04</span><div>'
+      + '<h2 id="bs-results-title">Full ranking</h2>'
+      + '<p>Every scored photo appears below with its sharpness, exposure and contrast breakdown.</p>'
+      + '</div><span class="pb-status" id="pbs-meta" aria-live="polite">No files loaded yet.</span></div>'
+      + '<div class="stats pb-stats bs-stats" id="pbs-stats"></div>'
+      + '<div class="pbs-results" id="pbs-results"></div>'
+      + '<div class="pbs-errors" id="pbs-errors"></div>'
+      + '</section>'
+      + '<div class="studio-bar pb-bar bs-bar">' + barMarkup() + '</div>'
+      + '</div>';
+  }
+
   /* --------------------------------------------------------------- mount */
 
   function mount(el, options) {
@@ -1346,26 +1437,8 @@
       ? "Exact duplicates are matched with SHA-256 inside a Web Worker; near-duplicates use aHash/dHash perceptual distance. Nothing is uploaded \u2014 files never leave this tab."
       : "Sharpness is variance-of-Laplacian on an aspect-preserving 256 px downsample (never stretched), combined with an exposure/clipping penalty and a contrast term. All local.";
 
-    const compare = state.mode === "best-shot"
-      ? '<div class="pbs-compare-head"><span>Compare top</span>'
-        + '<select id="pbs-compare-n" aria-label="Number of photos to compare">'
-        + '<option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>'
-        + '</div><div class="pbs-compare" id="pbs-compare"></div>'
-      : "";
-
-    root.className = "studio pbs-studio";
-    root.innerHTML =
-      '<p class="pbs-tip">' + tip + '</p>'
-      + (state.mode === "dedupe" ? dedupeControls() : bestControls())
-      + '<div class="st-progress" id="pbs-progress" hidden>'
-      + '<div class="st-progress-fill" id="pbs-progress-fill"></div>'
-      + '<div class="st-progress-label" id="pbs-progress-label"></div></div>'
-      + '<div class="stats" id="pbs-stats"></div>'
-      + compare
-      + '<div class="pbs-results" id="pbs-results"></div>'
-      + '<div class="pbs-errors" id="pbs-errors"></div>'
-      + '<div class="studio-bar"><div class="studio-meta" id="pbs-meta" aria-live="polite">No files loaded yet.</div>'
-      + barMarkup() + '</div>';
+    root.className = "studio pbs-studio" + (state.mode === "dedupe" ? " pbs-studio--dedupe" : " pbs-studio--best");
+    root.innerHTML = state.mode === "dedupe" ? dedupeMarkup(tip) : bestMarkup(tip);
 
     syncControls();
     bindControls();

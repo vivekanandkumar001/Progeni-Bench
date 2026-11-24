@@ -30,7 +30,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <link rel="stylesheet" href="/styles.css?v=a97f42b8">
   <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/image/studio/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -92,7 +92,7 @@
             <section class="mega-group mega-group--hubs">
               <h3>Toolkits &amp; hubs</h3>
               <p>Jump straight into a full suite.</p>
-              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
             </section>
             </div>
             <div class="mega-foot">
@@ -113,7 +113,7 @@
         <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-panel menu-panel" id="nav-studios" hidden>
           <span class="mega-eyebrow">Batch workflows</span>
-          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
         </div>
       </div>
       <a href="/about/" class="nav-link">About</a>
@@ -139,12 +139,31 @@
   </div>
 </header>
 
-<main id="app" class="container" tabindex="-1">
-<section class="tool-head itk-head">
-  <span class="eyebrow">Bench Image Toolkit</span>
-  <h1>Image Studio</h1>
-  <p>A three-step batch recipe for real work: add images, choose one set of export settings, then download every result or a ZIP. Everything runs locally — the files never leave your device.</p>
-  <div class="itk-meta"><span class="itk-chip">Up to 30 files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div>
+<main id="app" class="container tk-page tk-page--image" tabindex="-1">
+<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/image/">Image toolkit</a> <span aria-hidden="true">/</span> <span aria-current="page">Image Studio</span></nav>
+<section class="tk-hero tk-hero--studio">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head tk-head">
+      <span class="eyebrow">Bench Image Toolkit · Studio</span>
+      <h1>Image Studio</h1>
+      <p>A three-step batch recipe for real work: add images, choose one set of export settings, then download every result or a ZIP. Everything runs locally — the files never leave your device.</p>
+      <div class="itk-meta tk-stats"><span class="itk-chip">Up to 30 files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div>
+      <div class="tk-actions"><a class="btn" href="#studio-workspace">Open the workspace</a><a class="btn secondary" href="/image/">Back to all image tools</a></div>
+    </section>
+  </div>
+  <aside class="tk-hero-side" aria-label="Studio highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Three steps</span>
+      <h2>One recipe, every file</h2>
+      <ol class="tk-step-list"><li><b>01</b> Add images</li><li><b>02</b> Choose a recipe</li><li><b>03</b> Export results</li></ol>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">Need one file only?</span>
+      <p>Use a single-purpose tool for a one-off crop, convert or compression job.</p>
+      <a href="/image/resize/">Open Resize Image <span aria-hidden="true">→</span></a>
+    </section>
+  </aside>
 </section>
 
 <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
@@ -159,25 +178,36 @@
   </dl>
 </aside>
 
-<section class="itk-grid itk-studio-static">
-  <div class="itk-panel">
-    <h2>1. Add images</h2>
+<section class="tk-section-head" id="studio-workspace">
+  <div>
+    <span class="tk-kicker">Workspace</span>
+    <h2>Prepare a consistent batch</h2>
+  </div>
+  <p>Static guide below. JavaScript mounts the interactive studio in the same two-pane layout.</p>
+</section>
+<section class="itk-grid itk-studio-static tk-studio-static">
+  <div class="itk-panel tk-panel">
+    <span class="tk-step-badge">01</span>
+    <h2>Add images</h2>
     <p>Drop JPEG, PNG, WebP, GIF, BMP, TIFF, AVIF or SVG files, or use the picker. The live studio shows each preview, dimensions and byte size before you run anything.</p>
-    <h2>2. Choose a recipe</h2>
+    <span class="tk-step-badge">02</span>
+    <h2>Choose a recipe</h2>
     <ul>
       <li>Output format: WebP, JPEG or PNG.</li>
       <li>Maximum width: 0 keeps the original size; the default is 1600 px.</li>
       <li>Square crop, quality, background colour and metadata stripping.</li>
     </ul>
-    <h2>3. Export</h2>
+    <span class="tk-step-badge">03</span>
+    <h2>Export</h2>
     <p>Download each successful result, or take one ZIP containing everything. Files that fail are listed separately and never replaced with a fake success.</p>
     <noscript><p><em>Enable JavaScript to use the interactive studio. The individual tool pages below also need JavaScript because all processing happens in your browser.</em></p></noscript>
   </div>
-  <div class="itk-panel">
-    <h2>Why a studio instead of another page?</h2>
+  <div class="itk-panel tk-panel">
+    <span class="tk-kicker">Why a studio?</span>
+    <h2>One pipeline, no duplicate pages</h2>
     <p>Batch resize, batch convert and batch compression share exactly the same decode → transform → encode pipeline. Folding them into one recipe avoids three thin, duplicate pages while keeping the individual single-purpose tools available.</p>
     <h2>Related tools</h2>
-    <div class="tool-links">
+    <div class="tool-links tk-links">
       <a href="/image/compress/"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 10l7-7m-1 7h-6V4M3 21l7-7m-6 0h6v6"/></svg> Image Compressor</a>
       <a href="/image/resize/"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M14 15H9v-5m7-7h5v5m0-5L9 15"/></g></svg> Resize Image</a>
       <a href="/image/convert/"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9a9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5m5 4a9 9 0 0 1-9 9a9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></g></svg> Image Converter</a>
@@ -188,7 +218,8 @@
   </div>
 </section>
 
-<section class="seo-section itk-seo">
+<section class="seo-section itk-seo tk-seo">
+  <span class="tk-kicker">Details</span>
   <h2>What Image Studio does</h2>
   <p>Image Studio applies one resize, format and quality recipe to several images at once. It is intended for preparing web images, marketplace photos and consistent documentation. It is not a photo editor: use the individual crop, annotate, watermark and adjustment tools for per-image edits.</p>
   <h2>Privacy &amp; security</h2>

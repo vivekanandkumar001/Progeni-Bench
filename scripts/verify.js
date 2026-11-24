@@ -52,7 +52,7 @@ try {
 
 // C03: dist/ contains required files
 const reqFiles = [
-  '_headers', '_redirects', 'vercel.json', 'utils.js', 'app.js', 'styles.css',
+  '_headers', '_redirects', 'utils.js', 'app.js', 'styles.css',
   'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'about/index.html',
   'contact/index.html', 'privacy/index.html', 'terms/index.html', '404.html'
 ];
@@ -326,16 +326,17 @@ if (disallowed.length === 0) {
   addResult('C18', 'FAIL', `disallowed: ${disallowed.join(', ')}`);
 }
 
-// C19: netlify.toml & _redirects & vercel.json
+// C19: wrangler.toml, netlify.toml & _redirects
+const wrangler = fs.readFileSync(path.join(ROOT, 'wrangler.toml'), 'utf8');
+const wranglerPass = wrangler.includes('pages_build_output_dir = "dist"');
 const netlify = fs.readFileSync(path.join(ROOT, 'netlify.toml'), 'utf8');
 const netlifyPass = netlify.includes('publish = "dist"') && netlify.includes('command = "npm run build"');
 const redirects = fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8').trim();
 const redirectsPass = redirects.endsWith('404');
-const vercelPass = fs.existsSync(path.join(ROOT, 'vercel.json'));
-if (netlifyPass && redirectsPass && vercelPass) {
-  addResult('C19', 'PASS', 'netlify.toml, _redirects, vercel.json valid');
+if (wranglerPass && netlifyPass && redirectsPass) {
+  addResult('C19', 'PASS', 'wrangler.toml, netlify.toml, _redirects valid');
 } else {
-  addResult('C19', 'FAIL', `netlify=${netlifyPass} redirects=${redirectsPass} vercel=${vercelPass}`);
+  addResult('C19', 'FAIL', `wrangler=${wranglerPass} netlify=${netlifyPass} redirects=${redirectsPass}`);
 }
 
 // C20: Forbidden leftovers
@@ -780,7 +781,7 @@ const lowest3 = toolWordCounts.slice(0, 3).map(t => `${t.tool}=${t.count}`).join
 const c39Failed = toolWordCounts.filter(t => t.count < 120);
 const expectedSeoPageCount = TOOLS.length +
   imageConfig.TOOLS.filter(t => t.status === 'implemented').length +
-  audioConfig.TOOLS.filter(t => t.status === 'implemented').length + 1;
+  audioConfig.TOOLS.filter(t => t.status === 'implemented').length + 2;
 if (c39Failed.length === 0 && toolWordCounts.length === expectedSeoPageCount) {
   addResult('C39', 'PASS', `all ${toolWordCounts.length} indexable tool pages >= 120 unique words; lowest: ${lowest3}`);
 } else {
@@ -1113,9 +1114,7 @@ const homeForLlms = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8
 if (!homeForLlms.includes('/llms.txt')) c48Issues.push('home missing /llms.txt discovery link');
 if (!homeForLlms.includes('/llms-full.txt')) c48Issues.push('home missing /llms-full.txt discovery link');
 const headersForLlms = fs.readFileSync(path.join(ROOT, '_headers'), 'utf8');
-const vercelForLlms = fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8');
 if (!headersForLlms.includes('/llms.txt')) c48Issues.push('_headers missing llms Link');
-if (!vercelForLlms.includes('/llms.txt')) c48Issues.push('vercel.json missing llms Link');
 if (c48Issues.length === 0) {
   addResult('C48', 'PASS', 'llms.txt/llms-full.txt complete; AI crawlers allowed; discovery links present');
 } else {
@@ -1214,30 +1213,18 @@ if (c51Issues.length === 0 && lastmodDates.size >= 2) {
   addResult('C51', 'FAIL', c51Issues.length ? c51Issues.slice(0, 4).join('; ') : 'all sitemap entries share one lastmod');
 }
 
-// C52: Host canonicalization redirects exist on Vercel and Netlify/Cloudflare.
-const vercelConfigPath = path.join(ROOT, 'vercel.json');
+// C52: Host canonicalization redirects exist for Cloudflare Pages (_redirects).
 const redirectsFilePath = path.join(ROOT, '_redirects');
-let c52Vercel = false;
 let c52Edge = false;
-try {
-  const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, 'utf8'));
-  const redirects = vercelConfig.redirects || [];
-  const isHttpsRedirect = r => (r.has || []).some(h => h.type === 'header' && h.key === 'x-forwarded-proto' && h.value === 'http');
-  const isWwwRedirect = r => (r.has || []).some(h => h.type === 'host' && /www\.bench\.progeni\.live/i.test(h.value || ''));
-  c52Vercel = redirects.some(isHttpsRedirect) && redirects.some(isWwwRedirect) &&
-    redirects.every(r => !r.destination || r.destination.startsWith('https://bench.progeni.live'));
-} catch (e) {
-  c52Vercel = false;
-}
 if (fs.existsSync(redirectsFilePath)) {
   const edge = fs.readFileSync(redirectsFilePath, 'utf8');
   c52Edge = /http:\/\/bench\.progeni\.live\/\*\s+https:\/\/bench\.progeni\.live\/:splat\s+301!/i.test(edge) &&
             /https?:\/\/www\.bench\.progeni\.live\/\*\s+https:\/\/bench\.progeni\.live\/:splat\s+301!/i.test(edge);
 }
-if (c52Vercel && c52Edge) {
-  addResult('C52', 'PASS', 'http->https and www->apex 301 redirects configured for Vercel and edge');
+if (c52Edge) {
+  addResult('C52', 'PASS', 'http->https and www->apex 301 redirects configured for Cloudflare edge (_redirects)');
 } else {
-  addResult('C52', 'FAIL', `vercel redirects=${c52Vercel}, edge redirects=${c52Edge}`);
+  addResult('C52', 'FAIL', `edge redirects=${c52Edge}`);
 }
 
 // C53: The browser runtimes must reuse the generated copy instead of restoring

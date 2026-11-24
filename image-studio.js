@@ -1211,37 +1211,69 @@
       '<optgroup label="' + esc(g) + '">' + groups[g].map(k => '<option value="' + k + '">' + esc(RATIO_PRESETS[k].label) + "</option>").join("") + "</optgroup>"
     ).join("") + '<option value="custom">Custom ratio…</option>';
     return `
-      <div class="studio-controls ims-controls">
-        <label class="st-field"><span>Device / ratio preset</span><select id="ims-ratio" aria-label="Crop ratio preset">${opts}</select></label>
-        <label class="st-field" id="ims-ratio-custom" hidden><span>Custom ratio W : H</span>
-          <span class="ims-inline"><input type="number" id="ims-customRW" min="1" step="1" value="9" aria-label="Custom ratio width">
-          : <input type="number" id="ims-customRH" min="1" step="1" value="16" aria-label="Custom ratio height"></span>
-        </label>
-        <label class="st-field" id="ims-px-wrap" hidden><span>Custom pixels W × H</span>
-          <span class="ims-inline"><input type="number" id="ims-customW" min="16" step="1" value="1170" aria-label="Custom output width">
-          × <input type="number" id="ims-customH" min="16" step="1" value="2532" aria-label="Custom output height"></span>
-        </label>
-        <label class="st-field"><span>Fill mode</span>
-          <select id="ims-fillmode" aria-label="Fill mode">
-            <option value="cover">Cover crop (focal point)</option>
-            <option value="blur">Blur padding (no crop loss)</option>
-          </select>
-        </label>
-        <label class="st-field"><span>Export format</span>
-          <select id="ims-format" aria-label="Export format"><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select>
-        </label>
-        <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
-          <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="Export quality"></label>
-        <label class="st-field"><span>Output</span><b id="ims-px-v">1170 × 2532 px</b></label>
-      </div>
-      <div class="ims-canvas-wrap">
-        <canvas id="ims-canvas" aria-label="Wallpaper crop preview"></canvas>
-      </div>
-      <div class="ims-report" id="ims-report"></div>
-      <div class="studio-side">
-        <input type="file" id="ims-file" class="ims-hidden-file" accept="image/*" multiple aria-label="Add image files">
-        <button type="button" class="btn secondary" id="ims-ratio-reset">Reset focal point to centre</button>
-        <div class="studio-strip" id="ims-strip"></div>
+      <div class="ims-wp-layout">
+        <section class="ims-panel ims-wp-setup" aria-labelledby="ims-wp-setup-title">
+          <div class="ims-panel-head">
+            <span class="ims-panel-num">01</span>
+            <div><h2 id="ims-wp-setup-title">Choose your wallpaper size</h2><p>Start with a device preset, or enter an exact ratio and pixel size.</p></div>
+          </div>
+          <div class="studio-controls ims-controls">
+            <label class="st-field"><span>Device / ratio preset</span><select id="ims-ratio" aria-label="Crop ratio preset">${opts}</select></label>
+            <label class="st-field" id="ims-ratio-custom" hidden><span>Custom ratio W : H</span>
+              <span class="ims-inline"><input type="number" id="ims-customRW" min="1" step="1" value="9" aria-label="Custom ratio width">
+              : <input type="number" id="ims-customRH" min="1" step="1" value="16" aria-label="Custom ratio height"></span>
+            </label>
+            <label class="st-field" id="ims-px-wrap" hidden><span>Custom pixels W × H</span>
+              <span class="ims-inline"><input type="number" id="ims-customW" min="16" step="1" value="1170" aria-label="Custom output width">
+              × <input type="number" id="ims-customH" min="16" step="1" value="2532" aria-label="Custom output height"></span>
+            </label>
+            <label class="st-field"><span>Fill mode</span>
+              <select id="ims-fillmode" aria-label="Fill mode">
+                <option value="cover">Cover crop (focal point)</option>
+                <option value="blur">Blur padding (no crop loss)</option>
+              </select>
+            </label>
+            <label class="st-field"><span>Export format</span>
+              <select id="ims-format" aria-label="Export format"><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select>
+            </label>
+            <label class="st-field st-slider"><span>Quality <b id="ims-quality-v">92%</b></span>
+              <input type="range" id="ims-quality" min="30" max="100" step="1" value="92" aria-label="Export quality"></label>
+            <label class="st-field ims-wp-output"><span>Output size</span><b id="ims-px-v">1170 × 2532 px</b></label>
+          </div>
+        </section>
+        <aside class="ims-panel ims-wp-guide" aria-labelledby="ims-wp-guide-title">
+          <div class="ims-panel-head">
+            <span class="ims-panel-num">02</span>
+            <div><h2 id="ims-wp-guide-title">Frame the subject</h2><p>Drag the crop box so faces and details stay in view.</p></div>
+          </div>
+          <ol class="ims-guide-steps">
+            <li><strong>Pick a preset</strong><span>Phone, tablet, desktop and social ratios are built in.</span></li>
+            <li><strong>Drag the focal point</strong><span>Cover crop trims the edges; blur padding keeps the whole image.</span></li>
+            <li><strong>Export for your screen</strong><span>PNG, JPEG or WebP at the exact output size shown above.</span></li>
+          </ol>
+          <p class="ims-privacy"><strong>100% local.</strong> Photos stay in your browser — no upload, no storage.</p>
+        </aside>
+        <section class="ims-panel ims-wp-preview" aria-labelledby="ims-wp-preview-title">
+          <div class="ims-panel-head">
+            <span class="ims-panel-num">03</span>
+            <div><h2 id="ims-wp-preview-title">Live crop preview</h2><p>Drag on the canvas to reposition the crop before downloading.</p></div>
+          </div>
+          <div class="ims-canvas-wrap">
+            <canvas id="ims-canvas" aria-label="Wallpaper crop preview"></canvas>
+          </div>
+          <div class="ims-report" id="ims-report"></div>
+        </section>
+        <section class="ims-panel ims-wp-files" aria-labelledby="ims-wp-files-title">
+          <div class="ims-panel-head">
+            <span class="ims-panel-num">04</span>
+            <div><h2 id="ims-wp-files-title">Photos in this batch</h2><p>Choose an image to preview. Download all applies the same ratio to every photo.</p></div>
+          </div>
+          <div class="studio-side">
+            <input type="file" id="ims-file" class="ims-hidden-file" accept="image/*" multiple aria-label="Add image files">
+            <button type="button" class="btn secondary" id="ims-ratio-reset">Reset focal point to centre</button>
+            <div class="studio-strip" id="ims-strip"></div>
+          </div>
+        </section>
       </div>`;
   }
 

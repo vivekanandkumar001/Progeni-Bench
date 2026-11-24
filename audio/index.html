@@ -30,7 +30,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <link rel="stylesheet" href="/styles.css?v=a97f42b8">
   <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/audio/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -92,7 +92,7 @@
             <section class="mega-group mega-group--hubs">
               <h3>Toolkits &amp; hubs</h3>
               <p>Jump straight into a full suite.</p>
-              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
             </section>
             </div>
             <div class="mega-foot">
@@ -113,7 +113,7 @@
         <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-panel menu-panel" id="nav-studios" hidden>
           <span class="mega-eyebrow">Batch workflows</span>
-          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
         </div>
       </div>
       <a href="/about/" class="nav-link">About</a>
@@ -139,18 +139,41 @@
   </div>
 </header>
 
-<main id="app" class="container" tabindex="-1">
-<section class="tool-head itk-head atk-head">
-  <span class="eyebrow">Bench Audio Toolkit</span>
-  <h1>Private audio tools that run in your browser</h1>
-  <p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
-  <div class="itk-meta">
-    <span class="itk-chip">43 implemented tools</span>
-    <span class="itk-chip">5 experimental</span>
-    <span class="itk-chip">No account</span>
-    <span class="itk-chip">No uploads</span>
+<main id="app" class="container tk-page tk-page--audio" tabindex="-1">
+<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Audio toolkit</span></nav>
+<section class="tk-hero tk-hero--hub">
+  <div class="tk-hero-main">
+    <section class="tool-head itk-head atk-head tk-head">
+      <span class="eyebrow">Bench Audio Toolkit</span>
+      <h1>Private audio tools that run in your browser</h1>
+      <p>Convert, compress, trim, join, clean, record, analyse and inspect audio without uploading it. Every tool below has a real client-side handler and a tested download path. Tools that are not ready are labelled honestly instead of pretending to work.</p>
+      <div class="itk-meta tk-stats">
+        <span class="itk-chip">43 implemented tools</span>
+        <span class="itk-chip">5 experimental</span>
+        <span class="itk-chip">No account</span>
+        <span class="itk-chip">No uploads</span>
+      </div>
+      <div class="tk-actions">
+        <a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a>
+        <a class="btn secondary" href="/audio/studio/">Open Audio Studio</a>
+        <a class="btn secondary" href="/">Browse all Bench tools</a>
+      </div>
+    </section>
   </div>
-  <p><a class="btn btn-lg" href="/audio/trimmer/">Start with the Audio Trimmer</a> <a class="btn secondary" href="/">Browse all Bench tools</a></p>
+  <aside class="tk-hero-side" aria-label="Toolkit highlights">
+    <span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+    <section class="tk-start-card">
+      <span class="tk-kicker">Start here</span>
+      <h2>Pick a job, not a codec</h2>
+      <a href="/audio/trimmer/">Trim a clip <span aria-hidden="true">→</span></a>
+      <a href="/audio/convert/">Convert a format <span aria-hidden="true">→</span></a>
+      <a href="/audio/studio/">Run a studio chain <span aria-hidden="true">→</span></a>
+    </section>
+    <section class="tk-start-card tk-start-card--quiet">
+      <span class="tk-kicker">How it runs</span>
+      <p>Web Audio for simple edits, same-origin FFmpeg.wasm for heavy filters. Your audio bytes stay on this device.</p>
+    </section>
+  </aside>
 </section>
 
 <aside class="quick-answer" id="quick-answer" aria-labelledby="quick-answer-title">
@@ -165,7 +188,14 @@
   </dl>
 </aside>
 
-<section class="itk-categories">
+<section class="tk-section-head">
+  <div>
+    <span class="tk-kicker">Tool directory</span>
+    <h2>48 tools grouped by what you need to do</h2>
+  </div>
+  <p>Every card opens a working tool. Experimental results are labelled and should be checked before important use.</p>
+</section>
+<section class="itk-categories tk-categories">
 <section class="itk-category">
   <div class="itk-category-head">
     <h2>Convert &amp; Compress</h2>
@@ -450,7 +480,8 @@
 </section>
 </section>
 
-<section class="toolbox itk-notice-box">
+<section class="toolbox itk-notice-box tk-notice">
+  <span class="tk-kicker">Before you start</span>
   <h2>Status and limits</h2>
   <p>Implemented tools are covered by automated tests and produce real files. Experimental tools run real signal processing but have documented quality caveats; their results should be checked before important use. Limits: 100 MB per file, 30 minutes per file, 20 files per batch. Conversion and complex filters use a 31 MB FFmpeg engine downloaded once and cached.</p>
   <h2>How processing works</h2>
@@ -461,8 +492,13 @@
   <p class="itk-muted">Looking for the older file utilities? <a href="/">Browse the full Bench directory</a>.</p>
 </section>
 
-<section class="home-faq" aria-labelledby="audio-faq-title">
-  <h2 id="audio-faq-title">Quick answers about the audio toolkit</h2>
+<section class="home-faq tk-faq" aria-labelledby="audio-faq-title">
+  <div class="tk-section-head">
+    <div>
+      <span class="tk-kicker">Answers first</span>
+      <h2 id="audio-faq-title">Quick answers about the audio toolkit</h2>
+    </div>
+  </div>
   <div class="home-faq-grid">
     <article class="home-faq-item"><h3>Are my audio files uploaded when I use the Bench Audio Toolkit?</h3><p>No. Decoding, editing and encoding run inside your browser. Conversion and heavy filters use a same-origin FFmpeg.wasm engine that runs on your device; audio bytes are never sent to Bench or a third party.</p></article>
     <article class="home-faq-item"><h3>How many audio tools are available?</h3><p>48 public audio tools are available: 43 implemented tools and 5 experimental tools. Tools that need a model or an unreliable browser API are listed as deferred or unavailable instead of being faked.</p></article>

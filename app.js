@@ -1414,65 +1414,70 @@ async function panorama(f, rs) {
   const partsDefault = partsEl ? parseInt(partsEl.value, 10) : 3;
   const parts = Math.max(2, Math.min(6, partsDefault || 3));
 
-  const tileW = im.width / parts;
-  const tileH = im.height / parts; // keep aspect per row; overall sheets stay rectangular
-
-  // If the user wants square tiles, compute max parts that keeps height >= width per tile
-  const requestedSquare = true;
-  let actualParts = parts;
-  let tileWidth, tileHeight;
-  if (requestedSquare) {
-    // Max parts such that tileHeight (im.height / parts) >= tileWidth (im.width / parts)
-    // i.e. parts <= sqrt(im.height / im.width * parts) ... simpler: just check if we can do square
-    const maxSquareParts = Math.floor(im.height / im.width * parts);
-    actualParts = Math.max(2, Math.min(parts, maxSquareParts > 0 ? maxSquareParts : 2));
-    tileWidth = Math.floor(im.width / actualParts);
-    tileHeight = Math.floor(im.height / actualParts);
-  } else {
-    tileWidth = Math.floor(im.width / actualParts);
-    tileHeight = Math.floor(im.height / actualParts);
-  }
+  // Square carousel tiles: cap the count at how many full-height squares fit
+  // across the source, then slice adjacent crops from left to right.
+  const maxSquareParts = Math.max(2, Math.floor(im.width / Math.max(1, im.height)));
+  const actualParts = Math.max(2, Math.min(parts, maxSquareParts));
+  const tileWidth = Math.max(1, Math.floor(im.width / actualParts));
+  const tileHeight = Math.max(1, Math.min(tileWidth, im.height));
+  const sourceY = Math.max(0, Math.floor((im.height - tileHeight) / 2));
 
   const c = document.createElement("canvas"), ctx = c.getContext("2d");
-
-  let html = `<div class="notice">Panorama split into <strong>${actualParts}</strong> tile${actualParts !== 1 ? "s" : ""}${
-    requestedSquare ? " (square)" : ""
-  }</strong>:</div>`;
-
-  // Check if square tiles fit
-  if (tileHeight > im.height) {
-    html = `<div class="warn">Cannot yield square tiles (tile height ${tileHeight}px > image height ${im.height}px). Using rectangular tiles with per-row aspect ratio.</div>`;
-    // Fall back to rectangular: each row gets its portion, tiles are width-justified
-    tileWidth = Math.floor(im.width / parts);
-    tileHeight = Math.floor(im.height / parts);
-  }
-
-  html += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;" id="pg"></div>`;
-  rs.innerHTML = html;
   const tileBlobs = [];
+  const warned = tileWidth > im.height;
+
   for (let i = 0; i < actualParts; i++) {
     c.width = tileWidth;
     c.height = tileHeight;
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.drawImage(im, i * tileWidth, 0, tileWidth, im.height, 0, 0, c.width, c.height);
-    let b = await canvasBlob(c);
-    tileBlobs.push(b);
-    let img = document.createElement("img");
-    img.src = URL.createObjectURL(b);
-    img.alt = `Panorama tile ${i + 1} of ${actualParts}`;
-    img.style.width = "28%"; img.style.borderRadius = "8px"; img.style.cursor = "pointer";
-    img.title = `Click to download Tile ${i + 1}`;
-    img.onclick = () => downloadBlob(b, `panorama-tile-${i + 1}.png`);
-    $("#pg").appendChild(img);
+    ctx.drawImage(im, i * tileWidth, sourceY, tileWidth, tileHeight, 0, 0, c.width, c.height);
+    tileBlobs.push(await canvasBlob(c));
   }
-  let dlAll = document.createElement("button");
-  dlAll.className = "btn";
-  dlAll.id = "dl-all-tiles";
-  dlAll.textContent = `Download All ${actualParts} Tiles`;
-  rs.appendChild(dlAll);
+
+  const rsEl = $("#result"); if (rsEl) rsEl.classList.add("pg-result");
+  const ez = $("#pg-empty"); if (ez) ez.hidden = true;
+  const tileCards = tileBlobs.map((blob, i) => `
+    <figure class="pg-tile">
+      <button type="button" class="pg-tile-media" data-tile="${i}" aria-label="Download tile ${i + 1}">
+        <img src="${URL.createObjectURL(blob)}" alt="Panorama tile ${i + 1} of ${tileBlobs.length}">
+      </button>
+      <figcaption class="pg-tile-foot">
+        <span class="pg-tile-num">Tile ${i + 1}</span>
+        <button type="button" class="btn secondary btn-sm" data-tile="${i}">Download</button>
+      </figcaption>
+    </figure>
+  `).join("");
+
+  rs.innerHTML = `
+    <div class="pg-result-head">
+      <div><h2>Panorama sliced</h2><p>Tiles are ready to download in order — click any preview to save that slide.</p></div>
+      <span class="pg-chip">${tileBlobs.length} tile${tileBlobs.length === 1 ? "" : "s"}</span>
+    </div>
+    <div class="pg-summary">
+      <div><b>${im.width} × ${im.height}</b><span>Source pixels</span></div>
+      <div><b>${tileWidth} × ${tileHeight}</b><span>Each tile</span></div>
+      <div><b>${tileBlobs.length}</b><span>Carousel slides</span></div>
+    </div>
+    ${warned ? `<div class="pg-warn">Tiles use the full image height, so each slide is slightly wider than it is tall.</div>` : ""}
+    ${actualParts !== parts ? `<div class="pg-note">The requested count was adjusted to fit this image's proportions.</div>` : ""}
+    <section class="pg-list">
+      <div class="pg-section-head"><h3>Carousel tiles</h3><p>Click a tile or use its Download button. Files are named in slide order.</p></div>
+      <div class="pg-tiles" id="pg">${tileCards}</div>
+    </section>
+    <div class="pg-actions">
+      <button class="btn" id="dl-all-tiles">Download all ${tileBlobs.length} tiles</button>
+      <span>Each tile is a high-resolution PNG · saved locally from your browser</span>
+    </div>
+  `;
+
+  const downloadTile = i => downloadBlob(tileBlobs[i], `panorama-tile-${i + 1}.png`);
+  $("#pg").querySelectorAll("[data-tile]").forEach(el => {
+    el.onclick = () => downloadTile(Number(el.dataset.tile));
+  });
+  const dlAll = $("#dl-all-tiles");
   dlAll.onclick = async () => {
     for (let i = 0; i < tileBlobs.length; i++) {
-      downloadBlob(tileBlobs[i], `panorama-tile-${i + 1}.png`);
+      downloadTile(i);
       await new Promise(r => setTimeout(r, 100));
     }
   };
@@ -2290,6 +2295,71 @@ function toolPage(id) {
 
   let body = picker(multi, accept);
 
+  if (id === "wallpaper") {
+    body = `
+      <section class="wp-intake" aria-labelledby="wp-intake-title">
+        <div class="wp-intake-copy">
+          <span class="eyebrow">Step 1 · Source photos</span>
+          <h2 id="wp-intake-title">Add photos to crop</h2>
+          <p>Drop in one photo or a whole batch. Pick an exact wallpaper size in the cropper below — every image is processed locally.</p>
+        </div>
+        ${body}
+      </section>
+    `;
+  }
+
+  if (id === "duplicate-finder") {
+    body = `
+      <section class="pb-intake" aria-labelledby="pb-intake-title">
+        <div class="pb-intake-copy">
+          <span class="eyebrow">Step 1 · Add files</span>
+          <h2 id="pb-intake-title">Choose files to scan</h2>
+          <p>Drop in photos, documents or any other files. Exact copies are matched by content, and images are also checked for resized near-duplicates.</p>
+        </div>
+        ${body}
+      </section>
+    `;
+  }
+
+  if (id === "best-shot") {
+    body = `
+      <section class="pb-intake bs-intake" aria-labelledby="bs-intake-title">
+        <div class="pb-intake-copy">
+          <span class="eyebrow">Step 1 · Add burst photos</span>
+          <h2 id="bs-intake-title">Choose the frames to rank</h2>
+          <p>Drop in several takes from the same moment. Each photo is scored locally for sharpness, exposure and contrast — no upload, no cloud AI.</p>
+        </div>
+        ${body}
+      </section>
+    `;
+  }
+
+  if (id === "photo-timeline") {
+    body = `
+      <section class="pb-intake al-intake" aria-labelledby="al-intake-title">
+        <div class="pb-intake-copy">
+          <span class="eyebrow">Step 1 · Add photos</span>
+          <h2 id="al-intake-title">Build your photo timeline</h2>
+          <p>Drop in a whole event or folder. EXIF dates are read locally and each photo becomes part of one self-contained HTML album.</p>
+        </div>
+        ${body}
+      </section>
+    `;
+  }
+
+  if (id === "family-organizer") {
+    body = `
+      <section class="pb-intake al-intake" aria-labelledby="al-intake-title">
+        <div class="pb-intake-copy">
+          <span class="eyebrow">Step 1 · Add family files</span>
+          <h2 id="al-intake-title">Gather the years to organize</h2>
+          <p>Add photos and documents together. Review a year → month → day tree, correct dates, and export a planned folder structure.</p>
+        </div>
+        ${body}
+      </section>
+    `;
+  }
+
   // Sticker Sheet Maker runs inside the dedicated Sticker Studio engine
   // (live layout controls, drag-to-reorder preview, PNG/PDF/SVG export).
   if (id === "sticker-sheet") {
@@ -2815,18 +2885,40 @@ function toolPage(id) {
 
   if (id === "panorama") {
     body = `
-      <div class="controls">
-        <label>Tile Count
-          <select id="panoramaParts">
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </label>
+      <div class="pg-workspace">
+        <div class="pg-grid">
+          <section class="pg-panel pg-input" aria-labelledby="pg-input-title">
+            <h2 id="pg-input-title">Your panorama</h2>
+            <p class="cs-hint">Upload one wide photo. It is sliced locally into adjacent tiles you can swipe through as a carousel.</p>
+            ${body}
+            <label class="pg-field" for="panoramaParts"><span>Tile count</span>
+              <select id="panoramaParts">
+                <option value="2">2 tiles</option>
+                <option value="3" selected>3 tiles</option>
+                <option value="4">4 tiles</option>
+                <option value="5">5 tiles</option>
+                <option value="6">6 tiles</option>
+              </select>
+              <small>Choose how many slides the carousel should have. The final count adapts to very wide or narrow images.</small>
+            </label>
+            <p class="cs-formats">Accepts JPEG, PNG and WebP images. Everything stays on your device — no upload, no storage.</p>
+          </section>
+          <aside class="pg-panel pg-guide" aria-labelledby="pg-guide-title">
+            <h2 id="pg-guide-title">How splitting works</h2>
+            <ol class="cs-steps">
+              <li><strong>Load a wide photo</strong><span>Panoramas with a wide aspect give the cleanest carousel tiles.</span></li>
+              <li><strong>Pick the slide count</strong><span>Two to six tiles are supported; the preview updates when you upload.</span></li>
+              <li><strong>Download the set</strong><span>Save tiles one at a time by clicking a preview, or grab them all at once.</span></li>
+            </ol>
+            <p class="cs-privacy"><strong>100% local.</strong> Slicing happens in your browser — your photo is never uploaded.</p>
+          </aside>
+        </div>
+        <div class="pg-empty cs-empty" id="pg-empty">
+          <strong>No panorama loaded yet.</strong>
+          <span>Add a wide image above to preview the tiles and download your carousel set.</span>
+        </div>
       </div>
-    ` + body;
+    `;
   }
   if (id === "video-safe-zone") {
     body = `
@@ -2875,7 +2967,7 @@ function toolPage(id) {
     activeFiles = files;
     let old = $("#result");
     if (old) { revokeResultURLs(old); old.remove(); }
-    ["#cs-empty", "#cs-date-empty", "#vc-empty", "#bm-empty", "#rl-empty", "#sv-empty", "#cal-empty", "#tt-empty"].forEach(sel => {
+    ["#cs-empty", "#cs-date-empty", "#vc-empty", "#bm-empty", "#rl-empty", "#sv-empty", "#cal-empty", "#tt-empty", "#pg-empty"].forEach(sel => {
       const csEmpty = $(sel);
       if (csEmpty) csEmpty.hidden = false;
     });
@@ -2944,6 +3036,8 @@ function route() {
   if (p === "/audio" || p.startsWith("/audio/")) {
     if (p === "/audio") {
       mountAudioRoute("hub");
+    } else if (p === "/audio/studio") {
+      mountAudioRoute("studio");
     } else {
       const slug = p.split("/")[2];
       mountAudioRoute("tool", slug);

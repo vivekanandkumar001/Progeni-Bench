@@ -2629,6 +2629,10 @@
   function statusBadge(status) {
     return status === "implemented" ? "" : '<em class="itk-badge ' + statusClass(status) + '">' + esc(statusLabel(status)) + "</em>";
   }
+  function pageBreadcrumb(current, parent) {
+    var trail = parent ? '<a href="' + esc(parent.url) + '">' + esc(parent.label) + '</a> <span aria-hidden="true">/</span> ' : "";
+    return '<nav class="tool-breadcrumb tk-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> ' + trail + '<span aria-current="page">' + esc(current) + "</span></nav>";
+  }
 
   function optionHtml(opt, idx) {
     const id = "itk-opt-" + idx;
@@ -2985,8 +2989,16 @@
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/";
     const cats = config.CATEGORIES || [];
     const all = config.TOOLS || [];
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Browse the available tools below; processing happens on your device.</p><div class="itk-meta"><span class="itk-chip">' + all.filter(t => t.status === "implemented" || t.status === "experimental").length + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><p><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a></p></section>' + hubQuickAnswerHtml() +
-      '<section class="itk-categories">' + cats.map(function (cat) {
+    var publicCount = all.filter(t => t.status === "implemented" || t.status === "experimental").length;
+    app.innerHTML = pageBreadcrumb("Image toolkit") +
+      '<section class="tk-hero tk-hero--hub"><div class="tk-hero-main">' +
+      '<section class="tool-head itk-head tk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Private image tools that run in your browser</h1><p>Compress, resize, convert, edit, inspect and generate images in your browser. Browse the available tools below; processing happens on your device.</p><div class="itk-meta tk-stats"><span class="itk-chip">' + publicCount + ' working tools</span><span class="itk-chip">No account</span><span class="itk-chip">No uploads</span></div><div class="tk-actions"><a class="btn btn-lg" href="/image/studio/">Open Image Studio</a><a class="btn secondary" href="/">Browse all Bench tools</a></div></section>' +
+      '</div><aside class="tk-hero-side" aria-label="Toolkit highlights"><span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>' +
+      '<section class="tk-start-card"><span class="tk-kicker">Start here</span><h2>Pick a job, not a format</h2><a href="/image/compress/">Compress for web <span aria-hidden="true">→</span></a><a href="/image/resize/">Resize to exact pixels <span aria-hidden="true">→</span></a><a href="/image/studio/">Batch a whole folder <span aria-hidden="true">→</span></a></section>' +
+      '<section class="tk-start-card tk-start-card--quiet"><span class="tk-kicker">Good to know</span><p>Every result is created in this tab. Close the page and the files are gone.</p></section></aside></section>' +
+      hubQuickAnswerHtml() +
+      '<section class="tk-section-head"><div><span class="tk-kicker">Tool directory</span><h2>' + publicCount + ' tools grouped by what you need to do</h2></div><p>Choose a category below, or open Image Studio when one recipe should apply to every file.</p></section>' +
+      '<section class="itk-categories tk-categories">' + cats.map(function (cat) {
         const list = all.filter(t => t.category === cat.id);
         const publicList = list.filter(t => t.status === "implemented" || t.status === "experimental");
         if (!publicList.length) return "";
@@ -2996,7 +3008,7 @@
           }).join("") + "</div>" +
           "</section>";
       }).join("") + "</section>" +
-      '<section class="toolbox itk-notice-box"><h2>Status and limits</h2><p>Implemented tools produce real files and are covered by automated tests. Experimental tools run real pixel work but have limited validation. Limits: ' + esc(formatBytes(LIMITS.maxFileBytes)) + ' per file, ' + esc((LIMITS.maxPixels / 1e6).toFixed(0)) + ' megapixels per image, ' + esc(LIMITS.maxFiles) + ' files per batch, and a maximum dimension of ' + esc(LIMITS.maxDimension) + ' px.</p></section>';
+      '<section class="toolbox itk-notice-box tk-notice"><span class="tk-kicker">Before you start</span><h2>Status and limits</h2><p>Implemented tools produce real files and are covered by automated tests. Experimental tools run real pixel work but have limited validation. Limits: ' + esc(formatBytes(LIMITS.maxFileBytes)) + ' per file, ' + esc((LIMITS.maxPixels / 1e6).toFixed(0)) + ' megapixels per image, ' + esc(LIMITS.maxFiles) + ' files per batch, and a maximum dimension of ' + esc(LIMITS.maxDimension) + ' px.</p></section>';
   }
 
   function mountStudio() {
@@ -3008,10 +3020,17 @@
     document.title = "Image Studio: batch resize, convert and watermark | Bench";
     const canonical = document.querySelector('link[rel="canonical"]');
     if (canonical) canonical.href = (config.SITE_URL || "https://bench.progeni.live") + "/image/studio/";
-    app.innerHTML = '<section class="tool-head itk-head"><span class="eyebrow">Bench Image Toolkit</span><h1>Image Studio</h1><p>A three-step batch recipe for real work: upload, choose one set of export settings, download every result or a ZIP. No account and no upload.</p></section>' + studioQuickAnswerHtml() +
-      '<section class="itk"><div class="itk-grid"><div class="itk-panel itk-controls">' +
-      '<h2>1. Add images</h2><div id="studio-drop" class="drop" role="button" tabindex="0"><strong>Drop images here</strong><span>or click to browse · up to 30 files</span><input id="studio-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.svg,.tif,.tiff" multiple hidden></div><div id="studio-files" class="itk-files"></div>' +
-      '<h2>2. Recipe</h2><form id="studio-form" class="itk-options">' +
+    app.innerHTML = pageBreadcrumb("Image Studio", { label: "Image toolkit", url: "/image/" }) +
+      '<section class="tk-hero tk-hero--studio"><div class="tk-hero-main">' +
+      '<section class="tool-head itk-head tk-head"><span class="eyebrow">Bench Image Toolkit · Studio</span><h1>Image Studio</h1><p>A three-step batch recipe for real work: upload, choose one set of export settings, download every result or a ZIP. No account and no upload.</p><div class="itk-meta tk-stats"><span class="itk-chip">Up to ' + esc(LIMITS.maxFiles) + ' files</span><span class="itk-chip">WebP, JPEG or PNG</span><span class="itk-chip">Optional square crop</span></div><div class="tk-actions"><a class="btn" href="#studio-workspace">Open the workspace</a><a class="btn secondary" href="/image/">Back to all image tools</a></div></section>' +
+      '</div><aside class="tk-hero-side" aria-label="Studio highlights"><span class="tk-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>' +
+      '<section class="tk-start-card"><span class="tk-kicker">Three steps</span><h2>One recipe, every file</h2><ol class="tk-step-list"><li><b>01</b> Add images</li><li><b>02</b> Choose a recipe</li><li><b>03</b> Export results</li></ol></section>' +
+      '<section class="tk-start-card tk-start-card--quiet"><span class="tk-kicker">Need one file only?</span><p>Use a single-purpose tool for a one-off crop, convert or compression job.</p><a href="/image/resize/">Open Resize Image <span aria-hidden="true">→</span></a></section></aside></section>' +
+      studioQuickAnswerHtml() +
+      '<section class="tk-section-head" id="studio-workspace"><div><span class="tk-kicker">Workspace</span><h2>Prepare a consistent batch</h2></div><p>Add images on the left, choose one recipe, then download every result on the right.</p></section>' +
+      '<section class="itk tk-studio-shell"><div class="itk-grid"><div class="itk-panel itk-controls tk-panel">' +
+      '<span class="tk-step-badge">01</span><h2>Add images</h2><div id="studio-drop" class="drop" role="button" tabindex="0"><strong>Drop images here</strong><span>or click to browse · up to ' + esc(LIMITS.maxFiles) + ' files</span><input id="studio-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/avif,image/svg+xml,.svg,.tif,.tiff" multiple hidden></div><div id="studio-files" class="itk-files"></div>' +
+      '<span class="tk-step-badge">02</span><h2>Recipe</h2><form id="studio-form" class="itk-options">' +
       '<div class="itk-field"><label for="studio-format">Output format</label><select id="studio-format" data-opt="format"><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>' +
       '<div class="itk-field"><label for="studio-width">Maximum width (0 = original)</label><input id="studio-width" type="number" data-opt="maxWidth" min="0" max="12000" value="1600"></div>' +
       '<div class="itk-field itk-field-check"><label class="itk-check"><input id="studio-square" type="checkbox" data-opt="square"> <span>Crop to a centred square</span></label></div>' +
@@ -3019,8 +3038,8 @@
       '<div class="itk-field"><label for="studio-quality">Quality</label><span class="itk-range"><input id="studio-quality" type="range" data-opt="quality" min="30" max="100" step="1" value="82"><output id="studio-quality-out">82</output></span></div>' +
       '</form><div class="itk-actions"><button class="btn btn-lg" id="studio-run" type="button">Run recipe</button><button class="btn secondary" id="studio-reset" type="button">Reset</button></div>' +
       '<div class="itk-progress"><div class="itk-bar"><span id="studio-bar"></span></div><p id="studio-status">Ready. Every export is computed in this tab.</p></div>' +
-      '</div><div class="itk-panel itk-output"><h2>3. Results</h2><div id="studio-results" class="itk-results"><div class="itk-empty"><strong>No results yet</strong><span>Add images and run the recipe.</span></div></div></div></div></section>' +
-      '<section class="seo-section"><h2>What the Studio does</h2><p>The Studio applies one deterministic recipe to a batch: optional centred square crop, proportional resize, optional visible text watermark, then encoding to WebP, JPEG or PNG. It re-encodes pixels, so EXIF and GPS are not copied. It does not use AI upscaling, background removal or cloud processing.</p><h2>Limits</h2><p>Each file is limited to 50 MB and 40 megapixels. Larger batches stay in memory and should be run in groups. WebP encoding is available in all current browsers; if a browser refuses an encoder, choose JPEG or PNG. Watermarks are visible text only.</p></section>';
+      '</div><div class="itk-panel itk-output tk-panel"><span class="tk-step-badge">03</span><h2>Results</h2><div id="studio-results" class="itk-results"><div class="itk-empty"><strong>No results yet</strong><span>Add images and run the recipe.</span></div></div></div></div></section>' +
+      '<section class="seo-section tk-seo"><span class="tk-kicker">Details</span><h2>What the Studio does</h2><p>The Studio applies one deterministic recipe to a batch: optional centred square crop, proportional resize, optional visible text watermark, then encoding to WebP, JPEG or PNG. It re-encodes pixels, so EXIF and GPS are not copied. It does not use AI upscaling, background removal or cloud processing.</p><h2>Limits</h2><p>Each file is limited to 50 MB and 40 megapixels. Larger batches stay in memory and should be run in groups. WebP encoding is available in all current browsers; if a browser refuses an encoder, choose JPEG or PNG. Watermarks are visible text only.</p></section>';
 
     const state = { files: [], urls: [], running: false };
     active = state;

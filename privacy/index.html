@@ -31,7 +31,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png?v=0b940904">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=0b940904">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=0b940904">
-  <link rel="stylesheet" href="/styles.css?v=0ff32573">
+  <link rel="stylesheet" href="/styles.css?v=a97f42b8">
   <script src="/header.js?v=a6e71ac0" defer></script>
   <link rel="canonical" href="https://bench.progeni.live/privacy/">
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary">
@@ -93,7 +93,7 @@
             <section class="mega-group mega-group--hubs">
               <h3>Toolkits &amp; hubs</h3>
               <p>Jump straight into a full suite.</p>
-              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
+              <ul><li><a href="/#tools">All 122 tools</a></li><li><a href="/image/">Image toolkit (42)</a></li><li><a href="/audio/">Audio toolkit (48)</a></li><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/about/">Privacy &amp; how it works</a></li></ul>
             </section>
             </div>
             <div class="mega-foot">
@@ -114,7 +114,7 @@
         <button class="nav-trigger" type="button" data-nav-key="studios" aria-expanded="false" aria-controls="nav-studios">Studios <svg class="nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-panel menu-panel" id="nav-studios" hidden>
           <span class="mega-eyebrow">Batch workflows</span>
-          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
+          <ul class="menu-list"><li><a href="/image/studio/">Image Studio</a></li><li><a href="/audio/studio/">Audio Studio</a></li><li><a href="/tools/sticker-sheet/">Sticker Sheet</a></li><li><a href="/tools/labels/">Label Maker</a></li><li><a href="/tools/cross-stitch/">Pattern Studio</a></li><li><a href="/tools/photo-timeline/">Photo Timeline</a></li><li><a href="/tools/pdf-page-manager/">PDF Page Manager</a></li></ul>
         </div>
       </div>
       <a href="/about/" class="nav-link">About</a>
@@ -140,28 +140,70 @@
   </div>
 </header>
 
-<main id="app" class="container prose-page" tabindex="-1">
+<main id="app" class="container prose-page static-page static-page--privacy" tabindex="-1">
   <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Privacy Policy</span></nav>
-  <section class="tool-head">
-    <span class="eyebrow">Progeni Bench</span>
-    <h1>Privacy Policy</h1>
+  <section class="static-hero">
+    <div class="static-hero-copy">
+      <span class="eyebrow">Progeni Bench · Information</span>
+      <h1>Privacy Policy</h1>
+      <p>What stays on your device, what leaves it, and the one tool that needs a network connection — explained plainly.</p>
+    </div>
+    <div class="static-hero-side">
+      <span class="static-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+      <a class="btn secondary" href="/#tools">Browse all 122 tools <span aria-hidden="true">→</span></a>
+    </div>
   </section>
-  <section class="toolbox prose-content">
-    
-  <h2>1. Local Processing and the Translation Exception</h2>
-  <p>Most Progeni Bench tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
-  <ul>
-    <li>Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
-    <li>Calculations and conversions run on your device's CPU/GPU.</li>
-    <li>Generated outputs are downloaded directly to your disk.</li>
-    <li>Those tools do not send selected file contents to Bench servers.</li>
-  </ul>
-  <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Vercel Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
-  <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
-  <h2>2. Zero Third-Party Tracking</h2>
-  <p>Progeni Bench does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
+  <div class="static-layout">
+    <section class="toolbox prose-content static-content">
+      
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">01</span>
+    <h2>1. Local Processing and the Translation Exception</h2>
+    <p>Most Progeni Bench tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
+    <ul class="static-checklist">
+      <li><span aria-hidden="true">✓</span> Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
+      <li><span aria-hidden="true">✓</span> Calculations and conversions run on your device's CPU/GPU.</li>
+      <li><span aria-hidden="true">✓</span> Generated outputs are downloaded directly to your disk.</li>
+      <li><span aria-hidden="true">✓</span> Those tools do not send selected file contents to Bench servers.</li>
+    </ul>
+    <div class="static-callout">
+      <strong>Limited exception: PDF Translator</strong>
+      <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Cloudflare Pages Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
+      <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
+    </div>
+  </section>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">02</span>
+    <h2>2. Zero Third-Party Tracking</h2>
+    <p>Progeni Bench does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
+  </section>
 
+    </section>
+    <aside class="static-rail" aria-label="Page highlights">
+      
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">The short version</span>
+    <h2>Local by default</h2>
+    <ul class="static-rail-list">
+      <li>Files stay in browser memory</li>
+      <li>Processing runs on your device</li>
+      <li>Results download directly to disk</li>
+      <li>No upload for ordinary tools</li>
+    </ul>
   </section>
+  <section class="static-rail-card static-rail-card--warn">
+    <span class="static-rail-kicker">One exception</span>
+    <p>Only PDF Translator sends extracted text to DeepL through a server-side function. Avoid sensitive documents there.</p>
+    <a href="/tools/pdf-translator/">Open PDF Translator <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Questions?</span>
+    <p>If anything here is unclear, email the team directly. We never ask you to send the files themselves.</p>
+    <a href="/contact/">Contact support <span aria-hidden="true">→</span></a>
+  </section>
+
+    </aside>
+  </div>
 </main>
 
 <footer role="contentinfo">

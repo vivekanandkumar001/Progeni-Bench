@@ -86,6 +86,7 @@ const JOB_GROUPS = [
     [`Image toolkit (${toolCounts.image})`, '/image/'],
     [`Audio toolkit (${toolCounts.audio})`, '/audio/'],
     ['Image Studio', '/image/studio/'],
+    ['Audio Studio', '/audio/studio/'],
     ['Privacy & how it works', '/about/']
   ]}
 ];
@@ -103,6 +104,7 @@ const POPULAR_TOOLS = [
 
 const STUDIO_LINKS = [
   ['Image Studio', '/image/studio/'],
+  ['Audio Studio', '/audio/studio/'],
   ['Sticker Sheet', '/tools/sticker-sheet/'],
   ['Label Maker', '/tools/labels/'],
   ['Pattern Studio', '/tools/cross-stitch/'],

@@ -904,7 +904,7 @@ ${siteFooter()}
 `;
 }
 
-function generateStaticPageHtml(pageId, title, desc, h1, bodyContent) {
+function generateStaticPageHtml(pageId, title, desc, h1, lede, bodyContent, railContent) {
   const canonicalUrl = `${SITE_URL}/${pageId}/`;
 
   const schema = seo.graph([
@@ -934,15 +934,27 @@ ${seo.headMeta({ title, description: desc, canonicalUrl, imageAlt: `${SITE_NAME}
 <body><a class="skip-link" href="#app">Skip to main content</a>
 ${siteHeader({ active: '' })}
 
-<main id="app" class="container prose-page" tabindex="-1">
+<main id="app" class="container prose-page static-page static-page--${pageId}" tabindex="-1">
   <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">${h1}</span></nav>
-  <section class="tool-head">
-    <span class="eyebrow">${SITE_NAME}</span>
-    <h1>${h1}</h1>
+  <section class="static-hero">
+    <div class="static-hero-copy">
+      <span class="eyebrow">${SITE_NAME} · Information</span>
+      <h1>${h1}</h1>
+      <p>${lede}</p>
+    </div>
+    <div class="static-hero-side">
+      <span class="static-trust-pill"><span aria-hidden="true">&#128274;</span> 100% local · no upload · no signup</span>
+      <a class="btn secondary" href="/#tools">Browse all ${totalPublicTools} tools <span aria-hidden="true">→</span></a>
+    </div>
   </section>
-  <section class="toolbox prose-content">
-    ${bodyContent}
-  </section>
+  <div class="static-layout">
+    <section class="toolbox prose-content static-content">
+      ${bodyContent}
+    </section>
+    <aside class="static-rail" aria-label="Page highlights">
+      ${railContent}
+    </aside>
+  </div>
 </main>
 
 ${siteFooter()}
@@ -975,11 +987,25 @@ ${brand.iconLinks()}
 <body data-page="404"><a class="skip-link" href="#app">Skip to main content</a>
 ${siteHeader()}
 <main id="app" class="container not-found-page" tabindex="-1">
+  <nav class="tool-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Page not found</span></nav>
   <section class="not-found-card">
-    <span class="not-found-code" aria-hidden="true">404</span>
-    <h1>Page Not Found</h1>
-    <p>The page you are looking for does not exist on ${SITE_NAME}. The link might be outdated or mistyped.</p>
-    <p><a href="/" class="btn">Return to ${SITE_NAME} Homepage</a></p>
+    <div class="nf-main">
+      <span class="nf-eyebrow">Wrong turn?</span>
+      <span class="not-found-code" aria-hidden="true">404</span>
+      <h1>Page Not Found</h1>
+      <p>The page you are looking for does not exist on ${SITE_NAME}. The link might be outdated or mistyped.</p>
+      <div class="nf-actions">
+        <a href="/" class="btn">Return to ${SITE_NAME} homepage</a>
+        <a href="/#tools" class="btn secondary">Browse all ${totalPublicTools} tools</a>
+      </div>
+    </div>
+    <aside class="nf-links" aria-label="Popular destinations">
+      <span class="nf-links-title">Popular destinations</span>
+      <a href="/image/">Image toolkit <span aria-hidden="true">→</span></a>
+      <a href="/audio/">Audio toolkit <span aria-hidden="true">→</span></a>
+      <a href="/image/studio/">Image Studio <span aria-hidden="true">→</span></a>
+      <a href="/about/">About ${SITE_NAME} <span aria-hidden="true">→</span></a>
+    </aside>
   </section>
 </main>
 ${siteFooter()}
@@ -1003,6 +1029,7 @@ function generateSitemapXml() {
     { loc: `${SITE_URL}/image/studio/`, lastmod: TOOLKIT_UPDATED.image },
     ...imagePages.IMPLEMENTED.map(t => ({ loc: `${SITE_URL}/image/${t.slug}/`, lastmod: TOOLKIT_UPDATED.image })),
     { loc: `${SITE_URL}/audio/`, lastmod: TOOLKIT_UPDATED.audio },
+    { loc: `${SITE_URL}/audio/studio/`, lastmod: TOOLKIT_UPDATED.audio },
     ...audioPages.IMPLEMENTED.map(t => ({ loc: `${SITE_URL}/audio/${t.slug}/`, lastmod: TOOLKIT_UPDATED.audio })),
     ...TOOLS.map(t => ({ loc: `${SITE_URL}/tools/${t.id}/`, lastmod: LAST_UPDATED }))
   ];
@@ -1098,51 +1125,148 @@ fs.writeFileSync(path.join(distDir, 'index.html'), homeHtml, 'utf8');
 
 // 3. Build static pages
 const aboutContent = `
-  <h2>Browser-First Global Architecture</h2>
-  <p>${SITE_NAME} is a collection of ${totalPublicTools} browser-based utilities: ${publicToolCounts.core} core tools, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools. Most tools process files locally in your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL for translation.</p>
-  <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> dedicated to building fast, zero-bloat web utilities.</p>
-  <h2>Who is ${SITE_NAME} Built For?</h2>
-  <ul>
-    <li><strong>Crafters & Creators:</strong> Make <a href="/tools/sticker-sheet/">sticker sheets</a>, mirror <a href="/tools/tshirt-mirror/">T-shirt prints</a>, create <a href="/tools/cross-stitch/">cross-stitch patterns</a>, and test <a href="/tools/video-safe-zone/">video safe zones</a>.</li>
-    <li><strong>Professionals & Marketers:</strong> Clean <a href="/tools/bookmark-cleaner/">browser bookmarks</a>, split large <a href="/tools/csv-splitter/">CSVs</a>, deduplicate <a href="/tools/contact-dedupe/">contact databases</a>, and format <a href="/tools/vcard/">vCards</a>.</li>
-    <li><strong>Everyday Power Users:</strong> Convert <a href="/tools/timetable-calendar/">timetables to iCal</a>, check <a href="/tools/subtitle-speed/">subtitle reading speed</a>, find <a href="/tools/duplicate-finder/">duplicate photos</a>, and optimize <a href="/tools/print-layout/">print layouts</a>.</li>
-  </ul>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">01</span>
+    <h2>Browser-First Global Architecture</h2>
+    <p>${SITE_NAME} is a collection of ${totalPublicTools} browser-based utilities: ${publicToolCounts.core} core tools, ${publicToolCounts.image} image tools, and ${publicToolCounts.audio} audio tools. Most tools process files locally in your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL for translation.</p>
+    <p>${SITE_NAME} is <a href="${PARENT_URL}" target="_blank" rel="noopener">A Progeni project</a> dedicated to building fast, zero-bloat web utilities.</p>
+    <div class="static-counts">
+      <div><b>${publicToolCounts.core}</b><span>Core tools</span></div>
+      <div><b>${publicToolCounts.image}</b><span>Image tools</span></div>
+      <div><b>${publicToolCounts.audio}</b><span>Audio tools</span></div>
+      <div><b>${totalPublicTools}</b><span>Total utilities</span></div>
+    </div>
+  </section>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">02</span>
+    <h2>Who is ${SITE_NAME} Built For?</h2>
+    <div class="static-audience">
+      <article><h3>Crafters &amp; Creators</h3><p>Make <a href="/tools/sticker-sheet/">sticker sheets</a>, mirror <a href="/tools/tshirt-mirror/">T-shirt prints</a>, create <a href="/tools/cross-stitch/">cross-stitch patterns</a>, and test <a href="/tools/video-safe-zone/">video safe zones</a>.</p></article>
+      <article><h3>Professionals &amp; Marketers</h3><p>Clean <a href="/tools/bookmark-cleaner/">browser bookmarks</a>, split large <a href="/tools/csv-splitter/">CSVs</a>, deduplicate <a href="/tools/contact-dedupe/">contact databases</a>, and format <a href="/tools/vcard/">vCards</a>.</p></article>
+      <article><h3>Everyday Power Users</h3><p>Convert <a href="/tools/timetable-calendar/">timetables to iCal</a>, check <a href="/tools/subtitle-speed/">subtitle reading speed</a>, find <a href="/tools/duplicate-finder/">duplicate photos</a>, and optimize <a href="/tools/print-layout/">print layouts</a>.</p></article>
+    </div>
+  </section>
 `;
-const aboutHtml = generateStaticPageHtml('about', `About ${SITE_NAME}: Privacy-First Browser Tools`, `Explore ${totalPublicTools} free file, image and audio tools from ${SITE_NAME}. Process files locally in your browser without uploading them to Bench.`, `About ${SITE_NAME}`, aboutContent);
+const aboutRail = `
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">At a glance</span>
+    <h2>One bench, three toolkits</h2>
+    <ul class="static-rail-list">
+      <li><a href="/#tools">Core file, print &amp; text tools</a></li>
+      <li><a href="/image/">Image toolkit (${publicToolCounts.image})</a></li>
+      <li><a href="/audio/">Audio toolkit (${publicToolCounts.audio})</a></li>
+      <li><a href="/image/studio/">Batch Image Studio</a></li>
+    </ul>
+  </section>
+  <section class="static-rail-card static-rail-card--accent">
+    <span class="static-rail-kicker">Privacy first</span>
+    <p>Your files stay in this browser tab for almost every tool. No upload, no account, no waiting in a queue.</p>
+    <a href="/privacy/">Read the privacy policy <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Need a hand?</span>
+    <p>Found a bug or want a new utility? Email the team directly — there is no form and no data collection.</p>
+    <a href="/contact/">Contact support <span aria-hidden="true">→</span></a>
+  </section>
+`;
+const aboutHtml = generateStaticPageHtml('about', `About ${SITE_NAME}: Privacy-First Browser Tools`, `Explore ${totalPublicTools} free file, image and audio tools from ${SITE_NAME}. Process files locally in your browser without uploading them to Bench.`, `About ${SITE_NAME}`, `A focused workspace for small file jobs — built by ${SITE_NAME}, run in your browser, and designed to keep your files on your device.`, aboutContent, aboutRail);
 if (!fs.existsSync(path.join(baseDir, 'about'))) fs.mkdirSync(path.join(baseDir, 'about'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'about'))) fs.mkdirSync(path.join(distDir, 'about'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'about', 'index.html'), aboutHtml, 'utf8');
 fs.writeFileSync(path.join(distDir, 'about', 'index.html'), aboutHtml, 'utf8');
 
 const privacyContent = `
-  <h2>1. Local Processing and the Translation Exception</h2>
-  <p>Most ${SITE_NAME} tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
-  <ul>
-    <li>Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
-    <li>Calculations and conversions run on your device's CPU/GPU.</li>
-    <li>Generated outputs are downloaded directly to your disk.</li>
-    <li>Those tools do not send selected file contents to Bench servers.</li>
-  </ul>
-  <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Vercel Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
-  <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
-  <h2>2. Zero Third-Party Tracking</h2>
-  <p>${SITE_NAME} does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">01</span>
+    <h2>1. Local Processing and the Translation Exception</h2>
+    <p>Most ${SITE_NAME} tools are a <strong>client-side execution platform</strong>. When you use bookmark cleaners, CSV tools, image converters, subtitle editors, or calendar organizers:</p>
+    <ul class="static-checklist">
+      <li><span aria-hidden="true">✓</span> Your uploaded files are loaded into your browser's local memory (RAM) via standard HTML5 File APIs.</li>
+      <li><span aria-hidden="true">✓</span> Calculations and conversions run on your device's CPU/GPU.</li>
+      <li><span aria-hidden="true">✓</span> Generated outputs are downloaded directly to your disk.</li>
+      <li><span aria-hidden="true">✓</span> Those tools do not send selected file contents to Bench servers.</li>
+    </ul>
+    <div class="static-callout">
+      <strong>Limited exception: PDF Translator</strong>
+      <p><strong>PDF Translator is different.</strong> The PDF itself remains in your browser, but extracted text blocks are sent through a Cloudflare Pages Function to DeepL for translation. DeepL processes that text under its own terms and privacy policy. Do not submit confidential or sensitive documents. The function does not log extracted content; it may retain a successful batch response in volatile server memory for up to five minutes to avoid duplicate translation charges. No PDF or text is stored in a persistent Bench database.</p>
+      <p>When local OCR is enabled for a scanned PDF, the browser may download English or Hindi OCR language data from the Tesseract data host. Page images are processed locally and are not sent to that host.</p>
+    </div>
+  </section>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">02</span>
+    <h2>2. Zero Third-Party Tracking</h2>
+    <p>${SITE_NAME} does not embed third-party advertising tracking scripts or behavioral profilers. Most utilities function locally once loaded; PDF Translator needs an internet connection for DeepL translation and OCR language-data downloads.</p>
+  </section>
 `;
-const privacyHtml = generateStaticPageHtml('privacy', `Privacy Policy: ${SITE_NAME} Local Processing`, `Read how ${SITE_NAME} processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.`, `Privacy Policy`, privacyContent);
+const privacyRail = `
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">The short version</span>
+    <h2>Local by default</h2>
+    <ul class="static-rail-list">
+      <li>Files stay in browser memory</li>
+      <li>Processing runs on your device</li>
+      <li>Results download directly to disk</li>
+      <li>No upload for ordinary tools</li>
+    </ul>
+  </section>
+  <section class="static-rail-card static-rail-card--warn">
+    <span class="static-rail-kicker">One exception</span>
+    <p>Only PDF Translator sends extracted text to DeepL through a server-side function. Avoid sensitive documents there.</p>
+    <a href="/tools/pdf-translator/">Open PDF Translator <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Questions?</span>
+    <p>If anything here is unclear, email the team directly. We never ask you to send the files themselves.</p>
+    <a href="/contact/">Contact support <span aria-hidden="true">→</span></a>
+  </section>
+`;
+const privacyHtml = generateStaticPageHtml('privacy', `Privacy Policy: ${SITE_NAME} Local Processing`, `Read how ${SITE_NAME} processes files locally by default and sends extracted text to DeepL only when PDF Translator is used.`, `Privacy Policy`, `What stays on your device, what leaves it, and the one tool that needs a network connection — explained plainly.`, privacyContent, privacyRail);
 if (!fs.existsSync(path.join(baseDir, 'privacy'))) fs.mkdirSync(path.join(baseDir, 'privacy'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'privacy'))) fs.mkdirSync(path.join(distDir, 'privacy'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'privacy', 'index.html'), privacyHtml, 'utf8');
 fs.writeFileSync(path.join(distDir, 'privacy', 'index.html'), privacyHtml, 'utf8');
 
 const termsContent = `
-  <h2>1. Acceptance of Terms</h2>
-  <p>By accessing and using ${SITE_NAME} (${SITE_URL}) and any of our browser-based utility tools, you agree to comply with and be bound by these Terms of Service.</p>
-  <h2>2. Description of Service & Local Processing</h2>
-  <p>${SITE_NAME} provides browser-first digital utilities. Most file processing happens locally inside your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL through a server-side function; the provider's own terms and privacy policy apply to that text.</p>
-  <h2>3. Disclaimer of Warranties</h2>
-  <p>All utilities, software routines, and calculations on ${SITE_NAME} are provided "as is" and "as available" without warranty of any kind.</p>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">01</span>
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing and using ${SITE_NAME} (${SITE_URL}) and any of our browser-based utility tools, you agree to comply with and be bound by these Terms of Service.</p>
+  </section>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">02</span>
+    <h2>2. Description of Service &amp; Local Processing</h2>
+    <p>${SITE_NAME} provides browser-first digital utilities. Most file processing happens locally inside your browser. PDF Translator keeps the PDF local but sends extracted text to DeepL through a server-side function; the provider's own terms and privacy policy apply to that text.</p>
+  </section>
+  <section class="static-card">
+    <span class="static-card-num" aria-hidden="true">03</span>
+    <h2>3. Disclaimer of Warranties</h2>
+    <p>All utilities, software routines, and calculations on ${SITE_NAME} are provided "as is" and "as available" without warranty of any kind.</p>
+  </section>
 `;
-const termsHtml = generateStaticPageHtml('terms', `Terms of Service: ${SITE_NAME} Online Utilities`, `Read the terms of service for using ${SITE_NAME} browser-based utilities. Free client-side tools provided with clear usage and limitation policies.`, `Terms of Service`, termsContent);
+const termsRail = `
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">In plain language</span>
+    <h2>What these terms cover</h2>
+    <ul class="static-rail-list">
+      <li>Using ${SITE_NAME} tools</li>
+      <li>Local processing by default</li>
+      <li>The PDF Translator exception</li>
+      <li>Utilities provided as-is</li>
+    </ul>
+  </section>
+  <section class="static-rail-card static-rail-card--accent">
+    <span class="static-rail-kicker">Related reading</span>
+    <p>Want the data details behind the terms? The privacy policy explains exactly what stays local.</p>
+    <a href="/privacy/">Read the privacy policy <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Still curious?</span>
+    <p>Browse the toolkits to see what the service actually does, all without an account.</p>
+    <a href="/image/">Image toolkit <span aria-hidden="true">→</span></a>
+    <a href="/audio/">Audio toolkit <span aria-hidden="true">→</span></a>
+  </section>
+`;
+const termsHtml = generateStaticPageHtml('terms', `Terms of Service: ${SITE_NAME} Online Utilities`, `Read the terms of service for using ${SITE_NAME} browser-based utilities. Free client-side tools provided with clear usage and limitation policies.`, `Terms of Service`, `The ground rules for using ${SITE_NAME}: what the service offers, how files are handled, and the limits of the utilities.`, termsContent, termsRail);
 if (!fs.existsSync(path.join(baseDir, 'terms'))) fs.mkdirSync(path.join(baseDir, 'terms'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'terms'))) fs.mkdirSync(path.join(distDir, 'terms'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'terms', 'index.html'), termsHtml, 'utf8');
@@ -1150,18 +1274,49 @@ fs.writeFileSync(path.join(distDir, 'terms', 'index.html'), termsHtml, 'utf8');
 
 const contactContent = `
   <div class="contact-card">
-    <h2>Direct Email Inquiries</h2>
-    <p>For general support, feedback, and inquiries regarding ${SITE_NAME}:</p>
-    <p class="contact-email"><span aria-hidden="true">&#9993;</span><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
-    <h3>Feature Suggestions &amp; Bug Reports</h3>
-    <p>${SITE_NAME} is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
-    <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
-    <h3>Why there is no contact form</h3>
-    <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
-    <p class="contact-meta">We usually respond to all inquiries within 24 to 48 business hours.</p>
+    <header class="contact-hero">
+      <span class="eyebrow">Direct line</span>
+      <h2>Direct Email Inquiries</h2>
+      <p>For general support, feedback, and inquiries regarding ${SITE_NAME}:</p>
+      <p class="contact-email"><span aria-hidden="true">&#9993;</span><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
+    </header>
+    <div class="contact-sections">
+      <section class="contact-section">
+        <h3>Feature Suggestions &amp; Bug Reports</h3>
+        <p>${SITE_NAME} is constantly expanding its suite of client-side web tools. Let us know if you have an idea for a utility that can save time without uploading files to a cloud server.</p>
+        <p>When reporting a bug, include the tool name, your browser and version, and the steps that triggered the problem. Since every tool runs entirely in your browser, these details let us reproduce the issue without ever asking for your files.</p>
+      </section>
+      <section class="contact-section">
+        <h3>Why there is no contact form</h3>
+        <p>We deliberately run this site without a web contact form. A form would require a server-side endpoint to receive your message — an extra place where data is collected and retained. Email goes straight from your mail provider to our inbox, which keeps the data path as short as the tools themselves keep yours.</p>
+      </section>
+    </div>
+    <p class="contact-meta"><span aria-hidden="true">◷</span> We usually respond to all inquiries within 24 to 48 business hours.</p>
   </div>
 `;
-const contactHtml = generateStaticPageHtml('contact', `Contact Us: ${SITE_NAME} Support & Inquiries`, `Contact the ${SITE_NAME} team for support, feature suggestions, bug reports, and partnership inquiries. We respond within 24 to 48 business hours.`, `Contact Support`, contactContent);
+const contactRail = `
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Before you write</span>
+    <h2>Useful details</h2>
+    <ul class="static-rail-list">
+      <li>Tool name and page URL</li>
+      <li>Browser name and version</li>
+      <li>Steps that triggered the issue</li>
+      <li>A short note on the expected result</li>
+    </ul>
+  </section>
+  <section class="static-rail-card static-rail-card--accent">
+    <span class="static-rail-kicker">No form, by design</span>
+    <p>Email goes straight from your mail provider to our inbox. There is no extra endpoint collecting or retaining your message.</p>
+    <a href="/privacy/">See the privacy policy <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="static-rail-card">
+    <span class="static-rail-kicker">Typical reply</span>
+    <p>We usually answer within 24 to 48 business hours. Please do not attach selected files — we never need them to reproduce a browser-side issue.</p>
+    <a href="/#tools">Browse tools while you wait <span aria-hidden="true">→</span></a>
+  </section>
+`;
+const contactHtml = generateStaticPageHtml('contact', `Contact Us: ${SITE_NAME} Support & Inquiries`, `Contact the ${SITE_NAME} team for support, feature suggestions, bug reports, and partnership inquiries. We respond within 24 to 48 business hours.`, `Contact Support`, `Questions, ideas, or a bug to report? Reach the team directly by email — no form, no upload, no account.`, contactContent, contactRail);
 if (!fs.existsSync(path.join(baseDir, 'contact'))) fs.mkdirSync(path.join(baseDir, 'contact'), { recursive: true });
 if (!fs.existsSync(path.join(distDir, 'contact'))) fs.mkdirSync(path.join(distDir, 'contact'), { recursive: true });
 fs.writeFileSync(path.join(baseDir, 'contact', 'index.html'), contactHtml, 'utf8');
@@ -1249,7 +1404,7 @@ console.log(`Generated search-index.json (${searchIndexEntries.length} tools).`)
 
 // 8. Copy static files to dist/
 const filesToCopy = [
-  'site.config.js', 'icons.js', 'header.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'vercel.json', 'netlify.toml', 'llms.txt', 'llms-full.txt', 'robots.txt', 'c032a188f5724bc4935ef7a07525d886.txt'
+  'site.config.js', 'icons.js', 'header.js', 'app.js', 'pdf-translator.js', 'pdf-page-manager.js', 'sticker-studio.js', 'label-studio.js', 'sheet-studio.js', 'pattern-studio.js', 'image-studio.js', 'photo-batch-studio.js', 'album-studio.js', 'media-studio.js', 'subtitle-studio.js', 'utils.js', 'styles.css', 'image-tools.config.js', 'image-toolkit.js', 'audio-tools.config.js', 'audio-toolkit.js', '_headers', '_redirects', 'netlify.toml', 'llms.txt', 'llms-full.txt', 'robots.txt', 'c032a188f5724bc4935ef7a07525d886.txt'
 ];
 fs.readdirSync(baseDir).forEach(f => {
   if (f.startsWith('google') && f.endsWith('.html')) {
