@@ -3,7 +3,7 @@
 > **Test-suite location notice.** The `main` branch ships *without* a test
 > harness so the deployed tree stays lean: `test/`, `tests/`,
 > `playwright.config.js` and the `@playwright/test` dev dependency were removed
-> from `main` before the Vercel deploy. The harness now lives on the **`tests`
+> from `main` before deployment. The harness now lives on the **`tests`
 > branch** (pushed to `origin/tests`), restored from git history and extended
 > with new image-toolkit coverage.
 >
@@ -33,7 +33,7 @@ prioritised next-step list.
 
 The toolkit is **the same static site** — no second frontend, no new backend,
 no database. It reuses the existing shell (`index.html`, `app.js`,
-`styles.css`, `site.config.js`, Netlify/Vercel/Cloudflare config) and adds:
+`styles.css`, `site.config.js`, Cloudflare Pages config) and adds:
 
 ```
 image-tools.config.js   typed-ish registry (63 entries) — single source of truth
@@ -441,15 +441,13 @@ main-thread processing, and the pages were rebuilt. No Web Worker is created by
 ```
 npm ci
 npm run build:vendor   # only if vendor/ needs regenerating
-npm run build          # writes root pages + dist/ (44 image pages, sitemap, dist copy)
-# publish dist/  (Netlify: netlify.toml already builds+publishes dist)
+npm run build          # writes dist/ (44 image pages, sitemap, dist copy)
+# publish dist/  (Cloudflare Pages: wrangler.toml builds and publishes dist)
 ```
 
-- **Netlify:** `netlify.toml` → `command = "npm run build"`, `publish = "dist"`.
-- **Vercel:** `vercel.json` → `buildCommand`, `cleanUrls`, `trailingSlash`,
-  `outputDirectory: dist`, plus mirrored security headers.
-- **Cloudflare Pages:** build `npm run build`, output `dist`.
-- Custom domain `bench.progeni.live` (HTTPS automatic on all three).
+- **Cloudflare Pages:** `wrangler.toml` sets `pages_build_output_dir = "dist"`;
+  the connected repo builds with `npm run build`.
+- Custom domain `bench.progeni.live` (HTTPS automatic).
 
 **Rollback options**
 

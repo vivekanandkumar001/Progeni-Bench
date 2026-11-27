@@ -1,2 +1,0 @@
-﻿Generated 44 image toolkit pages (42 public tools).
-Successfully generated rich SEO pages for all 30 tools and mirrored to dist/!

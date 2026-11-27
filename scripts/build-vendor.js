@@ -20,7 +20,7 @@ const esbuild = require('esbuild');
 
 const ROOT = path.resolve(__dirname, '..');
 const ENTRY_DIR = path.join(ROOT, 'scripts', 'vendor-entries');
-const OUT_DIR = path.join(ROOT, 'vendor');
+const OUT_DIR = path.join(ROOT, 'public', 'vendor');
 
 const BUNDLES = [
   { out: 'qrcode.min.js', entry: 'qrcode-entry.js' },

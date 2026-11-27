@@ -46,7 +46,7 @@ npm start
 ```
 
 Deploy the generated `dist/` directory using the existing Bench static-site
-deployment process (Netlify, Vercel, or Cloudflare Pages). No backend or new
+deployment process on Cloudflare Pages. No backend or new
 environment variables are required. The build generates the tool route and
 copies the local editor script; PDF processing libraries are served from the
 existing `/vendor/` assets.

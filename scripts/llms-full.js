@@ -9,9 +9,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const site = require('../site.config.js');
-const imageConfig = require('../image-tools.config.js');
-const audioConfig = require('../audio-tools.config.js');
+const site = require('../src/config/site.config.js');
+const imageConfig = require('../src/config/image-tools.config.js');
+const audioConfig = require('../src/config/audio-tools.config.js');
 
 const SITE_URL = site.SITE_URL;
 const SITE_NAME = site.SITE_NAME;
@@ -181,7 +181,6 @@ function render() {
 function writeLlmsFull(baseDir) {
   const text = render();
   const distDir = path.join(baseDir, 'dist');
-  fs.writeFileSync(path.join(baseDir, 'llms-full.txt'), text, 'utf8');
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
   fs.writeFileSync(path.join(distDir, 'llms-full.txt'), text, 'utf8');
   return text;

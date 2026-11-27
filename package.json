@@ -4,10 +4,10 @@
   "private": true,
   "description": "Progeni Bench — 122 Privacy-First Browser Tools for Files, Images & Audio",
   "scripts": {
-    "build": "node build_seo_pages.js",
+    "build": "node scripts/build.js",
     "build:vendor": "node scripts/build-vendor.js",
     "indexnow": "node scripts/indexnow.js",
-    "test": "node --test",
+    "test": "node --test tests/unit/*.test.js",
     "test:e2e": "playwright test",
     "verify": "node scripts/verify.js",
     "start": "node scripts/serve.js 3000 dist",

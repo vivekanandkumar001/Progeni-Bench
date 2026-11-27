@@ -2,7 +2,7 @@
 
 PDF Translator is a browser-based PDF workflow with DeepL-backed text
 translation. The original PDF is parsed and rendered in the browser. Only
-extracted text blocks are sent to `/api/translate`; the server-side Vercel
+extracted text blocks are sent to `/api/translate`; the Cloudflare Pages
 Function forwards them to DeepL. OCR runs locally with Tesseract.js, although
 its English and Hindi language-data files are fetched from the configured
 Tesseract data host.
@@ -19,19 +19,17 @@ npm run verify
 ```
 
 `npm start` serves only the generated `dist/` site; it does not run the API
-Function. Use the Vercel CLI's local development server to exercise the
-Function:
+Function. Use Wrangler to run the Cloudflare Pages project locally:
 
 ```bash
-vercel dev
+npx wrangler pages dev dist
 ```
 
-Link the local project and configure the environment variables below in
-Vercel, or pull them into a local environment with `vercel env pull`. Keep
-local environment files out of source control and never paste secrets into
-client-side code.
+Configure the environment variables below in the Cloudflare Pages dashboard
+(or in a local `.dev.vars` file that stays out of source control). Never paste
+secrets into client-side code.
 
-## Vercel and provider setup
+## Cloudflare Pages and provider setup
 
 1. Create a DeepL API key. The default endpoint is the paid API. For a DeepL
    Free API key, set `DEEPL_API_URL` to
@@ -42,7 +40,7 @@ client-side code.
    without it, each Function instance keeps its own in-memory rate limiter;
    this is best-effort on serverless because instances are ephemeral, but it
    is enough to stop accidental bursts on a warm instance.)
-3. Set these variables for the Vercel environments that will serve the tool:
+3. Set these variables for the Cloudflare Pages environment that will serve the tool:
 
    | Variable | Required | Purpose |
    | --- | --- | --- |
@@ -66,9 +64,10 @@ client-side code.
    anonymous provider automatically. Quota/rate-limit failures (HTTP 429)
    never fall back to the anonymous provider so costs stay predictable.
 
-4. Deploy the project from the `bench` directory with the repository's
-   `vercel.json`. It sets `dist` as the static output and gives
-   `api/translate.js` a 60-second maximum duration.
+4. Deploy the project from the `bench` directory to the Cloudflare Pages
+   project `progeni-bench` (build command `npm run build`, output directory
+   `dist`). The Pages Function in `functions/api/translate.js` provides
+   `/api/translate` alongside the static output.
 5. After deployment, verify that the Function is present with a GET request:
 
    ```bash
@@ -114,9 +113,10 @@ limiter when Upstash is not configured; this is not suitable for production.
 ## Privacy, retention, and security
 
 - The PDF file and page images are not uploaded to Progeni or DeepL.
-- Extracted text is sent to the Progeni Vercel Function and then to DeepL for
-  translation. Do not use the tool for confidential or regulated documents.
-- The Function does not intentionally log document text. Vercel and DeepL
+- Extracted text is sent to the Progeni Cloudflare Pages Function and then to
+  DeepL for translation. Do not use the tool for confidential or regulated
+  documents.
+- The Function does not intentionally log document text. Cloudflare and DeepL
   handle request metadata and translation data under their respective service
   terms and retention policies.
 - Successful translated response payloads may be held in volatile Function
@@ -153,7 +153,7 @@ provider response mapping, page-range parsing, and Romanization. They do not
 replace a browser test with a synthetic PDF or a live DeepL integration test.
 
 To disable translation immediately, remove `DEEPL_AUTH_KEY` from the affected
-Vercel environment and redeploy; the endpoint will return a configuration
-error instead of forwarding requests. For a full rollback, use Vercel's
-deployment rollback and verify the previous static site and Function
-configuration together.
+Cloudflare Pages environment and redeploy; the endpoint will return a
+configuration error instead of forwarding requests. For a full rollback, use
+Cloudflare Pages' deployment rollback and verify the previous static site and
+Function configuration together.

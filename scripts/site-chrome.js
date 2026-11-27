@@ -3,9 +3,9 @@
  * search box and navigation never drift between the core, image and audio
  * builders again.
  */
-const { SITE_NAME, TOOLS, PARENT_URL, TAGLINE } = require('../site.config.js');
-const imageConfig = require('../image-tools.config.js');
-const audioConfig = require('../audio-tools.config.js');
+const { SITE_NAME, TOOLS, PARENT_URL, TAGLINE } = require('../src/config/site.config.js');
+const imageConfig = require('../src/config/image-tools.config.js');
+const audioConfig = require('../src/config/audio-tools.config.js');
 const brand = require('./brand.js');
 
 const esc = value => String(value == null ? '' : value)

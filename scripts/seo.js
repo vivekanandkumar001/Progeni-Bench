@@ -11,7 +11,7 @@
  *   - every claim must be supported by site.config.js or a toolkit registry;
  *   - output is HTML-escaped unless a helper explicitly says otherwise.
  */
-const site = require('../site.config.js');
+const site = require('../src/config/site.config.js');
 const brand = require('./brand.js');
 
 const SITE_URL = site.SITE_URL;

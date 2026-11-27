@@ -13,7 +13,7 @@
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
-    module.exports = factory(require("../site.config.js"));
+    module.exports = factory(require("../src/config/site.config.js"));
   } else {
     root.SeoCopy = factory(root.SiteConfig || {});
   }

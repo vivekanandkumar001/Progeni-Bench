@@ -20,10 +20,10 @@ function assetVersion(relPath) {
   }
 }
 
-const version = assetVersion('assets/favicon.svg');
+const version = assetVersion('public/assets/favicon.svg');
 const logo = `/assets/favicon.svg${version}`;
-const stylesHref = `/styles.css${assetVersion('styles.css')}`;
-const headerSrc = `/header.js${assetVersion('header.js')}`;
+const stylesHref = `/styles.css${assetVersion('src/styles/styles.css')}`;
+const headerSrc = `/header.js${assetVersion('src/core/header.js')}`;
 
 function iconLinks() {
   return `  <link rel="manifest" href="/manifest.webmanifest">

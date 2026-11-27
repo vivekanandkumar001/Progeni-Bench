@@ -7,9 +7,9 @@ const HOST = 'bench.progeni.live';
 const KEY = 'c032a188f5724bc4935ef7a07525d886';
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
 
-const sitemapPath = path.join(__dirname, '..', 'sitemap.xml');
+const sitemapPath = path.join(__dirname, '..', 'dist', 'sitemap.xml');
 if (!fs.existsSync(sitemapPath)) {
-  console.error('sitemap.xml not found! Build the site first.');
+  console.error('dist/sitemap.xml not found! Build the site first.');
   process.exit(1);
 }
 

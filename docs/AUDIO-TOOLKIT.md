@@ -29,7 +29,7 @@ prioritised next-step list.
 
 The toolkit is **the same static site** — no second frontend, no new backend,
 no database. It reuses the existing shell (`index.html`, `app.js`,
-`styles.css`, `site.config.js`, Netlify/Vercel headers) and adds:
+`styles.css`, `site.config.js`, `public/_headers`) and adds:
 
 ```
 audio-tools.config.js    registry (56 entries) — single source of truth
@@ -98,7 +98,7 @@ Key properties:
 | `build_seo_pages.js` | Requires the audio registry/generator; adds `/audio/` nav links, a homepage audio band, 44 audio sitemap URLs, copies the registry/runtime into `dist`, and makes vendor copying recursive for `vendor/ffmpeg/` |
 | `app.js` | Lazy `/audio/*` routing with navigation tokens, `leaveAudioToolkit()` cleanup, `/audio` hub branch |
 | `styles.css` | `atk-*` styles for waveform, transport, recorder, meter, text output and the `.audio-band` |
-| `vercel.json`, `_headers` | CSP `script-src` gains `'wasm-unsafe-eval'`; `/audio/*` scopes `microphone=(self)`; `/vendor/ffmpeg/*` gets a long cache |
+| `public/_headers`, `wrangler.toml` | CSP `script-src` gains `'wasm-unsafe-eval'`; `/audio/*` scopes `microphone=(self)`; `/vendor/ffmpeg/*` gets a long cache; Cloudflare Pages publishes `dist` |
 | `scripts/build-vendor.js` | Copies the FFmpeg engine from `node_modules` and writes `NOTICE.txt` |
 | `scripts/verify.js` | C38/C45 now compare the sitemap to **indexable** canonicals (see §7) |
 | `image-tools.config.js` | Fixes 14 over-length titles and 31 out-of-range descriptions surfaced by the shared C35 check (see §7) |
@@ -481,19 +481,18 @@ Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'
 ```
 npm ci
 npm run build:vendor   # only if vendor/ffmpeg/ needs regenerating
-npm run build          # writes root pages + dist/ (49 audio pages, sitemap, dist copy)
-# publish dist/  (Vercel: vercel.json builds dist; Netlify: netlify.toml)
+npm run build          # writes dist/ (49 audio pages, sitemap, dist copy)
+# publish dist/  (Cloudflare Pages: wrangler.toml builds and publishes dist)
 ```
 
-- **Vercel:** `buildCommand: npm run build`, `outputDirectory: dist`,
-  `cleanUrls: true`, `trailingSlash: true`.
-- **Netlify:** `netlify.toml` builds and publishes `dist`.
-- **Headers:** `vercel.json` and `_headers` are both updated, so the CSP and the
-  scoped `Permissions-Policy` apply on either host.
+- **Cloudflare Pages:** `wrangler.toml` sets `pages_build_output_dir = "dist"`;
+  the connected repo builds with `npm run build`.
+- **Headers:** `public/_headers` carries the CSP and the scoped
+  `Permissions-Policy`; Cloudflare Pages applies them to the static output.
 - **No DB, no env vars, no secrets.** Nothing to migrate.
-- **Large asset note:** `vendor/ffmpeg/ffmpeg-core.wasm` is ~30.7 MB and is
-  committed, matching the existing vendor-bundle convention. Confirm any host
-  file-size limit allows it (Vercel and Netlify both do).
+- **Large asset note:** `public/vendor/ffmpeg/ffmpeg-core.wasm` is ~30.7 MB and
+  is committed, matching the existing vendor-bundle convention. Cloudflare
+  Pages accepts it.
 
 **Rollback** — the change is additive and isolated:
 

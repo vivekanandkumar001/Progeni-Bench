@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
-const { TOOLS, LAST_UPDATED, TOOLKIT_UPDATED } = require('../site.config.js');
+const { TOOLS, LAST_UPDATED, TOOLKIT_UPDATED } = require('../src/config/site.config.js');
 const seoCopy = require('./seo-copy.js');
 const seo = require('./seo.js');
-const imageConfig = require('../image-tools.config.js');
-const audioConfig = require('../audio-tools.config.js');
+const imageConfig = require('../src/config/image-tools.config.js');
+const audioConfig = require('../src/config/audio-tools.config.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const results = [];
@@ -25,7 +25,7 @@ function sha256File(filePath) {
 }
 
 // C00: SHA256 of key files
-const keyFiles = ['app.js', 'utils.js', 'build_seo_pages.js', 'package.json', '_headers', 'netlify.toml'];
+const keyFiles = ['src/core/app.js', 'src/core/utils.js', 'scripts/build.js', 'package.json', 'public/_headers', 'wrangler.toml'];
 const hashes = keyFiles.map(f => `${f}=${sha256File(f)}`);
 addResult('C00', 'PASS', hashes.join(' '));
 
@@ -131,7 +131,7 @@ try {
 
 // C07: No duplicate definitions in app.js
 const forbiddenHelpers = ['esc', 'csvParse', 'csvOut', 'parseSRT', 'buildContactKey', 'filterBookmarkLinks', 'cleanSVG', 'parseVCF', 'normalizeDate'];
-const appContent = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
+const appContent = fs.readFileSync(path.join(ROOT, 'src', 'core', 'app.js'), 'utf8');
 const dupFound = [];
 for (const fn of forbiddenHelpers) {
   const re = new RegExp(`\\b(?:function\\s+${fn}\\s*\\(|(?:const|let|var)\\s+${fn}\\s*=)`, 'g');
@@ -146,7 +146,7 @@ if (dupFound.length === 0) {
 }
 
 // C08: esc() behaviour
-const utils = require('../utils.js');
+const utils = require('../src/core/utils.js');
 const escIn = '<img src=x onerror=alert(1)>"\'&';
 const escExp = '&lt;img src=x onerror=alert(1)&gt;&quot;&#39;&amp;';
 const escAct = utils.esc(escIn);
@@ -283,7 +283,7 @@ if (silenceMapExists && ctxLines.length === 0) {
 }
 
 // C17: _headers
-const headersContent = fs.readFileSync(path.join(ROOT, '_headers'), 'utf8');
+const headersContent = fs.readFileSync(path.join(ROOT, 'public', '_headers'), 'utf8');
 const badHeaders = ['googlesyndication', 'doubleclick', 'google-analytics', 'googletagmanager', 'jsdelivr'];
 const violations = [];
 for (const bad of badHeaders) {
@@ -298,12 +298,12 @@ if (violations.length === 0) {
 }
 
 // C18: External URLs with exact exclusion list
-const exactExclusions = ['schema.org', 'progeni.live', 'progeni.invalid', 'www.w3.org', 'dummy'];
+const exactExclusions = ['schema.org', 'progeni.live', 'progeni.invalid', 'www.w3.org', 'clarity.ms', 'dummy'];
 const allDistFiles = getAllHtmlFiles(path.join(ROOT, 'dist')).concat([
-  path.join(ROOT, 'app.js'),
-  path.join(ROOT, 'utils.js'),
-  path.join(ROOT, 'styles.css'),
-  path.join(ROOT, 'manifest.webmanifest')
+  path.join(ROOT, 'dist', 'app.js'),
+  path.join(ROOT, 'dist', 'utils.js'),
+  path.join(ROOT, 'dist', 'styles.css'),
+  path.join(ROOT, 'dist', 'manifest.webmanifest')
 ]);
 const foundUrls = new Set();
 for (const file of allDistFiles) {
@@ -326,33 +326,32 @@ if (disallowed.length === 0) {
   addResult('C18', 'FAIL', `disallowed: ${disallowed.join(', ')}`);
 }
 
-// C19: wrangler.toml, netlify.toml & _redirects
+// C19: wrangler.toml, public/_headers & public/_redirects
 const wrangler = fs.readFileSync(path.join(ROOT, 'wrangler.toml'), 'utf8');
 const wranglerPass = wrangler.includes('pages_build_output_dir = "dist"');
-const netlify = fs.readFileSync(path.join(ROOT, 'netlify.toml'), 'utf8');
-const netlifyPass = netlify.includes('publish = "dist"') && netlify.includes('command = "npm run build"');
-const redirects = fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8').trim();
+const headersPass = fs.existsSync(path.join(ROOT, 'public', '_headers'));
+const redirects = fs.readFileSync(path.join(ROOT, 'public', '_redirects'), 'utf8').trim();
 const redirectsPass = redirects.endsWith('404');
-if (wranglerPass && netlifyPass && redirectsPass) {
-  addResult('C19', 'PASS', 'wrangler.toml, netlify.toml, _redirects valid');
+if (wranglerPass && headersPass && redirectsPass) {
+  addResult('C19', 'PASS', 'wrangler.toml, public/_headers, public/_redirects valid');
 } else {
-  addResult('C19', 'FAIL', `wrangler=${wranglerPass} netlify=${netlifyPass} redirects=${redirectsPass}`);
+  addResult('C19', 'FAIL', `wrangler=${wranglerPass} headers=${headersPass} redirects=${redirectsPass}`);
 }
 
 // C20: Forbidden leftovers
 const searchFiles = [
-  path.join(ROOT, 'app.js'),
-  path.join(ROOT, 'styles.css'),
-  path.join(ROOT, 'build_seo_pages.js'),
-  path.join(ROOT, 'privacy', 'index.html'),
-  path.join(ROOT, 'index.html')
+  path.join(ROOT, 'src', 'core', 'app.js'),
+  path.join(ROOT, 'src', 'styles', 'styles.css'),
+  path.join(ROOT, 'scripts', 'build.js'),
+  path.join(ROOT, 'dist', 'privacy', 'index.html'),
+  path.join(ROOT, 'dist', 'index.html')
 ];
 const c20Violations = [];
 for (const file of searchFiles) {
   if (fs.existsSync(file)) {
     const txt = fs.readFileSync(file, 'utf8');
     if (txt.includes('UtilityHub')) c20Violations.push(`${path.basename(file)}:UtilityHub`);
-    if ((file.includes('app.js') || file.includes('styles.css') || file.includes('build_seo_pages.js')) && (txt.includes('cookie-banner') || txt.includes('ackCookie'))) {
+    if ((file.includes('app.js') || file.includes('styles.css') || file.includes('build.js')) && (txt.includes('cookie-banner') || txt.includes('ackCookie'))) {
       c20Violations.push(`${path.basename(file)}:cookie-banner`);
     }
     if (file.includes('privacy') && (txt.includes('Google Analytics') || txt.includes('AdSense'))) {
@@ -368,14 +367,14 @@ if (c20Violations.length === 0) {
   addResult('C20', 'FAIL', c20Violations.join(', '));
 }
 
-// C21: TOOLS single source of truth (site.config.js) imported by app.js and build_seo_pages.js
-const buildSeo = fs.readFileSync(path.join(ROOT, 'build_seo_pages.js'), 'utf8');
-const siteConfigModule = require(path.join(ROOT, 'site.config.js'));
+// C21: TOOLS single source of truth (src/config/site.config.js) imported by app.js and scripts/build.js
+const buildSeo = fs.readFileSync(path.join(ROOT, 'scripts', 'build.js'), 'utf8');
+const siteConfigModule = require(path.join(ROOT, 'src', 'config', 'site.config.js'));
 const tConfig = siteConfigModule.TOOLS;
 const appImportsConfig = appContent.includes('site.config.js') && appContent.includes('TOOLS');
 const buildImportsConfig = buildSeo.includes('site.config.js') && buildSeo.includes('TOOLS');
 if (tConfig && appImportsConfig && buildImportsConfig) {
-  addResult('C21', 'PASS', `${tConfig.length} tools defined in site.config.js and shared across app.js and build_seo_pages.js`);
+  addResult('C21', 'PASS', `${tConfig.length} tools defined in src/config/site.config.js and shared across src/core/app.js and scripts/build.js`);
 } else {
   addResult('C21', 'FAIL', `config tools=${tConfig ? tConfig.length : 0}, appImportsConfig=${appImportsConfig}, buildImportsConfig=${buildImportsConfig}`);
 }
@@ -413,7 +412,7 @@ addResult('C22', routePass ? 'PASS' : 'FAIL', routeOuts.slice(0, 5).join(', ') +
 
 // C23: README claims
 const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
-const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+const sitemap = fs.readFileSync(path.join(ROOT, 'dist', 'sitemap.xml'), 'utf8');
 const sitemapCount = (sitemap.match(/<url>/g) || []).length;
 const readmeMatch = readme.match(/(\d+)\s+(?:crawlable\s+)?URLs/i) ||
   readme.match(/sitemap\.xml[^\n]*?(\d+)\s+crawlable/i);
@@ -438,12 +437,12 @@ try {
   addResult('C24', 'FAIL', e.message);
 }
 
-// C25: node --check app.js, utils.js, build_seo_pages.js
+// C25: node --check src/core/app.js, src/core/utils.js, scripts/build.js
 try {
-  execSync('node --check app.js', { cwd: ROOT });
-  execSync('node --check utils.js', { cwd: ROOT });
-  execSync('node --check build_seo_pages.js', { cwd: ROOT });
-  addResult('C25', 'PASS', 'syntax valid across app.js, utils.js, build_seo_pages.js');
+  execSync('node --check src/core/app.js', { cwd: ROOT });
+  execSync('node --check src/core/utils.js', { cwd: ROOT });
+  execSync('node --check scripts/build.js', { cwd: ROOT });
+  addResult('C25', 'PASS', 'syntax valid across src/core/app.js, src/core/utils.js, scripts/build.js');
 } catch (e) {
   addResult('C25', 'FAIL', `syntax check failed: ${e.message}`);
 }
@@ -543,12 +542,12 @@ if (wpBatch && !wpMulti) {
 }
 
 // C33: site.config.js exists; SITE_NAME appears nowhere hardcoded outside it
-const siteConfigPath = path.join(ROOT, 'site.config.js');
+const siteConfigPath = path.join(ROOT, 'src', 'config', 'site.config.js');
 const siteConfigExists = fs.existsSync(siteConfigPath);
 let siteConfig = {};
 try { siteConfig = require(siteConfigPath); } catch (e) {}
 const siteName = siteConfig.SITE_NAME || 'Progeni Bench';
-const sourceJsFiles = ['app.js', 'build_seo_pages.js', 'utils.js'];
+const sourceJsFiles = ['src/core/app.js', 'scripts/build.js', 'src/core/utils.js'];
 const hardcodedInSource = sourceJsFiles.filter(f => {
   const p = path.join(ROOT, f);
   return fs.existsSync(p) && fs.readFileSync(p, 'utf8').includes(siteName);
@@ -897,7 +896,7 @@ if (manifestValid) {
 
 // C44: literal host "progeni.live" appears ONLY in site.config.js and docs/MIGRATION.md; "bench.progeni.live" is only host in canonicals
 const c44Offenders = [];
-const c44JsFiles = ['app.js', 'utils.js', 'build_seo_pages.js'];
+const c44JsFiles = ['src/core/app.js', 'src/core/utils.js', 'scripts/build.js'];
 for (const file of c44JsFiles) {
   const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
   if (content.includes('"progeni.live"') || content.includes("'progeni.live'") || content.includes('`progeni.live`')) {
@@ -1099,8 +1098,8 @@ if (llmsText) {
 if (llmsFullText) {
   const expectedUrls = [
     ...TOOLS.map(tool => `${siteConfig.SITE_URL}/tools/${tool.id}/`),
-    ...require('../image-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/image/${tool.slug}/`),
-    ...require('../audio-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/audio/${tool.slug}/`)
+    ...require('../src/pages/image-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/image/${tool.slug}/`),
+    ...require('../src/pages/audio-pages.js').PUBLIC.map(tool => `${siteConfig.SITE_URL}/audio/${tool.slug}/`)
   ];
   const missingUrls = expectedUrls.filter(url => !llmsFullText.includes(url));
   if (missingUrls.length) c48Issues.push(`llms-full.txt missing ${missingUrls.length} tool URLs (first: ${missingUrls[0]})`);
@@ -1113,7 +1112,7 @@ const robotsForAi = fs.existsSync(path.join(ROOT, 'dist', 'robots.txt')) ? fs.re
 const homeForLlms = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8');
 if (!homeForLlms.includes('/llms.txt')) c48Issues.push('home missing /llms.txt discovery link');
 if (!homeForLlms.includes('/llms-full.txt')) c48Issues.push('home missing /llms-full.txt discovery link');
-const headersForLlms = fs.readFileSync(path.join(ROOT, '_headers'), 'utf8');
+const headersForLlms = fs.readFileSync(path.join(ROOT, 'public', '_headers'), 'utf8');
 if (!headersForLlms.includes('/llms.txt')) c48Issues.push('_headers missing llms Link');
 if (c48Issues.length === 0) {
   addResult('C48', 'PASS', 'llms.txt/llms-full.txt complete; AI crawlers allowed; discovery links present');
@@ -1214,7 +1213,7 @@ if (c51Issues.length === 0 && lastmodDates.size >= 2) {
 }
 
 // C52: Host canonicalization redirects exist for Cloudflare Pages (_redirects).
-const redirectsFilePath = path.join(ROOT, '_redirects');
+const redirectsFilePath = path.join(ROOT, 'public', '_redirects');
 let c52Edge = false;
 if (fs.existsSync(redirectsFilePath)) {
   const edge = fs.readFileSync(redirectsFilePath, 'utf8');
@@ -1237,7 +1236,7 @@ if (!fs.existsSync(seoRuntimePath)) {
   const helper = fs.readFileSync(seoRuntimePath, 'utf8');
   if (!helper.includes('root.SeoCopy') || !helper.includes('forTool')) runtimeCopyIssues.push('dist helper is not browser-ready');
 }
-for (const runtimeFile of ['image-toolkit.js', 'audio-toolkit.js']) {
+for (const runtimeFile of ['src/toolkits/image-toolkit.js', 'src/toolkits/audio-toolkit.js']) {
   const source = fs.readFileSync(path.join(ROOT, runtimeFile), 'utf8');
   if (!source.includes('SeoCopy') || !source.includes('copy.seoDescription')) {
     runtimeCopyIssues.push(`${runtimeFile} does not consume SeoCopy`);

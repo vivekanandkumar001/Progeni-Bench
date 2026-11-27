@@ -19,82 +19,76 @@ npm start
 
 ### Deployment
 
-#### Cloudflare Pages (Primary)
+#### Cloudflare Pages
 1. Connect repository (`vivekanandkumar001/Progeni-Bench`)
 2. Build command: `npm run build`
 3. Build output directory: `dist`
-4. Configuration: `wrangler.toml`, `functions/`, `_headers`, `_redirects`
+4. Configuration: `wrangler.toml`, `functions/`, `public/_headers`, `public/_redirects`
 5. Custom domain: `bench.progeni.live` (HTTPS automatic)
-
-#### Netlify
-1. Connect repository or upload `dist/` folder
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-4. Custom domain: `bench.progeni.live` (HTTPS automatic)
 
 ## 🗂️ Repository Layout
 
 ```text
 bench/
-├─ index.html, app.js, styles.css, utils.js      # Runtime entry points (copied to dist as-is)
-├─ site.config.js                                # Single source of truth: brand, URLs, core TOOLS
-├─ image-tools.config.js / audio-tools.config.js # Toolkit registries (tools, status, SEO)
-├─ *-pages.js, *-toolkit.js, *-studio.js         # Page generators, runtimes and feature modules
-├─ tools/, image/, audio/                        # Generated static pages (do not hand-edit)
-├─ assets/, data/, vendor/                       # Static assets, shared data, same-origin deps
-├─ functions/                                    # Cloudflare Pages Functions (PDF Translator & WASM)
-├─ build_seo_pages.js                            # Build: generates pages and writes dist/
-├─ scripts/                                      # Build, serve, verify and audit tooling
-├─ docs/                                         # Architecture, audits, guides and reports
-├─ tests/                                        # Playwright end-to-end specs
-├─ dist/                                         # Build output (gitignored)
-└─ _headers, _redirects, wrangler.toml, netlify.toml, robots.txt, sitemap.xml
+├─ src/
+│  ├─ config/            # Single source of truth: site.config.js & toolkit registries
+│  ├─ core/              # app.js, header.js, icons.js, utils.js
+│  ├─ data/              # Shared data modules (dmc.js)
+│  ├─ pages/             # Static HTML generators (image-pages.js, audio-pages.js)
+│  ├─ studios/           # Interactive feature modules (*-studio.js, pdf-*.js)
+│  ├─ styles/            # styles.css
+│  └─ toolkits/          # Runtime engines (image-toolkit.js, audio-toolkit.js)
+├─ public/               # Static files copied to dist/ (_headers, _redirects, llms.txt, assets/, vendor/)
+├─ functions/            # Cloudflare Pages Functions (PDF Translator & FFmpeg WASM)
+├─ scripts/              # Build (build.js), SEO helpers, local server (serve.js), verification (verify.js)
+├─ tests/
+│  ├─ unit/              # Node unit tests (logic.test.js)
+│  └─ e2e/               # Playwright end-to-end specs (app.spec.js)
+├─ docs/                 # Architecture and feature guides
+├─ dist/                 # Generated production output (gitignored, built via npm run build)
+└─ package.json, playwright.config.js, wrangler.toml, README.md
 ```
 
 Repository rules:
 
-- **Never edit `dist/`** or generated `tools|image|audio/*/index.html` by hand — run `npm run build`.
-- **Configuration stays centralised**: brand/URLs in `site.config.js`, tool metadata in the
-  `*-tools.config.js` registries. Do not hardcode site names or hosts in feature code.
-- **Runtime files stay at the repo root** because pages load them from absolute URLs (`/app.js`,
-  `/styles.css`, `/vendor/...`). Keep new runtime dependencies under `vendor/`, never a CDN.
-- **Docs go in `docs/`**, reusable dev tooling in `scripts/`. Do not leave one-off fix scripts or
-  log dumps in the root.
-- **Before committing** run `npm run build`, `npm test` and `npm run verify` (the `C00`-`C49`
-  checks enforce CSP, SEO/GEO/AEO, accessibility-content and structure rules).
+- **Never edit `dist/`** by hand — run `npm run build` to regenerate pages, assets, and bundles.
+- **Configuration stays centralised**: brand/URLs in `src/config/site.config.js`, tool metadata in
+  `src/config/*-tools.config.js`. Do not hardcode site names or hosts in feature code.
+- **Flat runtime serving in `dist/`**: `scripts/build.js` copies source JS/CSS and `public/` assets
+  into `dist/` root so pages load `/app.js`, `/styles.css`, and `/vendor/...` cleanly. Keep third-party
+  runtime dependencies in `public/vendor/`, never a CDN.
+- **Docs go in `docs/`**, reusable tooling in `scripts/`, tests in `tests/`. Keep the repo root
+  clean of generated artifacts or one-off scripts.
+- **Before committing** run `npm run build`, `npm test` and `npm run verify` (`C00`-`C53` enforce CSP,
+  SEO/GEO/AEO, accessibility-content and structure rules).
 
 ## 📦 What's Included
 
 The `dist/` folder contains everything needed for static production hosting:
 
 - **index.html** - Single-page app root with fast category search
-- **app.js** - Client-side router + core tool processors
+- **app.js** (`src/core/app.js`) - Client-side router + core tool processors
 - **PDF Translator** - Browser-side PDF parsing, OCR and PDF generation with DeepL text translation through a Cloudflare Pages Function. See [docs/PDF-TRANSLATOR.md](./docs/PDF-TRANSLATOR.md) for setup, privacy and limits.
 - **PDF Page Manager** - Edit page order, insert, delete, duplicate, and merge PDFs entirely in the browser. See [docs/PDF-PAGE-MANAGER.md](./docs/PDF-PAGE-MANAGER.md) for usage, limits, privacy, tests, and deployment.
-- **utils.js** - Pure utility helper module (XSS escaping, CSV parsing, SRT parser)
-- **site.config.js** - Single source of truth for site configuration & brand model
-- **styles.css** - Custom responsive styling and CSS variables
-- **_headers** - Strict Content-Security-Policy & security headers
-- **_redirects** - Netlify 404 handler
+- **utils.js** (`src/core/utils.js`) - Pure utility helper module (XSS escaping, CSV parsing, SRT parser)
+- **site.config.js** (`src/config/site.config.js`) - Single source of truth for site configuration & brand model
+- **styles.css** (`src/styles/styles.css`) - Custom responsive styling and CSS variables
+- **_headers** (`public/_headers`) - Strict Content-Security-Policy & security headers
+- **_redirects** (`public/_redirects`) - Host canonicalization & 404 fallback rules
 - **manifest.webmanifest** - PWA configuration
 - **sitemap.xml** - 123 crawlable URLs for `bench.progeni.live` (5 static pages + 32 core tools + 3 hubs + 2 studios + 39 image tools + 43 audio tools; experimental pages are `noindex` and excluded)
 - **robots.txt** - Crawler directives, including explicit allowances for search and AI answer engines
 - **llms.txt / llms-full.txt** - Short and full machine-readable references for generative and answer engines
 - **docs/SEO-GEO-AEO.md** - How metadata, structured data, answer blocks and AI discovery fit together
-- **about/index.html** - About page
-- **privacy/index.html** - Privacy policy
-- **terms/index.html** - Terms of service
-- **contact/index.html** - Contact & support page
+- **about/, privacy/, terms/, contact/** - Static informational pages
 - **tools/** - 32 pre-rendered static tool pages with Schema.org JSON-LD
 - **image/** - 44 pre-rendered Bench Image Toolkit pages (hub, studio, 39 ready tools and 3 experimental pages)
 - **audio/** - 49 pre-rendered Bench Audio Toolkit pages (hub and 48 public tools)
-- **image-tools.config.js** - Image toolkit registry (source of truth for tools, SEO and status)
-- **image-toolkit.js** - Image toolkit runtime (pure byte core + browser engine + UI mounts)
-- **audio-tools.config.js** - Audio toolkit registry (source of truth for tools, SEO and status)
-- **audio-toolkit.js** - Audio toolkit runtime (Web Audio + FFmpeg.wasm processors + UI mounts)
-- **vendor/** - Same-origin third-party bundles (QR, barcode, GIF, TIFF) — no CDN
-- **vendor/ffmpeg/** - Same-origin FFmpeg.wasm engine (GPL, `NOTICE.txt` included) — no CDN
-- **assets/** - favicon.svg
+- **image-tools.config.js / image-toolkit.js** - Image toolkit registry and browser engine
+- **audio-tools.config.js / audio-toolkit.js** - Audio toolkit registry and Web Audio / FFmpeg engine
+- **vendor/** (`public/vendor/`) - Same-origin third-party bundles (QR, barcode, GIF, TIFF) — no CDN
+- **vendor/ffmpeg/** (`public/vendor/ffmpeg/`) - Same-origin FFmpeg.wasm engine (GPL, `NOTICE.txt` included) — no CDN
+- **assets/** (`public/assets/`) - Brand SVG, OG image, and PWA icons
 - **wrangler.toml** - Cloudflare Pages configuration (`dist` output & `nodejs_compat`)
 
 ## 🖼️ Bench Image Toolkit (63 tools · 42 public)
